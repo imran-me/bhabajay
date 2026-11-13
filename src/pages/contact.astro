@@ -1,0 +1,28 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/ui/Icon.astro';
+import InboxForm from '../components/islands/InboxForm';
+import { SITE } from '../config/site';
+---
+<BaseLayout title="যোগাযোগ" description="ভাবা যায়!-এর সাথে যোগাযোগ: ভুল তথ্যের রিপোর্ট, স্কুল-ক্লাব অংশীদারত্ব, মিডিয়া বা যেকোনো প্রশ্ন।">
+  <section class="wrap max-w-4xl pt-6 sm:pt-10">
+    <h1 class="font-display text-[2.3rem] leading-tight sm:text-5xl">যোগাযোগ</h1>
+    <p class="mt-2 text-lg text-ink-soft">ভুল তথ্য পেয়েছ? স্কুলে ভাবা যায় ক্লাব খুলতে চান? শুধু হ্যালো বলতে চাও? লেখো।</p>
+    <div class="mt-6 grid gap-6 lg:grid-cols-[1fr_18rem]">
+      <div class="card p-6">
+        <InboxForm client:visible kind="contact" submitLabel="পাঠাও" successTitle="পৌঁছে গেছে!" successBody="সাধারণত ৩ কার্যদিবসের মধ্যে উত্তর দিই।"
+          fields={[
+            { name: 'name', label: 'নাম', required: true, maxLength: 80 },
+            { name: 'email', label: 'ইমেইল', type: 'email', required: true },
+            { name: 'topic', label: 'বিষয়', type: 'select', required: true, options: ['ভুল তথ্যের রিপোর্ট', 'স্কুল / ক্লাব অংশীদারত্ব', 'মিডিয়া', 'গোপনীয়তা / ডেটা', 'অন্য কিছু'] },
+            { name: 'message', label: 'বার্তা', type: 'textarea', required: true, maxLength: 1500 },
+          ]} />
+      </div>
+      <aside class="grid content-start gap-3">
+        <a href={`mailto:${SITE.contactEmail}`} class="card card-hover flex items-center gap-3 p-4"><Icon name="mail" class="h-6 w-6 text-link" /><span class="font-en font-semibold">{SITE.contactEmail}</span></a>
+        <a href="/privacy" class="card card-hover flex items-center gap-3 p-4"><Icon name="shield" class="h-6 w-6 text-link" /><span class="font-semibold">গোপনীয়তা ও অভিভাবক</span></a>
+        <a href="/teachers" class="card card-hover flex items-center gap-3 p-4"><Icon name="school" class="h-6 w-6 text-link" /><span class="font-semibold">শিক্ষকদের কিট</span></a>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>

@@ -1,0 +1,7 @@
+---
+import { avatarSvg } from '../../lib/bhabu';
+import type { AvatarConfig, Tier } from '../../data/types';
+interface Props { avatar: AvatarConfig; tier?: Tier | 'none'; class?: string; title?: string }
+const { avatar, tier = 'none', class: cls = 'w-14 h-14', title } = Astro.props;
+---
+<span class:list={['inline-block shrink-0 rounded-full', cls]} set:html={avatarSvg(avatar, { tier, title, className: 'w-full h-full' })} />

@@ -1,0 +1,129 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FameCard from '../components/cards/FameCard.astro';
+import Avatar from '../components/ui/Avatar.astro';
+import Icon from '../components/ui/Icon.astro';
+import Doodle from '../components/brand/Doodle.astro';
+import { wallPeople, getPerson, getSeries, posts, cardSeries, MONTH_STAR } from '../lib/content';
+import { TOPIC_LABEL, bn, bnCompact } from '../lib/bn';
+import { TIERS } from '../lib/badges';
+import { SITE } from '../config/site';
+
+const star = getPerson(MONTH_STAR)!;
+const starSeries = getSeries(star.seriesSlug!)!;
+const topics = [...new Set(wallPeople.map((p) => getSeries(p.seriesSlug ?? '')?.topic).filter(Boolean))] as string[];
+const districts = [...new Set(wallPeople.filter((p) => p.ageBand === 'adult' && p.district).map((p) => p.district!))];
+
+// monthly highlights (1st of every month, also auto-made into a Facebook carousel)
+const topPost = posts.slice().sort((a, b) => b.shares - a.shares)[0];
+const bestSeries = cardSeries.slice().sort((a, b) => b.followers - a.followers)[0];
+const bestTeam = cardSeries.slice().sort((a, b) => b.team.length - a.team.length)[0];
+const highlights = [
+  { label: 'সেরা সিরিজ', title: bestSeries.title, sub: `${bnCompact(bestSeries.followers)} ফলোয়ার`, href: `/series/${bestSeries.slug}`, doodle: bestSeries.doodle },
+  { label: 'সবচেয়ে শেয়ার হওয়া কার্ড', title: topPost.title, sub: `${bnCompact(topPost.shares)} বার শেয়ার`, href: `/series/${topPost.seriesSlug}/${topPost.slug}`, doodle: topPost.art.doodle },
+  { label: 'নতুন ইনিশিয়েটর স্বাগতম', title: `${star.nickname} · ${starSeries.title}`, sub: 'অক্টোবরে খেতাব', href: `/u/${star.username}`, doodle: 'sparkle' as const },
+  { label: 'সেরা দল', title: bestTeam.title, sub: `${bn(bestTeam.team.length)} জনের দল`, href: `/series/${bestTeam.slug}`, doodle: 'paw' as const },
+];
+const deltaHref = SITE.deltaUrl || '/about#delta';
+const jsonLd = {
+  '@type': 'CollectionPage',
+  name: 'ওয়াল অফ ফেম — ভাবা যায়!',
+  inLanguage: 'bn',
+  hasPart: wallPeople.filter((p) => p.ageBand === 'adult').map((p) => ({ '@type': 'Person', name: p.realName ?? p.nickname, url: `${SITE.url}/u/${p.username}` })),
+};
+---
+<BaseLayout title="ওয়াল অফ ফেম — যারা প্রশ্ন করেছে, আর উত্তর খুঁজে বের করেছে" description="ভাবা যায়! ইনিশিয়েটর, কিংবদন্তি আর অভিযাত্রীদের দেয়াল। প্রতিটা খেতাব যাচাইযোগ্য — বিশ্ববিদ্যালয়কে দেখানোর মতো।" jsonLd={jsonLd}>
+  <section class="pattern-teal text-white">
+    <div class="wrap grid items-center gap-6 py-10 sm:py-12 lg:grid-cols-[1fr_auto]">
+      <div class="rounded-3xl bg-teal/80 p-1">
+        <h1 class="font-display text-[2.6rem] leading-tight text-sun sm:text-6xl">ওয়াল অফ ফেম</h1>
+        <p class="mt-2 text-lg text-white/90">যারা প্রশ্ন করেছে, আর উত্তর খুঁজে বের করেছে</p>
+      </div>
+      <a href={`/u/${star.username}`} class="flex items-center gap-4 rounded-3xl bg-white/15 p-4 pr-6 ring-1 ring-white/20 backdrop-blur-sm transition hover:bg-white/20">
+        <Avatar avatar={star.avatar} tier={star.tier} class="h-16 w-16" />
+        <span><span class="block text-sm text-sun">নভেম্বরের তারকা</span><span class="block text-2xl font-bold">{star.nickname} · {starSeries.title}</span></span>
+      </a>
+    </div>
+  </section>
+
+  <section class="wrap mt-6">
+    <div class="flex flex-wrap items-center gap-2" role="toolbar" aria-label="ছাঁকো">
+      <button type="button" class="chip" aria-pressed="true" data-ff="tier:all">সব</button>
+      <button type="button" class="chip !bg-sun-soft !text-mustard aria-pressed:!bg-sun aria-pressed:!text-deep" aria-pressed="false" data-ff="tier:legend">কিংবদন্তি</button>
+      <button type="button" class="chip !bg-coral-soft !text-coral-dark aria-pressed:!bg-coral-dark aria-pressed:!text-white" aria-pressed="false" data-ff="tier:initiator">ইনিশিয়েটর</button>
+      <button type="button" class="chip" aria-pressed="false" data-ff="tier:explorer">অভিযাত্রী</button>
+      <label class="sr-only" for="ff-topic">বিষয়</label>
+      <select id="ff-topic" class="chip cursor-pointer" data-ff-topic>
+        <option value="">সব বিষয়</option>
+        {topics.map((t) => <option value={t}>{TOPIC_LABEL[t]}</option>)}
+      </select>
+      <label class="sr-only" for="ff-dist">জেলা</label>
+      <select id="ff-dist" class="chip cursor-pointer" data-ff-dist title="শুধু ১৮+ যারা জেলা দেখাতে রাজি">
+        <option value="">সব জেলা</option>
+        {districts.map((d) => <option value={d}>{d}</option>)}
+      </select>
+    </div>
+
+    <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4" data-fame-grid>
+      {wallPeople.map((p) => <div data-fp data-tier={p.tier} data-topic={getSeries(p.seriesSlug ?? '')?.topic ?? ''} data-district={p.ageBand === 'adult' ? p.district ?? '' : ''}><FameCard p={p} /></div>)}
+    </div>
+    <p data-fame-empty hidden class="card mt-5 p-6 text-center text-ink-soft">এই ছাঁকনিতে কেউ নেই — এখনো! হয়তো প্রথমজন তুমিই।</p>
+    <p class="mt-4 text-sm text-ink-soft"><Icon name="shield" class="mr-1 inline h-4 w-4" />১৮-এর কম বয়সীদের শুধু ডাকনাম আর অবতার দেখাই — ছবি, স্কুল বা জেলা নয়। কার্ডে চাপ দিলে উল্টে যায়: শুরুর প্রশ্ন, যাত্রা আর যাচাই-লিংক।</p>
+  </section>
+
+  <section class="wrap mt-10" aria-labelledby="hl-h">
+    <div class="rounded-[28px] bg-tint p-5 sm:p-7">
+      <div class="flex items-center gap-3">
+        <Doodle name="sparkle" class="h-10 w-10" />
+        <h2 id="hl-h" class="text-2xl font-bold">মাসের হাইলাইট</h2>
+        <span class="ml-auto hidden text-sm text-ink-soft sm:block">প্রতি মাসের ১ তারিখে · ফেসবুক ক্যারোসেলেও</span>
+      </div>
+      <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        {highlights.map((h) => (
+          <a href={h.href} class="card card-hover press flex items-start gap-3 p-4">
+            <Doodle name={h.doodle} class="h-10 w-10" />
+            <span class="min-w-0"><span class="block text-xs font-bold text-coral-dark dark:text-coral">{h.label}</span><span class="line-clamp-2 font-bold leading-snug">{h.title}</span><span class="text-sm text-ink-soft">{h.sub}</span></span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap mt-10 grid gap-4 lg:grid-cols-[2fr_1fr]">
+    <div class="card p-6">
+      <h2 class="text-xl font-bold">চার ধাপের সিঁড়ি</h2>
+      <ol class="mt-3 grid gap-2 sm:grid-cols-4">
+        {TIERS.map((t, i) => <li class:list={['rounded-2xl p-3 text-sm', ['bg-mint text-deep', 'bg-teal text-white', 'bg-coral text-white', 'bg-sun text-deep'][i]]}><b class="block">{bn(i + 1)} · {t.bn}</b>{t.unlocks}</li>)}
+      </ol>
+      <a href="/initiator" class="mt-4 inline-flex font-bold text-link">কীভাবে উঠবে? →</a>
+    </div>
+    <a href={deltaHref} class="flex flex-col justify-between rounded-[22px] bg-deep p-6 text-white">
+      <p class="text-xl font-bold text-sun">বার্ষিক “ভাবা যায়! অ্যাওয়ার্ডস”</p>
+      <p class="mt-2 text-white/85">বছরের সেরা ইনিশিয়েটর, দল আর প্রশ্নের সম্মাননা রাত — ডেল্টা ইনিশিয়েটিভসের সাথে।</p>
+      <span class="mt-4 font-bold text-sun">বিস্তারিত ↗</span>
+    </a>
+  </section>
+</BaseLayout>
+
+<script>
+  let tier = 'all';
+  const items = [...document.querySelectorAll<HTMLElement>('[data-fp]')];
+  const topicSel = document.querySelector<HTMLSelectElement>('[data-ff-topic]')!;
+  const distSel = document.querySelector<HTMLSelectElement>('[data-ff-dist]')!;
+  function apply() {
+    let n = 0;
+    for (const el of items) {
+      const ok = (tier === 'all' || el.dataset.tier === tier) && (!topicSel.value || el.dataset.topic === topicSel.value) && (!distSel.value || el.dataset.district === distSel.value);
+      el.hidden = !ok;
+      if (ok) n++;
+    }
+    document.querySelector<HTMLElement>('[data-fame-empty]')!.hidden = n > 0;
+  }
+  document.querySelectorAll<HTMLButtonElement>('[data-ff]').forEach((b) => b.addEventListener('click', () => {
+    tier = b.dataset.ff!.split(':')[1];
+    document.querySelectorAll('[data-ff]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+    apply();
+  }));
+  topicSel.addEventListener('change', apply);
+  distSel.addEventListener('change', apply);
+</script>

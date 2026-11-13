@@ -1,0 +1,22 @@
+---
+import { BADGE_MAP } from '../../lib/badges';
+import { doodleSvg } from '../../lib/doodles';
+interface Props { id: string; size?: string; locked?: boolean; showLabel?: boolean }
+const { id, size = 'w-14 h-14', locked = false, showLabel = false } = Astro.props;
+const b = BADGE_MAP[id];
+const BG = { teal: 'bg-teal', coral: 'bg-coral', sun: 'bg-sun', deep: 'bg-deep', mint: 'bg-mint' } as const;
+---
+{b && (
+  <span class="inline-flex flex-col items-center gap-1.5 text-center" title={locked ? `${b.bn} — ${b.how}` : b.bn}>
+    <span class:list={['relative grid place-items-center rounded-full ring-4 ring-offset-0', size, locked ? 'bg-line ring-line grayscale' : [BG[b.bg], 'ring-white/70 shadow-[0_3px_0_rgb(0_0_0/.12)]']]}>
+      {locked ? (
+        <span class="font-display text-2xl text-ink-soft">?</span>
+      ) : b.text ? (
+        <span class:list={['font-stamp text-lg leading-none', b.bg === 'sun' || b.bg === 'mint' ? 'text-deep' : 'text-white']}>{b.text}</span>
+      ) : (
+        <span class="w-3/5 h-3/5" set:html={doodleSvg(b.doodle!, { className: 'w-full h-full' })} />
+      )}
+    </span>
+    {showLabel && <span class:list={['text-xs font-semibold leading-tight max-w-20', locked ? 'text-ink-soft' : '']}>{b.bn}</span>}
+  </span>
+)}

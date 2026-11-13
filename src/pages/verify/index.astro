@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/ui/Icon.astro';
+---
+<BaseLayout title="খেতাব যাচাই" description="ভাবা যায়! ইনিশিয়েটর বা কিংবদন্তি খেতাব যাচাই করুন — কার্ডে দেওয়া BJ-2026-xxx কোড লিখুন।">
+  <div class="wrap max-w-xl pt-8 sm:pt-12">
+    <h1 class="font-display text-[2.2rem] leading-tight sm:text-5xl">খেতাব যাচাই</h1>
+    <p class="mt-2 text-ink-soft">বিশ্ববিদ্যালয়, স্কুল বা নিয়োগকর্তার জন্য: ওয়াল অফ ফেম কার্ডে থাকা কোডটি লিখুন।</p>
+    <form class="mt-6 flex gap-2" data-verify>
+      <label for="vc" class="sr-only">যাচাই কোড</label>
+      <input id="vc" class="field flex-1 font-en uppercase tracking-wider" placeholder="BJ-2026-014" autocapitalize="characters" required pattern="[Bb][Jj]-\d{4}-\d{3}" />
+      <button class="btn btn-secondary" type="submit"><Icon name="shield" class="h-5 w-5" />যাচাই</button>
+    </form>
+    <p class="mt-2 text-sm text-ink-soft" data-verify-msg>কোড দেখতে এমন: <span class="font-en font-bold">BJ-2026-014</span></p>
+  </div>
+</BaseLayout>
+<script>
+  const f = document.querySelector<HTMLFormElement>('[data-verify]')!;
+  f.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const code = (f.querySelector('input') as HTMLInputElement).value.trim().toUpperCase();
+    const msg = document.querySelector<HTMLElement>('[data-verify-msg]')!;
+    const res = await fetch(`/verify/${code}/`, { method: 'HEAD' }).catch(() => null);
+    if (res && res.ok) location.href = `/verify/${code}`;
+    else msg.innerHTML = '<b class="text-coral-dark">এই কোডে কোনো খেতাব পাওয়া যায়নি।</b> বানানটা আবার দেখুন, বা hello@bhabajay.com-এ লিখুন।';
+  });
+</script>

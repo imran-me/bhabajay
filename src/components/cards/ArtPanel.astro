@@ -1,0 +1,24 @@
+---
+/** Card art: brand ground + doodle. Stands in for photo-card images (real text, never baked into images). */
+import Doodle from '../brand/Doodle.astro';
+import type { BrandBg, DoodleName } from '../../data/types';
+interface Props { bg: BrandBg; doodle: DoodleName; class?: string; size?: 'sm' | 'md' | 'lg' }
+const { bg, doodle, class: cls, size = 'md' } = Astro.props;
+const ground: Record<BrandBg, string> = {
+  teal: 'pattern-teal',
+  deep: 'pattern-deep',
+  mint: 'pattern-mint',
+  coral: 'bg-[radial-gradient(120%_90%_at_80%_10%,#FF8D7F_0%,#FF6B5B_55%,#F0503F_100%)]',
+  sun: 'bg-[radial-gradient(120%_90%_at_80%_10%,#FFDB7A_0%,#FFC93C_55%,#F5B321_100%)]',
+};
+const dsize = { sm: 'w-14 h-14', md: 'w-24 h-24', lg: 'w-36 h-36' }[size];
+---
+<div class:list={['relative overflow-hidden', ground[bg], cls]}>
+  <div class="absolute -right-3 -top-2 rotate-[8deg] drop-shadow-[0_6px_0_rgb(0_0_0/.12)]">
+    <Doodle name={doodle} class={dsize} />
+  </div>
+  {bg === 'coral' || bg === 'sun' ? (
+    <svg class="absolute bottom-4 left-4 h-10 w-10 opacity-60" viewBox="0 0 40 40" aria-hidden="true"><path d="M20 2 Q 22 18 38 20 Q 22 22 20 38 Q 18 22 2 20 Q 18 18 20 2Z" fill="#fff" /></svg>
+  ) : null}
+  <slot />
+</div>

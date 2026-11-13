@@ -1,0 +1,30 @@
+---
+import Doodle from '../brand/Doodle.astro';
+import Icon from '../ui/Icon.astro';
+import type { Episode } from '../../data/types';
+import { bn, bnCompact, bnDate } from '../../lib/bn';
+interface Props { ep: Episode; horizontal?: boolean }
+const { ep, horizontal = false } = Astro.props;
+const href = `/bhabur-duniya/${ep.slug}`;
+---
+<article class:list={['card card-hover press group relative overflow-hidden', horizontal && 'grid grid-cols-[42%_1fr] items-center']}>
+  <div class="pattern-deep relative aspect-video">
+    <Doodle name={ep.doodle} class="absolute left-4 top-3 h-12 w-12 opacity-90" />
+    <span class:list={['absolute inset-0 grid place-items-center', ep.comingSoon && 'opacity-60']}>
+      <span class="grid h-14 w-14 place-items-center rounded-full bg-coral text-white shadow-[0_4px_0_#D94A3B] transition-transform group-hover:scale-110">
+        {ep.comingSoon ? <Icon name="clock" class="h-7 w-7" /> : <Icon name="play" class="ml-1 h-7 w-7" />}
+      </span>
+    </span>
+    <span class="absolute bottom-2 right-2 rounded-md bg-deep/80 px-1.5 text-xs font-bold text-white">{ep.duration}</span>
+    <span class="absolute bottom-0 left-0 h-1 w-1/3 bg-sun" aria-hidden="true"></span>
+  </div>
+  <div class="p-3.5 sm:p-4">
+    <p class="text-sm font-bold text-coral-dark dark:text-coral">পর্ব {bn(ep.number)}{ep.comingSoon && ' · শীঘ্রই'}</p>
+    <h3 class="mt-0.5 text-lg font-bold leading-snug">
+      {ep.comingSoon ? ep.title : <a href={href} class="after:absolute after:inset-0 after:content-['']">{ep.title}</a>}
+    </h3>
+    <p class="mt-1 text-sm text-ink-soft">
+      {ep.comingSoon ? `আসছে ${bnDate(ep.publishedAt, { year: false })}` : `${bnCompact(ep.views)} বার দেখা · ৩ প্রশ্নের কুইজ`}
+    </p>
+  </div>
+</article>

@@ -1,0 +1,6 @@
+---
+/** Bilingual UI chrome: renders both, CSS shows the active language (EN toggle). */
+interface Props { bn: string; en: string }
+const { bn, en } = Astro.props;
+---
+<span data-bn lang="bn">{bn}</span><span data-en lang="en">{en}</span>

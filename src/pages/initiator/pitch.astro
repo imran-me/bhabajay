@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/ui/Icon.astro';
+import PitchForm from '../../components/islands/PitchForm';
+import { DISTRICTS } from '../../data/districts';
+---
+<BaseLayout title="আইডিয়া পাঠাও — তোমার সিরিজ পিচ করো" description="৫ মিনিটের কথোপকথনের মতো ফর্ম। যেকোনো বিষয়, যেকোনো ফরম্যাট। ৭ দিনের মধ্যে উত্তর।">
+  <div class="wrap max-w-2xl pt-5 sm:pt-8">
+    <a href="/initiator" class="inline-flex items-center gap-1 font-bold text-link"><Icon name="arrow-left" class="h-4 w-4" />কীভাবে কাজ করে</a>
+    <h1 class="mt-2 font-display text-[2.2rem] leading-tight sm:text-5xl">আইডিয়া পাঠাও</h1>
+    <p class="mt-1 text-ink-soft">৫টা ধাপ · প্রায় ৫ মিনিট · প্রতিটা উত্তর এই ফোনে নিজে নিজে সেভ হয়</p>
+    <div class="mt-5"><PitchForm client:only="react" districts={DISTRICTS}><div slot="fallback" class="card grid h-80 place-items-center text-ink-soft">ফর্ম সাজাচ্ছি…</div></PitchForm></div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Bhabu from '../components/brand/Bhabu.astro';
+import Doodle from '../components/brand/Doodle.astro';
+---
+<BaseLayout title="ভাবু মহাকাশে হারিয়ে গেছে! (৪০৪)" description="এই পাতাটা খুঁজে পাওয়া যায়নি।" noindex>
+  <section class="pattern-deep relative overflow-hidden text-white">
+    <div class="wrap relative grid min-h-[70vh] place-items-center py-16 text-center">
+      <Doodle name="planet" class="absolute left-[8%] top-[14%] h-20 w-20 animate-float" />
+      <Doodle name="moon" class="absolute right-[10%] top-[22%] h-16 w-16 animate-float [animation-delay:-2s]" />
+      <Doodle name="sparkle" class="absolute bottom-[16%] left-[18%] h-10 w-10 animate-float [animation-delay:-3s]" />
+      <div class="rounded-[28px] bg-deep/85 p-6 sm:p-10">
+        <div class="mx-auto w-32 animate-[spin_18s_linear_infinite]"><Bhabu face="wow" body="coral" dot="sun" brows="light" hat="astro" class="w-32" /></div>
+        <p class="mt-4 font-display text-6xl text-sun">৪০৪</p>
+        <h1 class="mt-2 text-2xl font-bold sm:text-3xl">ভাবু মহাকাশে হারিয়ে গেছে!</h1>
+        <p class="mx-auto mt-2 max-w-md text-white/80">এই পাতাটা কোথাও খুঁজে পাচ্ছি না। মজার তথ্য: মহাকাশে কোনো শব্দ নেই, তাই ভাবু “সাহায্য!” বললেও কেউ শুনবে না।</p>
+        <div class="mt-6 flex flex-wrap justify-center gap-2">
+          <a href="/" class="btn btn-primary">পৃথিবীতে ফেরো (হোম)</a>
+          <a href="/search" class="btn btn-ghost-light">খুঁজে দেখো</a>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>

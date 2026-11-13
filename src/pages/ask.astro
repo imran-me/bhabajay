@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Bhabu from '../components/brand/Bhabu.astro';
+import Icon from '../components/ui/Icon.astro';
+import InboxForm from '../components/islands/InboxForm';
+import { asks } from '../lib/content';
+import { bnDate, TOPIC_LABEL } from '../lib/bn';
+
+const jsonLd = { '@type': 'FAQPage', mainEntity: asks.map((a) => ({ '@type': 'Question', name: a.q, acceptedAnswer: { '@type': 'Answer', text: a.a } })) };
+---
+<BaseLayout title="ভাবুকে জিজ্ঞেস করো — তোমার প্রশ্ন, সহজ উত্তর" description="যেকোনো কৌতূহলী প্রশ্ন ভাবুকে পাঠাও। সেরা প্রশ্নগুলোর উত্তর সূত্রসহ এখানে, আর কখনো কখনো পুরো একটা কার্টুন পর্ব!" jsonLd={jsonLd}>
+  <section class="wrap pt-6 sm:pt-10">
+    <div class="grid gap-8 lg:grid-cols-[1fr_26rem]">
+      <div>
+        <div class="flex items-start gap-4">
+          <Bhabu face="wow" body="teal" dot="coral" animateSparks class="w-16 shrink-0" />
+          <div>
+            <p class="eyebrow">Ask ভাবু</p>
+            <h1 class="mt-1 font-display text-[2.3rem] leading-tight sm:text-5xl">ভাবুকে জিজ্ঞেস করো</h1>
+            <p class="mt-2 max-w-xl text-lg text-ink-soft">মাথায় ঘুরছে এমন যেকোনো প্রশ্ন। প্রতি সপ্তাহে সেরাগুলোর উত্তর সূত্রসহ এখানে আসে — কোনোটা হয়ে যায় ভাবুর দুনিয়ার পুরো পর্ব!</p>
+          </div>
+        </div>
+
+        <h2 class="section-title mb-4 mt-10">যেসব প্রশ্নের উত্তর দিয়েছি</h2>
+        <div class="grid gap-3">
+          {asks.map((a, i) => (
+            <details class="group card p-5 [&_summary::-webkit-details-marker]:hidden" open={i === 0}>
+              <summary class="flex cursor-pointer items-start gap-3">
+                <span class="min-w-0 flex-1">
+                  <span class="block text-lg font-bold leading-snug">{a.q}</span>
+                  <span class="mt-1 block text-sm text-ink-soft">{a.askedBy} · {bnDate(a.date)} · <span class="tag !py-0 text-xs">{TOPIC_LABEL[a.topic]}</span></span>
+                </span>
+                <Icon name="chevron-down" class="mt-1 h-5 w-5 shrink-0 transition-transform group-open:rotate-180" />
+              </summary>
+              <p class="mt-3 leading-relaxed">{a.a}</p>
+              {a.sources && a.sources.length > 0 && <p class="mt-2 text-sm font-bold text-link">সূত্র: {a.sources.map((s, k) => <>{k > 0 && ', '}<a href={s.url} target="_blank" rel="noopener" class="hover:underline">{s.label}</a></>)}</p>}
+            </details>
+          ))}
+        </div>
+      </div>
+
+      <aside class="lg:sticky lg:top-24 lg:self-start">
+        <div class="rounded-[26px] bg-deep p-6 text-white">
+          <h2 class="text-2xl font-bold">তোমার প্রশ্ন পাঠাও</h2>
+          <p class="mt-1 text-sm text-white/75">নাম বা ফোন নম্বর লাগবে না। শুধু ডাকনাম আর বয়স (ইচ্ছে হলে)।</p>
+          <div class="mt-4">
+            <InboxForm client:visible kind="question" dark submitLabel="ভাবুকে পাঠাও" successTitle="প্রশ্ন পৌঁছেছে!" successBody="ভাবু খুঁজতে বসে গেছে। উত্তর বেরোলে এই পাতায় আসবে।"
+              fields={[
+                { name: 'question', label: 'তোমার প্রশ্ন', type: 'textarea', required: true, maxLength: 400, placeholder: 'যেমন: বিড়াল সবসময় পায়ের উপর পড়ে কেন?' },
+                { name: 'nickname', label: 'ডাকনাম, বয়স', maxLength: 40, placeholder: 'যেমন: ঋতু, ১৩' },
+              ]} />
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+</BaseLayout>

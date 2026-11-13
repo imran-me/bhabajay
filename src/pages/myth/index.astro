@@ -1,0 +1,134 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import MythCard from '../../components/cards/MythCard.astro';
+import Icon from '../../components/ui/Icon.astro';
+import Bhabu from '../../components/brand/Bhabu.astro';
+import InboxForm from '../../components/islands/InboxForm';
+import { myths, fridayMyth } from '../../lib/content';
+import { bn } from '../../lib/bn';
+
+const friday = fridayMyth();
+const index = myths.map((m) => ({ slug: m.slug, t: `${m.claim} ${m.question}`, x: `${m.aliases.join(' ')} ${m.short} ${m.body.join(' ')}` }));
+const counts = { true: myths.filter((m) => m.verdict === 'true').length, myth: myths.filter((m) => m.verdict === 'myth').length, partial: myths.filter((m) => m.verdict === 'partial').length };
+const jsonLd = {
+  '@type': 'CollectionPage',
+  name: 'মিথ না সত্য? — ভাবা যায়! মিথ লাইব্রেরি',
+  inLanguage: 'bn',
+  hasPart: myths.map((m) => ({ '@type': 'ClaimReview', claimReviewed: m.claim, url: `https://bhabajay.com/myth/${m.slug}`, reviewRating: { '@type': 'Rating', alternateName: m.verdict === 'true' ? 'সত্য' : m.verdict === 'myth' ? 'মিথ' : 'আংশিক' } })),
+};
+---
+<BaseLayout title="মিথ না সত্য? — পারিবারিক তর্ক মেটানোর লাইব্রেরি" description="দাদু যা বলেছিল, সেটা কি সত্যি? খাবার, স্বাস্থ্য, প্রকৃতি আর মহাকাশের প্রচলিত বিশ্বাস যাচাই — সত্য, মিথ না আংশিক, সূত্রসহ সহজ বাংলায়।" jsonLd={jsonLd} keywords={['মিথ না সত্য', 'কুসংস্কার', 'স্বাস্থ্য গুজব', 'myth or fact bangla']}>
+  <section class="pattern-mint">
+    <div class="wrap py-8 sm:py-12">
+      <div class="rounded-[28px] bg-mint/90 p-1 dark:bg-transparent">
+        <p class="eyebrow">পারিবারিক হোয়াটসঅ্যাপ গ্রুপের তর্ক মেটাও</p>
+        <h1 class="mt-1 font-display text-[2.4rem] leading-tight text-deep sm:text-6xl dark:text-ink">মিথ না সত্য?</h1>
+        <p class="mt-2 max-w-2xl text-lg text-deep/80 dark:text-ink-soft">{bn(myths.length)}টি দাবি যাচাই করা হয়েছে — {bn(counts.myth)}টি মিথ, {bn(counts.partial)}টি আংশিক, {bn(counts.true)}টি সত্য। প্রতিটার সাথে সূত্র।</p>
+      </div>
+
+      <form role="search" class="relative mt-6 max-w-3xl" onsubmit="return false">
+        <label for="myth-q" class="sr-only">মিথ খোঁজো</label>
+        <span class="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-teal"><Icon name="search" class="h-6 w-6" /></span>
+        <input id="myth-q" type="search" autocomplete="off" enterkeyhint="search"
+          class="h-16 w-full rounded-full border-[3px] border-teal bg-surface pl-14 pr-5 text-lg shadow-[0_6px_0_rgb(6_60_67/.12)] outline-none focus:shadow-[0_0_0_5px_rgb(255_201_60/.55)]"
+          placeholder="দাদু যা বলেছিল, লিখে খোঁজো… যেমন “দুধ আর মাছ একসাথে”" />
+      </form>
+      <p class="mt-2 text-sm text-deep/70 dark:text-ink-soft">বানান নিয়ে চিন্তা নেই — “শ্বেতি/শ্বেতী” বা “dudh mach” লিখলেও খুঁজে পাবে।</p>
+
+      <div class="mt-5 flex gap-2 overflow-x-auto pb-1" role="toolbar" aria-label="ছাঁকো">
+        <button type="button" class="chip" aria-pressed="true" data-mf="all">সব</button>
+        <button type="button" class="chip" aria-pressed="false" data-mf="t:food">খাবার</button>
+        <button type="button" class="chip" aria-pressed="false" data-mf="t:health">স্বাস্থ্য</button>
+        <button type="button" class="chip" aria-pressed="false" data-mf="t:nature">প্রকৃতি</button>
+        <button type="button" class="chip" aria-pressed="false" data-mf="t:space">মহাকাশ</button>
+        <button type="button" class="chip !bg-tint !text-teal aria-pressed:!bg-teal aria-pressed:!text-white" aria-pressed="false" data-mf="v:true">সত্য</button>
+        <button type="button" class="chip !bg-coral-soft !text-coral-dark aria-pressed:!bg-coral-dark aria-pressed:!text-white" aria-pressed="false" data-mf="v:myth">মিথ</button>
+        <button type="button" class="chip !bg-sun-soft !text-mustard aria-pressed:!bg-sun aria-pressed:!text-deep" aria-pressed="false" data-mf="v:partial">আংশিক</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap mt-8" aria-live="polite">
+    <p class="mb-3 text-sm font-semibold text-ink-soft" data-myth-count>{bn(myths.length)}টি দাবি</p>
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-myth-grid>
+      {myths.map((m) => <div data-slug={m.slug}><MythCard myth={m} /></div>)}
+    </div>
+    <div data-myth-empty hidden class="card flex flex-col items-center p-8 text-center">
+      <Bhabu face="think" body="teal" dot="coral" class="w-16" />
+      <p class="mt-3 text-xl font-bold">এটা এখনো যাচাই করা হয়নি!</p>
+      <p class="mt-1 max-w-md text-ink-soft">নিচের বক্সে পাঠিয়ে দাও — প্রতি শুক্রবার সেরা প্রশ্নটার উত্তর দিই।</p>
+      <a href="#dadu" class="btn btn-primary mt-4" data-send-query>ভাবুকে পাঠাও</a>
+    </div>
+  </section>
+
+  <section id="dadu" class="wrap mt-12 scroll-mt-24">
+    <div class="grid gap-6 rounded-[28px] bg-deep p-6 text-white sm:p-8 lg:grid-cols-[1fr_1.2fr]">
+      <div class="flex items-start gap-4">
+        <Bhabu face="wink" body="coral" dot="sun" brows="light" class="w-14" />
+        <div>
+          <h2 class="text-2xl font-bold">তোমার পরিবারের কোনো মিথ আছে?</h2>
+          <p class="mt-2 text-white/80"><b class="text-sun">ভাবুকে পাঠাও</b> → প্রতি শুক্রবার সেরাটার উত্তর আসে কার্ড হয়ে, এখানে আর ফেসবুকে। এই সপ্তাহের উত্তর: <a href={`/myth/${friday.slug}`} class="font-bold text-sun underline-offset-4 hover:underline">{friday.question}</a></p>
+        </div>
+      </div>
+      <InboxForm client:visible kind="myth_tip" dark submitLabel="ভাবুকে পাঠাও" successTitle="দাদুর প্রশ্ন পৌঁছেছে!" successBody="ভাবু খুঁজে দেখবে। উত্তর বেরোলে শুক্রবারের কার্ডে পাবে।"
+        fields={[
+          { name: 'text', label: 'কী শুনেছ? যেমন করে শুনেছ, তেমন করে লেখো', type: 'textarea', required: true, maxLength: 500, placeholder: 'যেমন: “রাতে নখ কাটলে অমঙ্গল হয়”' },
+          { name: 'nickname', label: 'তোমার ডাকনাম', maxLength: 40 },
+        ]} />
+    </div>
+  </section>
+</BaseLayout>
+
+<script type="application/json" id="myth-index" set:html={JSON.stringify(index)} />
+<script>
+  import { buildIndex, search } from '../../lib/search';
+  import { bn } from '../../lib/bn';
+
+  const raw: { slug: string; t: string; x: string }[] = JSON.parse(document.getElementById('myth-index')!.textContent!);
+  const idx = buildIndex(raw.map((r) => ({ id: r.slug, type: 'myth' as const, title: r.t, url: '', text: r.x })));
+  const input = document.getElementById('myth-q') as HTMLInputElement;
+  const grid = document.querySelector<HTMLElement>('[data-myth-grid]')!;
+  const empty = document.querySelector<HTMLElement>('[data-myth-empty]')!;
+  const count = document.querySelector<HTMLElement>('[data-myth-count]')!;
+  const items = [...grid.querySelectorAll<HTMLElement>('[data-slug]')];
+  let filter = 'all';
+
+  function apply() {
+    const q = input.value.trim();
+    const hits = q ? search(idx, q, 50).map((d) => d.id) : null;
+    let shown = 0;
+    const order = hits ? new Map(hits.map((s, i) => [s, i])) : null;
+    for (const el of items) {
+      const card = el.querySelector<HTMLElement>('[data-myth-card]')!;
+      const [k, v] = filter.split(':');
+      const okFilter = filter === 'all' || (k === 't' ? card.dataset.topic === v : card.dataset.verdict === v);
+      const okQuery = !order || order.has(el.dataset.slug!);
+      el.hidden = !(okFilter && okQuery);
+      el.style.order = order && order.has(el.dataset.slug!) ? String(order.get(el.dataset.slug!)) : '';
+      if (!el.hidden) shown++;
+    }
+    empty.hidden = shown > 0;
+    count.textContent = q ? `“${q}” — ${bn(shown)}টি মিল` : `${bn(shown)}টি দাবি`;
+  }
+  empty.querySelector('[data-send-query]')?.addEventListener('click', () => {
+    setTimeout(() => {
+      const ta = document.querySelector<HTMLTextAreaElement>('#dadu textarea');
+      if (!ta || ta.value) return;
+      // React controls this field: use the native setter so onChange fires
+      Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype, 'value')!.set!.call(ta, input.value.trim());
+      ta.dispatchEvent(new Event('input', { bubbles: true }));
+      ta.focus();
+    }, 300);
+  });
+  let t: number | undefined;
+  input.addEventListener('input', () => { clearTimeout(t); t = window.setTimeout(apply, 120); });
+  document.querySelectorAll<HTMLButtonElement>('[data-mf]').forEach((b) =>
+    b.addEventListener('click', () => {
+      filter = b.dataset.mf!;
+      document.querySelectorAll('[data-mf]').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+      apply();
+    }),
+  );
+  const pre = new URLSearchParams(location.search).get('q');
+  if (pre) { input.value = pre; apply(); }
+</script>

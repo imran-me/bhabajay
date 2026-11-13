@@ -1,0 +1,26 @@
+---
+/**
+ * One-line wordmark: ভাবা (teal) যায় (coral) + ভাবু as the "!".
+ * Brand rule: no doodles inside or touching the logo.
+ * Easter egg: tap the "!" seven times → ভাবু spins.
+ */
+import { bhabuSvg } from '../../lib/bhabu';
+interface Props { variant?: 'light' | 'dark'; size?: 'sm' | 'md' | 'lg' | 'xl'; egg?: boolean; class?: string }
+const { variant = 'light', size = 'md', egg = false, class: cls } = Astro.props;
+const text = { sm: 'text-[1.35rem]', md: 'text-[1.6rem]', lg: 'text-[2.2rem]', xl: 'text-[3.4rem]' }[size];
+const bang = { sm: 'h-[1.45rem]', md: 'h-[1.75rem]', lg: 'h-[2.4rem]', xl: 'h-[3.6rem]' }[size];
+const mark = bhabuSvg({ face: 'wow', body: 'coral', dot: variant === 'dark' ? 'sun' : 'coral', sparks: false, brows: 'none', tilt: 8, className: 'h-full w-auto' });
+---
+<span class:list={['inline-flex items-end select-none', cls]} data-logo>
+  <a href="/" class:list={['font-display leading-none tracking-normal', text]} aria-label="ভাবা যায়! — হোম">
+    <span class={variant === 'dark' ? 'text-white' : 'text-teal dark:text-teal-light'}>ভাবা</span>
+    <span class={variant === 'dark' ? 'text-sun' : 'text-coral'}>যায়</span>
+  </a>
+  {egg ? (
+    <button type="button" data-logo-bang aria-label="ভাবু (চাপো!)" class:list={['-ml-0.5 mb-[0.12em] inline-block origin-bottom', bang]}>
+      <span class="block h-full" set:html={mark} />
+    </button>
+  ) : (
+    <span aria-hidden="true" class:list={['-ml-0.5 mb-[0.12em] inline-block', bang]} set:html={mark} />
+  )}
+</span>

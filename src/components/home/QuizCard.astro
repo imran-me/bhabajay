@@ -1,0 +1,66 @@
+---
+/** শনিবারের কুইজ — yellow progress bar pulls people back; live counter (demo: estimate). */
+import Icon from '../ui/Icon.astro';
+import { weeklies } from '../../lib/content';
+import { weeklyWindow } from '../../lib/time';
+interface Props { variant?: 'strip' | 'big'; class?: string }
+const { variant = 'strip', class: cls } = Astro.props;
+const { current } = weeklyWindow(weeklies);
+const weeklyLite = weeklies.map((w) => ({ slug: w.slug, opensAt: w.opensAt, n: w.questions.length }));
+---
+{variant === 'strip' ? (
+  <a href="/quiz/weekly" data-weekly-card class:list={['card press block bg-sun-soft p-4 ring-0', cls]}>
+    <div class="flex items-center gap-2">
+      <p class="font-bold">শনিবারের কুইজ · ৫ প্রশ্ন</p>
+      <span class="ml-auto text-sm font-semibold text-ink-soft" data-weekly-status>খেলো →</span>
+    </div>
+    <div class="mt-2.5 h-2.5 overflow-hidden rounded-full bg-white/70 dark:bg-black/20" role="progressbar" aria-label="তোমার অগ্রগতি" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" data-weekly-bar>
+      <div class="h-full w-[6%] rounded-full bg-sun transition-[width] duration-700" data-weekly-fill></div>
+    </div>
+    <p class="mt-2 text-xs text-ink-soft" data-weekly-count>অনেকে খেলছে · তুমি?</p>
+  </a>
+) : (
+  <div data-weekly-card class:list={['relative overflow-hidden rounded-[26px] bg-sun p-6 text-deep shadow-[0_6px_0_#D9A21C]', cls]}>
+    <svg class="absolute -right-6 -top-6 h-32 w-32 opacity-40" viewBox="0 0 64 64" aria-hidden="true"><path d="M32 2 C 34 22, 42 30, 62 32 C 42 34, 34 42, 32 62 C 30 42, 22 34, 2 32 C 22 30, 30 22, 32 2 Z" fill="#fff"/></svg>
+    <p class="text-2xl font-bold" data-weekly-title>শনিবারের কুইজ খোলা!</p>
+    <p class="mt-1 font-semibold text-deep/80"><span data-weekly-count>অনেকে খেলেছে</span></p>
+    <div class="mt-4 h-3 overflow-hidden rounded-full bg-white/60" role="progressbar" aria-label="তোমার অগ্রগতি" aria-valuemin="0" aria-valuemax="5" aria-valuenow="0" data-weekly-bar>
+      <div class="h-full w-[6%] rounded-full bg-deep transition-[width] duration-700" data-weekly-fill></div>
+    </div>
+    <div class="mt-4 flex items-center gap-3">
+      <a href="/quiz/weekly" class="btn btn-secondary"><Icon name="play" class="h-4 w-4" />খেলো</a>
+      <span class="text-sm font-semibold" data-weekly-status></span>
+    </div>
+  </div>
+)}
+<script type="application/json" data-weeklies set:html={JSON.stringify({ list: weeklyLite, fallback: current?.slug })} />
+<script>
+  import { weeklyWindow, nextSaturdayDrop } from '../../lib/time';
+  import { getState } from '../../lib/store';
+  import { getBackend } from '../../lib/backend';
+  import { bn, bnNum, bnCountdown } from '../../lib/bn';
+
+  const cfg = JSON.parse(document.querySelector('[data-weeklies]')?.textContent || '{"list":[]}');
+  const { current, next } = weeklyWindow(cfg.list as { slug: string; opensAt: string; n: number }[]);
+  const cards = document.querySelectorAll<HTMLElement>('[data-weekly-card]');
+  if (current && cards.length) {
+    const rec = getState().quizzes[current.slug];
+    const nextDrop = next?.opensAt ? new Date(next.opensAt) : nextSaturdayDrop();
+    cards.forEach((card) => {
+      const fill = card.querySelector<HTMLElement>('[data-weekly-fill]');
+      const bar = card.querySelector('[data-weekly-bar]');
+      const status = card.querySelector('[data-weekly-status]');
+      if (rec) {
+        const pct = Math.max(6, (rec.best / rec.total) * 100);
+        if (fill) fill.style.width = pct + '%';
+        bar?.setAttribute('aria-valuenow', String(rec.best));
+        if (status) status.textContent = `তোমার স্কোর ${bn(rec.best)}/${bn(rec.total)} · পরের কুইজ ${bnCountdown(nextDrop.getTime() - Date.now())} পর`;
+      } else if (status && card.querySelector('[data-weekly-title]')) {
+        status.textContent = `৫ প্রশ্ন · ২০ সেকেন্ড করে`;
+      }
+    });
+    getBackend().then((b) => b.playCount(current.slug)).then((n) => {
+      document.querySelectorAll('[data-weekly-count]').forEach((el) => (el.textContent = `${bnNum(n)} জন খেলেছে · তুমি${rec ? 'ও!' : '?'}`));
+    });
+  }
+</script>

@@ -1,0 +1,37 @@
+# Content engine: every night, pull new Facebook posts as drafts and open a
+# pull request for the 5-minute editor check. Merging the PR triggers the
+# Cloudflare Pages build (Git integration), which publishes the new pages.
+name: nightly-facebook-import
+
+on:
+  schedule:
+    - cron: '0 20 * * *' # 02:00 Asia/Dhaka
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run import:facebook
+        env:
+          FB_PAGE_ID: ${{ secrets.FB_PAGE_ID }}
+          FB_PAGE_TOKEN: ${{ secrets.FB_PAGE_TOKEN }}
+      - run: npm run validate:data
+      - uses: peter-evans/create-pull-request@v6
+        with:
+          branch: content/facebook-import
+          title: 'নতুন ফেসবুক পোস্ট — এডিটর চেক দরকার'
+          body: |
+            রাতের ইমপোর্ট থেকে নতুন খসড়া (`src/data/imported/`).
+            এডিটর চেক (৫ মিনিট): বাংলা শিরোনাম, স্লাগ, ছবির alt টেক্সট, সিরিজ আর ইনিশিয়েটর ক্রেডিট ঠিক করে `src/data/posts.json`-এ সরাও।
+          commit-message: 'content: nightly Facebook import'

@@ -1,0 +1,13 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/ui/Icon.astro';
+import Leaderboard from '../../components/islands/Leaderboard';
+---
+<BaseLayout title="লিডারবোর্ড — খেলোয়াড়, স্কুল আর জেলা" description="কুইজের সেরা খেলোয়াড়, স্কুল বনাম স্কুল আর জেলার লিডারবোর্ড। শুধু ডাকনাম দেখানো হয়।">
+  <div class="wrap max-w-3xl pt-5 sm:pt-8">
+    <a href="/quiz" class="inline-flex items-center gap-1 font-bold text-link"><Icon name="arrow-left" class="h-4 w-4" />কুইজ জোন</a>
+    <h1 class="mt-2 font-display text-[2.2rem] leading-tight sm:text-5xl">লিডারবোর্ড</h1>
+    <p class="mt-1 text-ink-soft">শুধু ডাকনাম দেখাই — আসল নাম, ছবি বা স্কুল কখনো সম্মতি ছাড়া নয়। শনিবারের কুইজে প্রথম চেষ্টাটাই গোনা হয়।</p>
+    <div class="mt-5"><Leaderboard client:load limit={50} /></div>
+  </div>
+</BaseLayout>

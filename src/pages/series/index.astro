@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SeriesCover from '../../components/cards/SeriesCover.astro';
+import PostCard from '../../components/cards/PostCard.astro';
+import SectionHead from '../../components/ui/SectionHead.astro';
+import Bhabu from '../../components/brand/Bhabu.astro';
+import { seriesByActivity, posts, getSeries } from '../../lib/content';
+import { bn, TOPIC_LABEL } from '../../lib/bn';
+
+const all = seriesByActivity();
+const topics = [...new Set(all.map((s) => s.topic))];
+const latest = posts.slice(0, 8);
+---
+<BaseLayout title="সব সিরিজ" description="রান্নাঘরের বিজ্ঞান, মশার জীবন, হাওরের মাছ, তারার গল্প — তরুণ ইনিশিয়েটরদের বানানো বাংলা বিজ্ঞান সিরিজ। প্রতিটা সিরিজের একটা ঘর, একটা মুখ আর একজন মালিক।">
+  <section class="wrap pt-6 sm:pt-10">
+    <p class="eyebrow">প্রতিটা সিরিজের একটা ঘর, একটা মুখ, একজন মালিক</p>
+    <h1 class="mt-1 font-display text-[2.2rem] leading-tight sm:text-5xl">সিরিজ</h1>
+    <p class="mt-2 max-w-2xl text-lg text-ink-soft">প্রতিটা সিরিজ শুরু হয়েছে কারো একটা প্রশ্ন থেকে। পছন্দেরটা ফলো করো — নতুন পোস্ট এলেই জানবে।</p>
+
+    <div class="mt-6 flex gap-2 overflow-x-auto pb-1" role="toolbar" aria-label="বিষয় অনুযায়ী ছাঁকো">
+      <button type="button" class="chip" aria-pressed="true" data-topic-filter="all">সব</button>
+      {topics.map((t) => <button type="button" class="chip" aria-pressed="false" data-topic-filter={t}>{TOPIC_LABEL[t]}</button>)}
+    </div>
+
+    <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {all.map((s) => (
+        <div data-series-item data-topic={s.topic}><SeriesCover s={s} size="grid" /></div>
+      ))}
+      <a href="/initiator/pitch" class="press group relative flex min-h-[13rem] flex-col justify-end overflow-hidden rounded-[22px] border-2 border-dashed border-coral bg-coral-soft p-5">
+        <span class="absolute right-3 top-2 w-14" aria-hidden="true"><Bhabu face="wink" body="teal" dot="coral" class="w-14" /></span>
+        <span class="text-2xl font-bold">তোমার সিরিজ এখানে?</span>
+        <span class="mt-1 text-ink-soft">একটা প্রশ্ন + ৫ মিনিটের ফর্ম। ৭ দিনের মধ্যে উত্তর।</span>
+        <span class="btn btn-primary btn-sm mt-4 self-start">আইডিয়া পাঠাও</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="wrap mt-14" aria-labelledby="latest-title">
+    <SectionHead id="latest-title" title="সবশেষ পোস্ট" eyebrow={`মোট ${bn(posts.length)}টি পোস্ট`} />
+    <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
+      {latest.map((p) => <PostCard post={p} showSeries={getSeries(p.seriesSlug)?.title} />)}
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const chips = document.querySelectorAll<HTMLButtonElement>('[data-topic-filter]');
+  chips.forEach((c) =>
+    c.addEventListener('click', () => {
+      chips.forEach((x) => x.setAttribute('aria-pressed', String(x === c)));
+      const t = c.dataset.topicFilter;
+      document.querySelectorAll<HTMLElement>('[data-series-item]').forEach((el) => {
+        el.hidden = t !== 'all' && el.dataset.topic !== t;
+      });
+    }),
+  );
+</script>

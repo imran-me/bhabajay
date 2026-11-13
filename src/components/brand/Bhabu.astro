@@ -1,0 +1,7 @@
+---
+import { bhabuSvg, type BhabuOptions } from '../../lib/bhabu';
+interface Props extends BhabuOptions { class?: string }
+const { class: cls = 'w-16', ...opts } = Astro.props;
+const svg = bhabuSvg({ ...opts, className: `w-full h-auto` });
+---
+<span class:list={['inline-block shrink-0', cls]} set:html={svg} />

@@ -1,0 +1,26 @@
+---
+/** Mobile bottom tabs — thumb zone: হোম · সিরিজ · কুইজ · ফেম · আমি */
+import Icon from '../ui/Icon.astro';
+import T from '../ui/T.astro';
+import { TABS } from '../../config/site';
+const path = Astro.url.pathname;
+const isActive = (href: string) => (href === '/' ? path === '/' : path.startsWith(href) || (href === '/series' && path.startsWith('/bhabur-duniya')) || (href === '/me' && path.startsWith('/id')));
+---
+<nav data-bottom-tabs aria-label="ট্যাব" class="fixed inset-x-0 bottom-0 z-40 border-t border-line bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur-md lg:hidden">
+  <ul class="mx-auto grid h-16 max-w-lg grid-cols-5">
+    {TABS.map((t) => {
+      const on = isActive(t.href);
+      return (
+        <li>
+          <a href={t.href} aria-current={on ? 'page' : undefined} class="group flex h-full flex-col items-center justify-center gap-0.5 text-[.8rem] font-semibold">
+            <span class:list={['relative grid h-8 w-12 place-items-center rounded-2xl transition-colors', on ? 'bg-coral text-white' : 'text-ink-soft group-active:bg-tint']}>
+              <Icon name={t.icon} class="h-[1.3rem] w-[1.3rem]" />
+              {t.icon === 'me' && <span data-notice-dot hidden class="absolute right-2 top-1 h-2.5 w-2.5 rounded-full bg-coral ring-2 ring-surface" />}
+            </span>
+            <span class={on ? 'text-ink' : 'text-ink-soft'}><T bn={t.bn} en={t.en} /></span>
+          </a>
+        </li>
+      );
+    })}
+  </ul>
+</nav>

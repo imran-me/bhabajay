@@ -1,0 +1,16 @@
+---
+import Stamp from '../ui/Stamp.astro';
+import type { Myth } from '../../data/types';
+interface Props { myth: Myth; compact?: boolean }
+const { myth, compact = false } = Astro.props;
+---
+<article class="card card-hover press relative flex h-full flex-col p-4 sm:p-5" data-myth-card data-verdict={myth.verdict} data-topic={myth.topic}>
+  <div class="flex items-start gap-3">
+    <h3 class:list={['flex-1 font-bold leading-snug', compact ? 'text-lg' : 'text-xl']}>
+      <a href={`/myth/${myth.slug}`} class="after:absolute after:inset-0 after:content-['']">{myth.claim}</a>
+    </h3>
+    <Stamp verdict={myth.verdict} size="sm" class="mt-1 shrink-0" />
+  </div>
+  <p class="mt-2 text-[.95rem] leading-relaxed text-ink-soft">{myth.short}</p>
+  <p class="mt-auto pt-3 text-sm font-bold text-link">সূত্র: {myth.sources.map((s) => s.label).join(', ')}</p>
+</article>

@@ -1,0 +1,98 @@
+---
+import Logo from '../brand/Logo.astro';
+import Icon from '../ui/Icon.astro';
+import T from '../ui/T.astro';
+import { NAV, FOOTER_LINKS, SITE } from '../../config/site';
+const path = Astro.url.pathname;
+const active = (href: string) => (href === '/' ? path === '/' : path.startsWith(href));
+const deltaHref = SITE.deltaUrl || '/about#delta';
+---
+<header data-topbar class="sticky top-0 z-40 border-b border-line/80 bg-ground/90 backdrop-blur-md supports-[backdrop-filter]:bg-ground/80">
+  <div class="wrap flex h-12 items-center gap-2 lg:h-[72px] lg:gap-4">
+    <span class="flex lg:hidden"><Logo size="sm" egg /></span>
+    <span class="hidden lg:flex"><Logo size="md" egg /></span>
+
+    <nav aria-label="প্রধান মেনু" class="ml-auto hidden lg:block">
+      <ul class="flex items-center gap-1 xl:gap-2">
+        {NAV.map((n) => (
+          <li>
+            <a href={n.href} aria-current={active(n.href) ? 'page' : undefined}
+              class:list={['relative rounded-xl px-3 py-2 font-semibold transition-colors hover:bg-tint', active(n.href) ? 'text-link after:absolute after:inset-x-3 after:-bottom-0.5 after:h-[3px] after:rounded-full after:bg-coral' : 'text-ink']}>
+              <T bn={n.bn} en={n.en} />
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="ml-auto flex items-center gap-1 lg:ml-2">
+      <a href="/search" class="btn-icon hidden text-link lg:inline-grid" aria-label="খোঁজো"><Icon name="search" /></a>
+      <button type="button" class="btn-icon text-link" data-sound-toggle aria-pressed="false" aria-label="শব্দ চালু/বন্ধ">
+        <span data-sound-off><Icon name="sound-off" /></span>
+        <span data-sound-on hidden><Icon name="sound-on" /></span>
+      </button>
+      <span data-streak-slot class="inline-flex">
+        <a href="/id" class="inline-flex h-9 items-center rounded-xl px-3 text-[.95rem] font-bold text-link hover:bg-tint" data-login-link>
+          <T bn="লগ ইন" en="Log in" />
+        </a>
+      </span>
+      <button type="button" class="btn-icon text-ink" data-menu-open aria-haspopup="dialog" aria-controls="bj-menu" aria-label="মেনু খোলো">
+        <Icon name="menu" />
+      </button>
+      <a href="/initiator" class="btn btn-primary btn-sm ml-2 hidden lg:inline-flex"><T bn="ইনিশিয়েটর হও" en="Become an Initiator" /></a>
+    </div>
+  </div>
+</header>
+
+<dialog id="bj-menu" aria-label="মেনু" class="m-0 ml-auto h-dvh max-h-dvh w-full max-w-sm bg-transparent p-0 backdrop:bg-deep/50 backdrop:backdrop-blur-sm">
+  <div class="flex h-full flex-col overflow-y-auto bg-surface p-5 shadow-2xl sm:rounded-l-[28px]">
+    <div class="flex items-center justify-between">
+      <Logo size="sm" />
+      <button type="button" class="btn-icon" data-menu-close aria-label="মেনু বন্ধ করো"><Icon name="x" /></button>
+    </div>
+
+    <a href="/me" class="card mt-5 flex items-center gap-3 p-3 hover:bg-tint" data-menu-account>
+      <span class="grid h-11 w-11 place-items-center rounded-full bg-sun text-deep"><Icon name="me" /></span>
+      <span class="leading-tight">
+        <span class="block font-bold"><T bn="আমার ভাবা যায়" en="My Bhaba Jay" /></span>
+        <span class="text-sm text-ink-soft" data-menu-account-sub><T bn="আইডি বানাও, স্কোর জমাও" en="Create your ID, keep your scores" /></span>
+      </span>
+      <Icon name="chevron-right" class="ml-auto h-5 w-5 text-ink-soft" />
+    </a>
+
+    <div class="mt-5 grid gap-3">
+      <fieldset>
+        <legend class="mb-1.5 text-sm font-bold text-ink-soft"><T bn="থিম" en="Theme" /></legend>
+        <div class="grid grid-cols-3 gap-1 rounded-2xl bg-tint p-1" role="radiogroup">
+          <button type="button" class="rounded-xl py-2 text-sm font-semibold" data-theme-set="system" role="radio"><T bn="ফোনের মতো" en="System" /></button>
+          <button type="button" class="rounded-xl py-2 text-sm font-semibold" data-theme-set="light" role="radio"><T bn="দিন" en="Light" /></button>
+          <button type="button" class="rounded-xl py-2 text-sm font-semibold" data-theme-set="dark" role="radio"><T bn="রাত" en="Dark" /></button>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend class="mb-1.5 text-sm font-bold text-ink-soft"><T bn="ভাষা (মেনু ও বোতাম)" en="Language (menus & buttons)" /></legend>
+        <div class="grid grid-cols-2 gap-1 rounded-2xl bg-tint p-1" role="radiogroup">
+          <button type="button" class="rounded-xl py-2 text-sm font-semibold" data-lang-set="bn" role="radio">বাংলা</button>
+          <button type="button" class="rounded-xl py-2 font-en text-sm font-semibold" data-lang-set="en" role="radio">English</button>
+        </div>
+        <p class="mt-1 text-xs text-ink-soft"><T bn="পুরো ইংরেজি সংস্করণ আসছে (v3)।" en="Full English mirror is planned for v3." /></p>
+      </fieldset>
+    </div>
+
+    <nav aria-label="সব পেজ" class="mt-6 grid gap-5">
+      {Object.entries(FOOTER_LINKS).map(([group, links]) => (
+        <div>
+          <p class="mb-1 text-xs font-bold text-ink-soft">{group === 'explore' ? <T bn="ঘুরে দেখো" en="Explore" /> : group === 'community' ? <T bn="কমিউনিটি" en="Community" /> : <T bn="আমাদের সম্পর্কে" en="About" />}</p>
+          <ul class="grid">
+            {links.map((l) => (
+              <li><a href={l.href} class="flex min-h-11 items-center rounded-xl px-2 font-semibold hover:bg-tint"><T bn={l.bn} en={l.en} /></a></li>
+            ))}
+          </ul>
+        </div>
+      ))}
+      <a href={deltaHref} class="flex min-h-11 items-center gap-2 rounded-xl px-2 font-bold text-coral-dark hover:bg-coral-soft" {...(SITE.deltaUrl ? { target: '_blank', rel: 'noopener' } : {})}>
+        <T bn="ডেল্টা ইনিশিয়েটিভস" en="Delta Initiatives" /> <Icon name="external" class="h-4 w-4" />
+      </a>
+    </nav>
+  </div>
+</dialog>

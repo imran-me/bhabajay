@@ -1,0 +1,135 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Stamp from '../../components/ui/Stamp.astro';
+import Icon from '../../components/ui/Icon.astro';
+import Bhabu from '../../components/brand/Bhabu.astro';
+import MythCard from '../../components/cards/MythCard.astro';
+import Comments from '../../components/islands/Comments';
+import { myths } from '../../lib/content';
+import { bnCompact, bnDate, TOPIC_LABEL, VERDICT_LABEL } from '../../lib/bn';
+import { SITE } from '../../config/site';
+import type { Myth } from '../../data/types';
+
+export function getStaticPaths() {
+  return myths.map((m) => ({ params: { slug: m.slug }, props: { m } }));
+}
+const { m } = Astro.props as { m: Myth };
+const related = myths.filter((x) => x.slug !== m.slug && x.topic === m.topic).concat(myths.filter((x) => x.slug !== m.slug && x.topic !== m.topic)).slice(0, 3);
+const next = related[0];
+const url = `/myth/${m.slug}`;
+const verdictBn = VERDICT_LABEL[m.verdict];
+const face = m.verdict === 'myth' ? 'wow' : m.verdict === 'partial' ? 'think' : 'happy';
+const plate = { true: 'bg-tint', myth: 'bg-coral-soft', partial: 'bg-sun-soft' }[m.verdict];
+const jsonLd = [
+  {
+    '@type': 'FAQPage',
+    mainEntity: [
+      { '@type': 'Question', name: m.question, acceptedAnswer: { '@type': 'Answer', text: `${verdictBn}। ${m.short} ${m.body[0]}` } },
+      ...m.faq.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })),
+    ],
+  },
+  {
+    '@type': 'ClaimReview',
+    url: `${SITE.url}${url}`,
+    claimReviewed: m.claim,
+    author: { '@type': 'Organization', name: 'ভাবা যায়!' },
+    reviewRating: { '@type': 'Rating', ratingValue: m.verdict === 'true' ? 5 : m.verdict === 'partial' ? 3 : 1, bestRating: 5, worstRating: 1, alternateName: verdictBn },
+    inLanguage: 'bn',
+  },
+];
+---
+<BaseLayout title={m.question} description={`${verdictBn}। ${m.short} সূত্রসহ সহজ ব্যাখ্যা।`} keywords={[m.claim, ...m.aliases]} type="article" jsonLd={jsonLd} image={`/og/myth/${m.slug}.png`} published={m.fridayDate}>
+  <article class="wrap max-w-4xl pt-5 sm:pt-8">
+    <nav aria-label="অবস্থান" class="flex items-center gap-1 text-sm font-semibold text-ink-soft">
+      <a href="/myth" class="hover:text-link">মিথ না সত্য?</a><Icon name="chevron-right" class="h-4 w-4" /><span>{TOPIC_LABEL[m.topic]}</span>
+    </nav>
+
+    <header class:list={['relative mt-4 overflow-hidden rounded-[28px] p-6 sm:p-9', plate]}>
+      <div class="flex items-start gap-4">
+        <div class="min-w-0 flex-1">
+          <p class="text-sm font-bold text-ink-soft">শোনা কথা:</p>
+          <p class="mt-1 text-lg font-semibold italic text-ink-soft">“{m.claim}”</p>
+          <h1 class="mt-4 text-[1.9rem] font-bold leading-tight sm:text-[2.5rem]">{m.question}</h1>
+        </div>
+        <Bhabu face={face} body="teal" dot="coral" class="hidden w-20 shrink-0 sm:block" />
+      </div>
+      <div class="mt-5 flex flex-wrap items-center gap-4">
+        <Stamp verdict={m.verdict} size="xl" bang />
+        <p class="max-w-md text-lg font-semibold leading-snug">{m.short}</p>
+      </div>
+      <p class="mt-4 text-sm font-bold text-link">সূত্র: {m.sources.map((s) => s.label).join(', ')}</p>
+    </header>
+
+    {m.reveal && (
+      <button type="button" data-reveal class="mt-5 w-full overflow-hidden rounded-[22px] border-[3px] border-dashed border-sun bg-surface p-5 text-left">
+        <span data-reveal-cover class="flex items-center gap-4">
+          <span class="font-display text-3xl text-mustard dark:text-sun">ভাবা যায়!</span>
+          <span class="font-semibold text-ink-soft">লুকানো সংখ্যাটা দেখতে চাপো <span aria-hidden="true">👆</span></span>
+        </span>
+        <span data-reveal-content hidden class="flex flex-wrap items-baseline gap-x-4">
+          <span class="font-stamp text-5xl text-coral-dark dark:text-coral sm:text-6xl">{m.reveal.value}</span>
+          <span class="text-lg font-semibold">{m.reveal.label}</span>
+        </span>
+      </button>
+    )}
+
+    <div class="prose-bn mt-8">
+      {m.body.map((p) => <p>{p}</p>)}
+    </div>
+
+    <section class="mt-8" aria-labelledby="faq-h">
+      <h2 id="faq-h" class="text-xl font-bold">আরও প্রশ্ন</h2>
+      <div class="mt-3 grid gap-2">
+        {m.faq.map((f) => (
+          <details class="group card p-4 [&_summary::-webkit-details-marker]:hidden">
+            <summary class="flex cursor-pointer items-center gap-3 font-bold">{f.q}<Icon name="chevron-down" class="ml-auto h-5 w-5 shrink-0 transition-transform group-open:rotate-180" /></summary>
+            <p class="mt-2 leading-relaxed text-ink-soft">{f.a}</p>
+          </details>
+        ))}
+      </div>
+    </section>
+
+    <section class="mt-8 border-t border-line pt-5">
+      <h2 class="text-sm font-bold text-ink-soft">সূত্র</h2>
+      <ul class="mt-2 grid gap-1">{m.sources.map((s) => <li><a href={s.url} target="_blank" rel="noopener" class="link inline-flex items-center gap-1">{s.label}<Icon name="external" class="h-3.5 w-3.5" /></a></li>)}</ul>
+      {m.fridayDate && <p class="mt-2 text-sm text-ink-soft">শুক্রবারের মিথ হিসেবে প্রকাশ: {bnDate(m.fridayDate)}</p>}
+    </section>
+
+    <!-- share card: 1:1, ready for Messenger -->
+    <section class="mt-10 grid items-center gap-6 rounded-[28px] bg-tint p-5 sm:grid-cols-[16rem_1fr] sm:p-7" aria-labelledby="share-h">
+      <div class="pattern-warm relative aspect-square overflow-hidden rounded-[22px] p-4 shadow-[var(--shadow-card)]" aria-hidden="true">
+        <div class="rounded-2xl bg-white/95 p-3 text-deep">
+          <Stamp verdict={m.verdict} size="md" bang />
+          <p class="mt-3 text-[1.05rem] font-bold leading-snug">{m.claim}</p>
+          <p class="mt-2 text-xs font-bold text-teal">সূত্র: {m.sources[0]?.label}</p>
+        </div>
+        <p class="absolute bottom-3 left-4 font-display text-lg"><span class="text-teal">ভাবা</span> <span class="text-coral">যায়!</span></p>
+      </div>
+      <div>
+        <h2 id="share-h" class="text-2xl font-bold">পরিবারের গ্রুপে পাঠাও</h2>
+        <p class="mt-1 text-ink-soft">বড় রায়, এক লাইনের প্রমাণ, ছোট লোগো — থাম্বনেইলেও পড়া যায়। {bnCompact(m.shares)} বার শেয়ার হয়েছে।</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <button type="button" class="btn btn-primary" data-share data-share-sheet data-share-url={url} data-share-title={m.question} data-share-text={`${m.question} — ${verdictBn}! পুরো উত্তর + সূত্র:`}
+            data-card={JSON.stringify({ kind: 'myth', verdict: m.verdict, title: m.claim, line: m.short, source: m.sources[0]?.label })}>
+            <Icon name="share" class="h-5 w-5" />শেয়ার কার্ড
+          </button>
+          <button type="button" class="btn btn-ghost aria-pressed:!bg-surface" data-save={`myth:${m.slug}`} aria-pressed="false" data-on-label="সেভ করা" data-off-label="সেভ"><Icon name="bookmark" class="h-4 w-4" /><span data-label>সেভ</span></button>
+        </div>
+        <p class="mt-3 text-xs text-ink-soft">ছোট লিংক: <span class="font-en">{SITE.url.replace('https://', '')}/m/{m.id}</span></p>
+      </div>
+    </section>
+
+    <div data-mark-read={m.slug} class="h-px"></div>
+
+    <section class="mt-10" aria-labelledby="cm-h">
+      <h2 id="cm-h" class="text-xl font-bold">আলোচনা</h2>
+      <div class="mt-3"><Comments client:visible target={{ type: 'myth', id: m.slug }} /></div>
+    </section>
+    <div data-peek-end data-peek-href={`/myth/${next.slug}`} data-peek-label={next.question} class="h-px"></div>
+  </article>
+
+  <section class="wrap mt-12" aria-labelledby="rel-h">
+    <h2 id="rel-h" class="section-title mb-4">আরও মিথ</h2>
+    <div class="grid gap-4 md:grid-cols-3">{related.map((r) => <MythCard myth={r} compact />)}</div>
+  </section>
+</BaseLayout>

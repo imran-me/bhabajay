@@ -1,0 +1,88 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/ui/Icon.astro';
+import Logo from '../../components/brand/Logo.astro';
+import { kits, getQuiz, getEpisode, getSeries } from '../../lib/content';
+import { bn, TOPIC_LABEL } from '../../lib/bn';
+import type { TeacherKit } from '../../data/types';
+
+export function getStaticPaths() {
+  return kits.map((k) => ({ params: { kit: k.slug }, props: { k } }));
+}
+const { k } = Astro.props as { k: TeacherKit };
+const quiz = getQuiz(k.quizSlug);
+const ep = k.episodeSlug ? getEpisode(k.episodeSlug) : undefined;
+const s = k.seriesSlug ? getSeries(k.seriesSlug) : undefined;
+const jsonLd = {
+  '@type': 'LearningResource',
+  name: k.title,
+  description: k.summary,
+  inLanguage: 'bn',
+  educationalLevel: k.grades,
+  timeRequired: `PT${k.minutes}M`,
+  learningResourceType: 'Lesson plan',
+  teaches: k.objectives,
+  isAccessibleForFree: true,
+};
+---
+<BaseLayout title={`${k.title} (${k.grades})`} description={k.summary} jsonLd={jsonLd}>
+  <article class="wrap max-w-4xl pt-5 sm:pt-8">
+    <div class="no-print flex flex-wrap items-center gap-2">
+      <a href="/teachers" class="inline-flex items-center gap-1 font-bold text-link"><Icon name="arrow-left" class="h-4 w-4" />সব কিট</a>
+      <button type="button" class="btn btn-secondary btn-sm ml-auto" onclick="window.print()"><Icon name="printer" class="h-4 w-4" />প্রিন্ট / PDF</button>
+    </div>
+
+    <header class="mt-4 border-b-4 border-teal pb-5">
+      <div class="hidden print:block"><Logo size="sm" /></div>
+      <p class="flex flex-wrap gap-2"><span class="tag">{k.grades}</span><span class="tag tag-sun">{bn(k.minutes)} মিনিট</span><span class="tag tag-coral">{k.subject}</span></p>
+      <h1 class="mt-3 text-[2rem] font-bold leading-tight sm:text-4xl">{k.title}</h1>
+      <p class="mt-2 text-lg text-ink-soft">{k.summary}</p>
+    </header>
+
+    <div class="mt-6 grid gap-6 sm:grid-cols-2">
+      <section><h2 class="text-xl font-bold">শিখনফল</h2><ul class="mt-2 grid list-disc gap-1.5 pl-5">{k.objectives.map((o) => <li>{o}</li>)}</ul></section>
+      <section><h2 class="text-xl font-bold">যা লাগবে</h2><ul class="mt-2 grid list-disc gap-1.5 pl-5">{k.materials.map((m) => <li>{m}</li>)}</ul></section>
+    </div>
+
+    <section class="mt-8">
+      <h2 class="text-xl font-bold">পাঠের ধাপ</h2>
+      <ol class="mt-3 grid gap-3">
+        {k.steps.map((st, i) => (
+          <li class="card flex gap-4 p-4">
+            <span class="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-coral font-display text-white">{bn(i + 1)}</span>
+            <div><p class="text-sm font-bold text-coral-dark dark:text-coral">{st.time}</p><p class="font-bold">{st.title}</p><p class="mt-0.5 text-ink-soft">{st.detail}</p></div>
+          </li>
+        ))}
+      </ol>
+    </section>
+
+    <section class="mt-8">
+      <h2 class="text-xl font-bold">আলোচনার প্রশ্ন</h2>
+      <ol class="mt-2 grid list-decimal gap-1.5 pl-5">{k.discussion.map((d) => <li>{d}</li>)}</ol>
+    </section>
+
+    <section class="no-print mt-8 grid gap-3 sm:grid-cols-3">
+      {ep && <a href={`/bhabur-duniya/${ep.slug}`} class="card card-hover p-4"><p class="text-sm font-bold text-ink-soft">পর্ব</p><p class="font-bold">{ep.title}</p></a>}
+      {quiz && <a href={quiz.kind === 'episode' && ep ? `/bhabur-duniya/${ep.slug}#episode-quiz` : `/quiz/${quiz.slug}`} class="card card-hover bg-sun-soft p-4"><p class="text-sm font-bold text-ink-soft">ক্লাসের কুইজ</p><p class="font-bold">{quiz.title}</p></a>}
+      {s && <a href={`/series/${s.slug}`} class="card card-hover p-4"><p class="text-sm font-bold text-ink-soft">সিরিজ</p><p class="font-bold">{s.title}</p></a>}
+    </section>
+
+    <!-- printable worksheet -->
+    <section class="print-break mt-10 rounded-[22px] border-2 border-dashed border-line p-6 print:border-0 print:p-0">
+      <div class="flex items-center gap-3">
+        <h2 class="text-2xl font-bold">ওয়ার্কশিট</h2>
+        <span class="ml-auto text-sm text-ink-soft">ভাবা যায়! · {TOPIC_LABEL[k.topic]}</span>
+      </div>
+      <p class="mt-3">নাম: ______________________ &nbsp; শ্রেণি: ________ &nbsp; তারিখ: ____________</p>
+      <ol class="mt-5 grid gap-6">
+        {k.worksheet.map((w, i) => (
+          <li>
+            <p class="font-semibold">{bn(i + 1)}. {w.q}</p>
+            {Array.from({ length: w.lines }).map(() => <div class="mt-5 border-b border-ink-soft/50"></div>)}
+          </li>
+        ))}
+      </ol>
+      <p class="mt-6 text-xs text-ink-soft">bhabajay.com/teachers/{k.slug} · বিনামূল্যে ব্যবহার ও বিতরণযোগ্য</p>
+    </section>
+  </article>
+</BaseLayout>
