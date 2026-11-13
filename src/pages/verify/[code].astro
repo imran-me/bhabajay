@@ -1,0 +1,66 @@
+---
+/**
+ * Public verification record: bhabajay.com/verify/BJ-2026-014 lets a
+ * university confirm an Initiator/Legend title is real.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Avatar from '../../components/ui/Avatar.astro';
+import Icon from '../../components/ui/Icon.astro';
+import Logo from '../../components/brand/Logo.astro';
+import { people, getSeries, getMentor, personProof, displayName } from '../../lib/content';
+import { bn, bnDate, TIER_LABEL } from '../../lib/bn';
+import { SITE } from '../../config/site';
+import type { Person } from '../../data/types';
+
+export function getStaticPaths() {
+  return people.filter((p) => p.verifyCode).map((p) => ({ params: { code: p.verifyCode! }, props: { p } }));
+}
+const { p } = Astro.props as { p: Person };
+const s = getSeries(p.seriesSlug ?? '');
+const m = getMentor(p.mentorId);
+const proof = personProof(p);
+const teen = p.ageBand === 'teen';
+const titleEvent = [...p.journey].reverse().find((j) => /খেতাব|কিংবদন্তি/.test(j.label));
+const issued = titleEvent?.date ?? p.joinedAt;
+---
+<BaseLayout title={`যাচাই ${p.verifyCode} — ${displayName(p)}, ${TIER_LABEL[p.tier].bn}`} description={`ভাবা যায়! খেতাব যাচাই: ${displayName(p)} — ${TIER_LABEL[p.tier].bn}${s ? `, সিরিজ “${s.title}”` : ''}।`}>
+  <div class="wrap max-w-3xl pt-6 sm:pt-10">
+    <article class="card overflow-hidden">
+      <div class="flex items-center gap-3 bg-teal px-6 py-4 text-white">
+        <span class="grid h-10 w-10 place-items-center rounded-full bg-white text-teal"><Icon name="shield" class="h-6 w-6" /></span>
+        <div>
+          <p class="text-lg font-bold">যাচাই করা হয়েছে ✓</p>
+          <p class="font-en text-sm text-white/85">Verified · {p.verifyCode}</p>
+        </div>
+        <button type="button" class="btn-icon ml-auto text-white hover:!bg-white/10 no-print" onclick="window.print()" aria-label="প্রিন্ট করো"><Icon name="printer" /></button>
+      </div>
+      <div class="grid gap-6 p-6 sm:grid-cols-[auto_1fr] sm:p-8">
+        <Avatar avatar={p.avatar} tier={p.tier} class="mx-auto h-28 w-28" />
+        <div>
+          <p class="text-3xl font-bold">{displayName(p)}</p>
+          <p class="mt-1 text-xl font-semibold text-coral-dark dark:text-coral">ভাবা যায়! {TIER_LABEL[p.tier].bn} <span class="font-en text-base text-ink-soft">(Bhaba Jay {TIER_LABEL[p.tier].en})</span></p>
+          <dl class="mt-4 grid grid-cols-[auto_1fr] gap-x-4 gap-y-1.5 text-[.95rem]">
+            {s && <><dt class="text-ink-soft">সিরিজ</dt><dd class="font-semibold"><a href={`/series/${s.slug}`} class="link">{s.title}</a> ({s.subject})</dd></>}
+            <dt class="text-ink-soft">খেতাব প্রদান</dt><dd class="font-semibold">{bnDate(issued)}</dd>
+            {p.pitchDate && <><dt class="text-ink-soft">পিচের তারিখ</dt><dd class="font-semibold">{bnDate(p.pitchDate)}</dd></>}
+            <dt class="text-ink-soft">প্রকাশিত কাজ</dt><dd class="font-semibold">{bn(proof.posts)} পোস্ট{proof.videos ? `, ${bn(proof.videos)} ভিডিও` : ''}{proof.research ? `, ${bn(proof.research)} গবেষণা নোট` : ''}{proof.forums ? `, ${bn(proof.forums)} ফোরাম বক্তৃতা` : ''}</dd>
+            {m && <><dt class="text-ink-soft">মেন্টর</dt><dd class="font-semibold">{m.name}, {m.title}</dd></>}
+          </dl>
+          {teen && <p class="mt-4 rounded-2xl bg-sun-soft p-3 text-sm">প্রাপক ১৮ বছরের কম বয়সী, তাই এখানে শুধু ডাকনাম দেখানো হয়েছে। প্রতিষ্ঠান চাইলে প্রাপক ও অভিভাবকের লিখিত সম্মতিতে পূর্ণ নাম নিশ্চিত করা হয়: <a href={`mailto:${SITE.contactEmail}?subject=Verify ${p.verifyCode}`} class="font-bold text-link">{SITE.contactEmail}</a></p>}
+        </div>
+      </div>
+      <div class="border-t border-line p-6 sm:p-8">
+        <h2 class="font-bold">যাত্রা</h2>
+        {p.originalQuestion && <p class="mt-1 text-ink-soft">শুরুর প্রশ্ন: “{p.originalQuestion}”</p>}
+        <ol class="mt-3 grid gap-2">
+          {p.journey.map((j) => <li class="flex gap-3"><span class="w-28 shrink-0 text-sm text-ink-soft">{bnDate(j.date)}</span><span>{j.label}</span></li>)}
+        </ol>
+      </div>
+      <div class="flex flex-wrap items-center gap-3 border-t border-line bg-tint px-6 py-4 text-sm">
+        <Logo size="sm" />
+        <p class="text-ink-soft">এই পাতাটাই খেতাবের সরকারি রেকর্ড। ঠিকানা: <span class="font-en">{SITE.url.replace('https://', '')}/verify/{p.verifyCode}</span></p>
+      </div>
+    </article>
+    <p class="mt-4 text-center text-sm"><a href="/verify" class="link">আরেকটা কোড যাচাই করো</a> · <a href={`/u/${p.username}`} class="link">প্রোফাইল</a></p>
+  </div>
+</BaseLayout>

@@ -1,0 +1,134 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Bhabu from '../../components/brand/Bhabu.astro';
+import Icon from '../../components/ui/Icon.astro';
+import Avatar from '../../components/ui/Avatar.astro';
+import { TIERS } from '../../lib/badges';
+import { wallPeople, getSeries, mentors } from '../../lib/content';
+import { bn } from '../../lib/bn';
+import { SITE } from '../../config/site';
+
+const steps = [
+  { n: '১', t: 'পিচ', d: '৫ মিনিটের ফর্ম, যেকোনো বিষয়। সাথে সাথে বাংলায় স্বয়ংক্রিয় উত্তর।', emoji: '💡', cls: 'bg-tint' },
+  { n: '২', t: 'রিভিউ', d: 'কোর টিম দেখে: বিষয়ের মিল, তথ্য, নিরাপত্তা। ৭ দিনের মধ্যে, স্ট্যাটাস সবসময় দেখা যায়।', emoji: '🔍', cls: 'bg-tint' },
+  { n: '৩', t: 'মেন্টর + কিট', d: 'মেন্টর ঠিক হয়, সিরিজের নাম চূড়ান্ত হয়, ব্র্যান্ড কিট আর তথ্য-যাচাইয়ের ছোট পাঠ।', emoji: '🤝', cls: 'bg-coral-soft' },
+  { n: '৪', t: 'সিরিজ তৈরি', d: 'প্রথম ৪টি কাজ, মেন্টরের রিভিউ — তারপর সাইট আর ফেসবুকে প্রকাশ।', emoji: '🎬', cls: 'bg-coral text-white' },
+  { n: '৫', t: 'ক্রেডিট', d: 'ইনিশিয়েটর খেতাব · ওয়াল অফ ফেম কার্ড · সার্টিফিকেট · প্রতিটা পোস্টে তোমার নাম।', emoji: '🏅', cls: 'bg-sun text-deep' },
+];
+const faqs = [
+  { q: 'কারা পিচ করতে পারে?', a: '১৩ বছর বা তার বেশি বয়সী যে কেউ, যার একটা প্রশ্ন আছে। ১৩–১৭ হলে অভিভাবকের ইমেইল দিয়ে আইডি নিশ্চিত করতে হয়। ১৩-র কম হলে প্রশ্নটা ভাবুকে পাঠাও — হয়তো সেটা দিয়েই পর্ব হবে।' },
+  { q: 'কোন বিষয়ে পিচ করা যায়?', a: 'পদার্থবিজ্ঞান থেকে কৃষি, সাহিত্য থেকে খেলাধুলার বিজ্ঞান — ২০টি ক্ষেত্র। শর্ত একটাই: প্রশ্নটা কৌতূহল জাগাবে আর উত্তরের সূত্র থাকবে।' },
+  { q: 'টাকা লাগে?', a: 'একদম না। ভাবা যায় আইডি, মেন্টর, ব্র্যান্ড কিট — সব বিনামূল্যে।' },
+  { q: 'পিচ “এখনো না” হলে?', a: 'মন খারাপের কিছু নেই। বন্ধুত্বপূর্ণ মতামত আর একটা ছোট প্রথম ধাপের পরামর্শ পাবে। যেকোনো সময় আবার পিচ করা যায়।' },
+  { q: 'কত সময় দিতে হবে?', a: 'তুমি ঠিক করো — সপ্তাহে ১টা, মাসে ২টা বা মাসে ১টা পোস্ট। ইনিশিয়েটর হতে ২ মাসে অন্তত ৪টি প্রকাশিত কাজ লাগে।' },
+  { q: 'ক্রেডিট কীভাবে দেখানো হয়?', a: 'সাইটের কার্ডে, ফেসবুক ক্যাপশনে আর ভিডিওর শেষ স্লেটে: “সিরিজ: তোমার নাম, ভাবা যায়! ইনিশিয়েটর”। ১৮-র কম হলে শুধু ডাকনাম।' },
+  { q: 'বিশ্ববিদ্যালয় কি খেতাবটা যাচাই করতে পারবে?', a: 'হ্যাঁ। প্রতিটা ওয়াল অফ ফেম কার্ডে একটা যাচাই-লিংক আছে (যেমন bhabajay.com/verify/BJ-2026-014) — সেখানে খেতাব, তারিখ আর যাত্রা দেখা যায়।' },
+  { q: 'পুরস্কার বা বৃত্তি আছে?', a: 'আমরা যোগ্যদের পুরস্কার আর বৃত্তির জন্য সুপারিশ করি, কিন্তু কখনো প্রতিশ্রুতি দিই না। কিংবদন্তি স্তরে সুপারিশপত্র আর ডেল্টা ইনিশিয়েটিভস রেফারেল পাওয়া যায়।' },
+];
+const jsonLd = { '@type': 'FAQPage', mainEntity: faqs.map((f) => ({ '@type': 'Question', name: f.q, acceptedAnswer: { '@type': 'Answer', text: f.a } })) };
+const examples = wallPeople.filter((p) => p.tier === 'initiator' || p.tier === 'legend').slice(0, 3);
+const deltaHref = SITE.deltaUrl || '/about#delta';
+---
+<BaseLayout title="ইনিশিয়েটর হও — প্রশ্ন যার, সিরিজ তার" description="একটা প্রশ্ন পাঠাও, মেন্টর আর দল পাও, নিজের নামে সিরিজ চালাও। পিচ → রিভিউ → সিরিজ → ক্রেডিট। ওয়াল অফ ফেমে জায়গা নাও।" jsonLd={jsonLd}>
+  <section class="pattern-teal text-white">
+    <div class="wrap grid items-center gap-6 py-10 sm:py-14 lg:grid-cols-[1fr_auto]">
+      <div class="rounded-3xl bg-teal/80 p-1">
+        <p class="font-display text-xl text-sun">প্রশ্ন যার, সিরিজ তার</p>
+        <h1 class="mt-2 font-display text-[2.5rem] leading-[1.15] sm:text-6xl">ইনিশিয়েটর হও</h1>
+        <p class="mt-3 max-w-xl text-lg text-white/90">“আমরা কনটেন্ট বানাই না, কনটেন্ট নির্মাতা বানাই।” তোমার একটা প্রশ্ন থেকে শুরু হবে তোমার নিজের সিরিজ — মেন্টর, দল আর প্রতিটা পোস্টে তোমার নাম।</p>
+        <div class="mt-6 flex flex-wrap gap-3">
+          <a href="/initiator/pitch" class="btn btn-primary btn-lg">আইডিয়া পাঠাও</a>
+          <a href="/initiator/track" class="btn btn-ghost-light btn-lg">পিচ ট্র্যাক করো</a>
+        </div>
+      </div>
+      <div class="hidden w-40 lg:block" aria-hidden="true"><Bhabu face="wow" body="coral" dot="sun" brows="light" animateSparks class="w-40" /></div>
+    </div>
+  </section>
+
+  <!-- journey: pitch → review → series → credit -->
+  <section class="wrap mt-12" aria-labelledby="path-h">
+    <p class="eyebrow">ইনিশিয়েটরের যাত্রা</p>
+    <h2 id="path-h" class="section-title">পিচ → রিভিউ → সিরিজ তৈরি → ক্রেডিট</h2>
+    <ol class="mt-6 grid gap-3 md:grid-cols-5">
+      {steps.map((s, i) => (
+        <li class:list={['relative rounded-[22px] p-5', s.cls]}>
+          <p class="text-3xl" aria-hidden="true">{s.emoji}</p>
+          <h3 class="mt-2 text-xl font-bold">{s.n} · {s.t}</h3>
+          <p class:list={['mt-1 text-sm leading-relaxed', s.cls.includes('text-white') ? 'text-white/90' : s.cls.includes('text-deep') ? 'text-deep/85' : 'text-ink-soft']}>{s.d}</p>
+          {i < steps.length - 1 && <span class="absolute -right-3 top-1/2 z-10 hidden h-6 w-6 -translate-y-1/2 place-items-center rounded-full bg-deep text-white md:grid" aria-hidden="true"><Icon name="arrow-right" class="h-4 w-4" /></span>}
+        </li>
+      ))}
+    </ol>
+    <div class="mt-3 grid gap-3 md:grid-cols-[1fr_2fr]">
+      <p class="rounded-[22px] border-2 border-dashed border-coral p-4 text-sm font-semibold text-coral-dark dark:text-coral">↺ “এখনো না”: বন্ধুত্বপূর্ণ মতামত + একটা ছোট প্রথম ধাপের পরামর্শ। যেকোনো সময় আবার পিচ।</p>
+      <a href={deltaHref} class="rounded-[22px] bg-deep p-5 text-white transition hover:-translate-y-0.5">
+        <p class="text-lg font-bold text-sun">৬ · বড় মঞ্চ (কিংবদন্তির পথ)</p>
+        <p class="mt-1 text-white/85">দল · জার্নাল · সিম্পোজিয়াম · SDG অ্যাকশন → ডেল্টা ইনিশিয়েটিভস ফোরাম ↗</p>
+      </a>
+    </div>
+  </section>
+
+  <section class="wrap mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div class="card p-5"><h3 class="font-bold text-link">স্ট্যাটাস ট্র্যাকার</h3><p class="mt-1 text-sm text-ink-soft">পাঠানো → দেখা হচ্ছে → মেন্টর ঠিক → লাইভ — পার্সেলের মতো। কেউ চুপচাপ অপেক্ষা করে না।</p></div>
+    <div class="card p-5"><h3 class="font-bold text-link">প্রতিটা ধাপে খবর</h3><p class="mt-1 text-sm text-ink-soft">ইমেইল আর সাইটে নোটিফিকেশন, সাথে মুড অনুযায়ী ভাবুর মুখ (অনুমোদনে “ওয়াও!”)।</p></div>
+    <div class="card p-5"><h3 class="font-bold text-link">সব জায়গায় ক্রেডিট</h3><p class="mt-1 text-sm text-ink-soft">“সিরিজ: নাদিয়া রহমান, ভাবা যায়! ইনিশিয়েটর” — সাইটের কার্ডে, ফেসবুক ক্যাপশনে, ভিডিওর শেষে।</p></div>
+    <a href="/mentors" class="card card-hover p-5"><h3 class="font-bold text-link">রিচ মাইন্ডস ট্র্যাক →</h3><p class="mt-1 text-sm text-ink-soft">মেন্টর আর সহায়করা আলাদা সাইন আপ করেন (ক্যারিয়ার, গবেষণা, স্টার্টআপ), বিষয় মিলিয়ে ইনিশিয়েটরের সাথে জোড়া হয়।</p></a>
+  </section>
+
+  <!-- roles -->
+  <section class="wrap mt-12" aria-labelledby="roles-h">
+    <h2 id="roles-h" class="section-title">কে কী করে</h2>
+    <div class="mt-4 grid gap-3 md:grid-cols-3">
+      <div class="card p-5"><p class="tag tag-coral">ইনিশিয়েটর</p><p class="mt-2">সিরিজের মালিক। প্রশ্ন বাছে, দল চালায়, প্রকাশের সিদ্ধান্ত নেয় মেন্টরের সাথে।</p></div>
+      <div class="card p-5"><p class="tag">অভিযাত্রী (দলের সদস্য)</p><p class="mt-2">লেখে, আঁকে, অনুবাদ করে, তথ্য খোঁজে। প্রতিটা কাজে নামসহ ক্রেডিট লাইন।</p></div>
+      <div class="card p-5"><p class="tag tag-sun">মেন্টর</p><p class="mt-2">তথ্য যাচাই করেন, পথ দেখান। এখন {bn(mentors.length)} জন মেন্টর — <a href="/about#mentors" class="link">পরিচয়</a>।</p></div>
+    </div>
+  </section>
+
+  <!-- tiers -->
+  <section class="mt-12 bg-deep py-12 text-white" aria-labelledby="tiers-h">
+    <div class="wrap">
+      <p class="font-bold text-sun">ওয়াল অফ ফেমের স্তর</p>
+      <h2 id="tiers-h" class="font-display text-3xl sm:text-4xl">প্রশ্ন থেকে উত্তরাধিকার — চার ধাপে</h2>
+      <ol class="mt-6 grid items-end gap-3 md:grid-cols-4">
+        {TIERS.map((t, i) => (
+          <li class:list={['rounded-[22px] p-5', ['bg-[#0B5961]', 'bg-teal', 'bg-coral', 'bg-sun text-deep'][i]]} style={`min-height:${12 + i * 3}rem`}>
+            <span class:list={['grid h-11 w-11 place-items-center rounded-full font-display text-lg', i === 3 ? 'bg-deep text-sun' : 'bg-white text-deep']}>{bn(i + 1)}</span>
+            <h3 class="mt-3 text-xl font-bold">{t.en} · {t.bn}</h3>
+            <p class:list={['mt-1 text-sm', i === 3 ? 'text-deep/85' : 'text-white/85']}>{t.need}</p>
+            <p class:list={['mt-2 text-sm font-bold', i === 3 ? 'text-deep' : 'text-sun']}>খোলে: {t.unlocks}</p>
+          </li>
+        ))}
+      </ol>
+      <p class="mt-4 text-sm text-white/70">স্তরের নাম আর শর্ত কোর মিটিংয়ে চূড়ান্ত হবে। পুরস্কার আর বৃত্তির জন্য সুপারিশ করা হয়, প্রতিশ্রুতি নয়।</p>
+    </div>
+  </section>
+
+  <section class="wrap mt-12" aria-labelledby="ex-h">
+    <h2 id="ex-h" class="section-title mb-4">যারা শুরু করেছে</h2>
+    <div class="grid gap-3 md:grid-cols-3">
+      {examples.map((p) => (
+        <a href={`/u/${p.username}`} class="card card-hover press flex items-center gap-4 p-4">
+          <Avatar avatar={p.avatar} tier={p.tier} class="h-16 w-16" />
+          <span><span class="block text-lg font-bold">{p.nickname}</span><span class="block text-sm text-ink-soft">{getSeries(p.seriesSlug!)?.title}</span><span class="mt-1 block text-sm font-semibold text-coral-dark dark:text-coral">“{p.originalQuestion}”</span></span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section class="wrap mt-12 max-w-3xl" aria-labelledby="faq-h">
+    <h2 id="faq-h" class="section-title mb-4">প্রশ্ন আর উত্তর</h2>
+    <div class="grid gap-2">
+      {faqs.map((f) => (
+        <details class="group card p-4 [&_summary::-webkit-details-marker]:hidden">
+          <summary class="flex cursor-pointer items-center gap-3 text-lg font-bold">{f.q}<Icon name="chevron-down" class="ml-auto h-5 w-5 shrink-0 transition-transform group-open:rotate-180" /></summary>
+          <p class="mt-2 leading-relaxed text-ink-soft">{f.a}</p>
+        </details>
+      ))}
+    </div>
+    <div class="mt-8 flex flex-wrap items-center gap-4 rounded-[24px] bg-coral-soft p-5">
+      <p class="flex-1 text-xl font-bold">তোমার প্রশ্নই হতে পারে পরের সিরিজ।</p>
+      <a href="/initiator/pitch" class="btn btn-primary">আইডিয়া পাঠাও</a>
+    </div>
+  </section>
+</BaseLayout>

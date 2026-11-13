@@ -1,0 +1,12 @@
+[
+  { "id": "shapla-model", "name": "শাপলা মডেল স্কুল", "district": "ঢাকা" },
+  { "id": "karnaphuli-girls", "name": "কর্ণফুলী বালিকা বিদ্যালয়", "district": "চট্টগ্রাম" },
+  { "id": "surma-high", "name": "সুরমা তীর উচ্চ বিদ্যালয়", "district": "সিলেট" },
+  { "id": "padma-par", "name": "পদ্মাপাড় হাই স্কুল", "district": "রাজশাহী" },
+  { "id": "haor-bidyaniketan", "name": "হাওর বিদ্যানিকেতন", "district": "সুনামগঞ্জ" },
+  { "id": "rupsha-academy", "name": "রূপসা একাডেমি", "district": "খুলনা" },
+  { "id": "kirtonkhola-school", "name": "কীর্তনখোলা স্কুল অ্যান্ড কলেজ", "district": "বরিশাল" },
+  { "id": "teesta-high", "name": "তিস্তা উচ্চ বিদ্যালয়", "district": "রংপুর" },
+  { "id": "brahmaputra-ideal", "name": "ব্রহ্মপুত্র আইডিয়াল স্কুল", "district": "ময়মনসিংহ" },
+  { "id": "kushiyara-club", "name": "কুশিয়ারা বিজ্ঞান ক্লাব", "district": "মৌলভীবাজার" }
+]

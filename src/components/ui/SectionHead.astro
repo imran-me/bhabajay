@@ -1,0 +1,16 @@
+---
+import Icon from './Icon.astro';
+interface Props { title: string; eyebrow?: string; href?: string; linkText?: string; class?: string; id?: string; light?: boolean }
+const { title, eyebrow, href, linkText = 'সব দেখো', class: cls, id, light = false } = Astro.props;
+---
+<div class:list={['mb-4 flex items-end gap-3 sm:mb-5', cls]}>
+  <div class="min-w-0">
+    {eyebrow && <p class:list={['eyebrow', light && '!text-sun']}>{eyebrow}</p>}
+    <h2 id={id} class:list={['section-title', light && 'text-white']}>{title}</h2>
+  </div>
+  {href && (
+    <a href={href} class:list={['ml-auto inline-flex shrink-0 items-center gap-1 rounded-xl px-2 py-1 font-bold hover:bg-tint', light ? 'text-sun hover:bg-white/10' : 'text-link']}>
+      {linkText}<Icon name="arrow-right" class="h-4 w-4" />
+    </a>
+  )}
+</div>

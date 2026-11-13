@@ -1,0 +1,75 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/ui/Icon.astro';
+import Bhabu from '../components/brand/Bhabu.astro';
+---
+<BaseLayout title="খোঁজো" description="ভাবা যায়!-এর সব কার্ড, মিথ, পর্ব, কুইজ আর মানুষ খোঁজো — বাংলায় বা বাংলিশে।" noindex>
+  <div class="wrap max-w-3xl pt-6 sm:pt-10">
+    <h1 class="font-display text-[2.2rem] leading-tight sm:text-5xl">খোঁজো</h1>
+    <form role="search" class="relative mt-4" onsubmit="return false">
+      <label for="sq" class="sr-only">কী খুঁজছ?</label>
+      <span class="pointer-events-none absolute left-5 top-1/2 -translate-y-1/2 text-teal"><Icon name="search" class="h-6 w-6" /></span>
+      <input id="sq" type="search" autocomplete="off" enterkeyhint="search" autofocus
+        class="h-16 w-full rounded-full border-[3px] border-teal bg-surface pl-14 pr-5 text-lg outline-none focus:shadow-[0_0_0_5px_rgb(255_201_60/.55)]"
+        placeholder="মশা, ইলিশ, জোনাকি, dudh mach…" />
+    </form>
+    <p class="mt-2 text-sm text-ink-soft" data-s-status>বাংলা, বাংলিশ বা ভুল বানান — সব চলবে।</p>
+
+    <div data-secret hidden class="mt-5 flex items-center gap-4 rounded-[22px] bg-deep p-5 text-white">
+      <Bhabu face="wink" body="coral" dot="sun" brows="light" animateSparks class="w-14" />
+      <div>
+        <p class="text-xl font-bold text-sun">আরে! আমাকে খুঁজছ? 🤫</p>
+        <p class="text-white/85">তুমি গোপন দরজা খুঁজে পেয়েছ। কাউকে বোলো না…</p>
+        <a href="/quiz/bhabu-secret" class="btn btn-pill btn-sm mt-3">গোপন কুইজ খেলো</a>
+      </div>
+    </div>
+
+    <ul class="mt-5 grid gap-2" data-s-results aria-live="polite"></ul>
+  </div>
+</BaseLayout>
+<script>
+  import { buildIndex, search, normalizeBn, type SearchDoc } from '../lib/search';
+  import { sound, confetti } from '../lib/fx';
+  import { bn } from '../lib/bn';
+
+  const TYPE: Record<string, string> = { myth: 'মিথ', post: 'কার্ড', episode: 'পর্ব', series: 'সিরিজ', quiz: 'কুইজ', person: 'মানুষ', kit: 'শিক্ষক কিট', ask: 'ভাবুকে প্রশ্ন', page: 'পাতা' };
+  const VERDICT: Record<string, string> = { true: 'সত্য', myth: 'মিথ', partial: 'আংশিক' };
+  const input = document.getElementById('sq') as HTMLInputElement;
+  const list = document.querySelector<HTMLElement>('[data-s-results]')!;
+  const status = document.querySelector<HTMLElement>('[data-s-status]')!;
+  const secret = document.querySelector<HTMLElement>('[data-secret]')!;
+  let index: ReturnType<typeof buildIndex> | null = null;
+  let secretShown = false;
+
+  async function load() {
+    if (index) return index;
+    status.textContent = 'সূচি আনছি…';
+    const docs: SearchDoc[] = await fetch('/search-index.json').then((r) => r.json());
+    index = buildIndex(docs);
+    status.textContent = '';
+    return index;
+  }
+  const esc = (s: string) => s.replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]!);
+
+  async function run() {
+    const q = input.value.trim();
+    const isBhabu = /^(ভাবু|bhabu|vabu)$/.test(normalizeBn(q).replace(/\s/g, '')) || normalizeBn(q) === normalizeBn('ভাবু');
+    secret.hidden = !isBhabu;
+    if (isBhabu && !secretShown) { secretShown = true; sound.badge(); confetti({ count: 60 }); }
+    if (!q) { list.innerHTML = ''; status.textContent = 'বাংলা, বাংলিশ বা ভুল বানান — সব চলবে।'; return; }
+    const idx = await load();
+    const hits = search(idx, q, 30);
+    status.textContent = hits.length ? `${bn(hits.length)}টি ফল` : 'কিছু পাওয়া গেল না। অন্যভাবে লিখে দেখো, বা ভাবুকে জিজ্ঞেস করো!';
+    list.innerHTML = hits.map((h) => `
+      <li><a href="${h.url}" class="card card-hover flex items-start gap-3 p-4">
+        <span class="tag shrink-0 !py-0 text-xs">${TYPE[h.type]}</span>
+        <span class="min-w-0"><span class="block font-bold leading-snug">${esc(h.title)}</span>
+        <span class="line-clamp-2 text-sm text-ink-soft">${h.meta?.verdict ? `<b>${VERDICT[h.meta.verdict]}</b> · ` : ''}${h.meta?.series ? `${esc(h.meta.series)} · ` : ''}${esc(h.text.slice(0, 140))}…</span></span>
+      </a></li>`).join('') + (hits.length ? '' : `<li><a href="/ask" class="btn btn-secondary">ভাবুকে জিজ্ঞেস করো</a></li>`);
+  }
+  let t: number | undefined;
+  input.addEventListener('input', () => { clearTimeout(t); t = window.setTimeout(run, 140); });
+  input.addEventListener('focus', () => void load(), { once: true });
+  const pre = new URLSearchParams(location.search).get('q');
+  if (pre) { input.value = pre; void run(); }
+</script>

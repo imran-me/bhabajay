@@ -1,0 +1,15 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/ui/Icon.astro';
+import PitchTracker from '../../components/islands/PitchTracker';
+import { DEMO_MODE } from '../../config/site';
+---
+<BaseLayout title="পিচ ট্র্যাকার" description="তোমার সিরিজ-পিচ কোন ধাপে আছে দেখো: পাঠানো → দেখা হচ্ছে → মেন্টর ঠিক → লাইভ।" noindex>
+  <div class="wrap max-w-3xl pt-5 sm:pt-8">
+    <a href="/initiator" class="inline-flex items-center gap-1 font-bold text-link"><Icon name="arrow-left" class="h-4 w-4" />ইনিশিয়েটর</a>
+    <h1 class="mt-2 font-display text-[2.2rem] leading-tight sm:text-5xl">পিচ ট্র্যাকার</h1>
+    <p class="mt-1 text-ink-soft">পার্সেলের মতো ট্র্যাক করো — কেউ চুপচাপ অপেক্ষা করে না।</p>
+    {DEMO_MODE && <p class="mt-2 text-sm text-ink-soft">ডেমোতে চেষ্টা করো: <a href="?code=BJ-P-0142" class="font-en font-bold text-link">BJ-P-0142</a> · <a href="?code=BJ-P-0139" class="font-en font-bold text-link">BJ-P-0139</a> · <a href="?code=BJ-P-0141" class="font-en font-bold text-link">BJ-P-0141</a></p>}
+    <div class="mt-5"><PitchTracker client:load /></div>
+  </div>
+</BaseLayout>

@@ -1,0 +1,132 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import ArtPanel from '../../../components/cards/ArtPanel.astro';
+import PostCard from '../../../components/cards/PostCard.astro';
+import Icon from '../../../components/ui/Icon.astro';
+import Avatar from '../../../components/ui/Avatar.astro';
+import LiteVideo from '../../../components/ui/LiteVideo.astro';
+import { posts, getSeries, getPerson, postsOf } from '../../../lib/content';
+import { bn, bnDate, bnCompact, FORMAT_LABEL, TOPIC_LABEL, TIER_LABEL } from '../../../lib/bn';
+import { SITE } from '../../../config/site';
+import type { Post } from '../../../data/types';
+
+export function getStaticPaths() {
+  return posts.map((p) => ({ params: { slug: p.seriesSlug, post: p.slug }, props: { post: p } }));
+}
+const { post } = Astro.props as { post: Post };
+const s = getSeries(post.seriesSlug)!;
+const owner = getPerson(s.ownerId)!;
+const isCore = owner.id === 'core';
+const ownerName = isCore ? 'ভাবা যায়! কোর টিম' : owner.ageBand === 'adult' && owner.realName ? owner.realName : owner.nickname;
+const siblings = postsOf(s.slug);
+const idx = siblings.findIndex((p) => p.slug === post.slug);
+const next = siblings[idx + 1] ?? siblings[0];
+const related = siblings.filter((p) => p.slug !== post.slug).slice(0, 4);
+const url = `/series/${s.slug}/${post.slug}`;
+const jsonLd = [
+  {
+    '@type': post.format === 'blog' ? 'BlogPosting' : 'Article',
+    headline: post.title,
+    description: post.hook,
+    inLanguage: 'bn',
+    datePublished: post.publishedAt,
+    author: isCore ? { '@type': 'Organization', name: 'ভাবা যায়!' } : { '@type': 'Person', name: owner.ageBand === 'adult' ? ownerName : owner.nickname },
+    publisher: { '@type': 'Organization', name: 'ভাবা যায়!', logo: { '@type': 'ImageObject', url: `${SITE.url}/icon-512.png` } },
+    isPartOf: { '@type': 'CreativeWorkSeries', name: s.title },
+    citation: post.sources.map((x) => x.url),
+  },
+  {
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      { '@type': 'ListItem', position: 1, name: 'সিরিজ', item: `${SITE.url}/series` },
+      { '@type': 'ListItem', position: 2, name: s.title, item: `${SITE.url}/series/${s.slug}` },
+      { '@type': 'ListItem', position: 3, name: post.title },
+    ],
+  },
+];
+---
+<BaseLayout title={post.title} description={post.hook} type="article" published={post.publishedAt} jsonLd={jsonLd} image={`/og/post/${post.slug}.png`}>
+  <article class="wrap pt-5 sm:pt-8">
+    <nav aria-label="অবস্থান" class="flex flex-wrap items-center gap-1 text-sm font-semibold text-ink-soft">
+      <a href="/series" class="hover:text-link">সিরিজ</a><Icon name="chevron-right" class="h-4 w-4" />
+      <a href={`/series/${s.slug}`} class="hover:text-link">{s.title}</a>
+    </nav>
+
+    <div class="mt-4 grid gap-8 lg:grid-cols-[minmax(0,26rem)_1fr] lg:gap-12">
+      <div class="lg:sticky lg:top-24 lg:self-start">
+        {post.format === 'video' ? (
+          <LiteVideo title={post.title} doodle={post.art.doodle} youtubeId={null} facebookUrl={post.fbUrl ?? null} />
+        ) : (
+          <ArtPanel bg={post.art.bg} doodle={post.art.doodle} size="lg" class="aspect-[4/5] rounded-[26px] shadow-[var(--shadow-lift)]">
+            <div class="absolute inset-x-4 bottom-4 rounded-[20px] bg-white/95 p-5 text-deep">
+              <p class="text-sm font-bold text-coral-dark">{s.title}</p>
+              <p class="mt-1 text-2xl font-bold leading-snug">{post.title}</p>
+              <p class="mt-2 text-[.95rem] leading-relaxed text-deep/80">{post.hook}</p>
+              <p class="mt-3 text-xs font-bold text-teal">সূত্র: {post.sources.map((x) => x.label).join(', ')}</p>
+            </div>
+          </ArtPanel>
+        )}
+        <div class="mt-4 flex flex-wrap gap-2">
+          <button type="button" class="btn btn-sm btn-ghost aria-pressed:!bg-coral-soft aria-pressed:!text-coral-dark" data-like={`post:${post.slug}`} aria-pressed="false" data-on-label="ভালো লেগেছে" data-off-label="ভালো লাগল">
+            <Icon name="heart" class="h-4 w-4" /><span data-label>ভালো লাগল</span>
+          </button>
+          <button type="button" class="btn btn-sm btn-ghost aria-pressed:!bg-tint" data-save={`post:${post.slug}`} aria-pressed="false" data-on-label="সেভ করা" data-off-label="সেভ">
+            <Icon name="bookmark" class="h-4 w-4" /><span data-label>সেভ</span>
+          </button>
+          <button type="button" class="btn btn-sm btn-secondary" data-share data-share-url={url} data-share-title={post.title} data-share-text={`${post.title} — ${post.hook}`}
+            data-card={JSON.stringify({ kind: 'post', eyebrow: s.title, title: post.title, line: post.hook, source: post.sources[0]?.label })}>
+            <Icon name="share" class="h-4 w-4" />শেয়ার
+          </button>
+        </div>
+        <p class="mt-3 text-sm text-ink-soft">{bnCompact(post.shares)} বার শেয়ার · {bnCompact(post.likes)} জনের ভালো লেগেছে</p>
+      </div>
+
+      <div class="min-w-0">
+        <p class="flex flex-wrap gap-2"><span class="tag">{TOPIC_LABEL[post.topic]}</span><span class="tag tag-sun">{FORMAT_LABEL[post.format]}</span><span class="tag tag-coral">{bn(post.readMinutes)} মিনিট পড়া</span></p>
+        <h1 class="mt-3 text-[2rem] font-bold leading-tight sm:text-[2.6rem]">{post.title}</h1>
+        <p class="mt-3 text-xl font-semibold leading-relaxed text-teal dark:text-teal-light">{post.hook}</p>
+
+        <div class="prose-bn mt-6">
+          {post.body.map((para) => <p>{para}</p>)}
+        </div>
+
+        {post.facts && post.facts.length > 0 && (
+          <aside class="mt-7 rounded-[22px] bg-tint p-5" aria-label="মজার তথ্য">
+            <h2 class="font-bold">{bn(post.facts.length)}টা মজার তথ্য</h2>
+            <ol class="mt-2 grid gap-1.5">
+              {post.facts.map((f, i) => <li class="flex gap-2"><span class="font-display text-coral">{bn(i + 1)}.</span><span>{f}</span></li>)}
+            </ol>
+          </aside>
+        )}
+
+        <section class="mt-7 border-t border-line pt-5">
+          <h2 class="text-sm font-bold text-ink-soft">সূত্র</h2>
+          <ul class="mt-2 grid gap-1">
+            {post.sources.map((x) => <li><a href={x.url} target="_blank" rel="noopener" class="link inline-flex items-center gap-1">{x.label}<Icon name="external" class="h-3.5 w-3.5" /></a></li>)}
+          </ul>
+        </section>
+
+        <!-- credit everywhere -->
+        <a href={isCore ? '/about' : `/u/${owner.username}`} class="card mt-6 flex items-center gap-3 p-4 hover:bg-tint">
+          <Avatar avatar={owner.avatar} tier={isCore ? 'none' : owner.tier} class="h-12 w-12" />
+          <span class="text-[.95rem] leading-snug">সিরিজ: <b>{ownerName}</b>{!isCore && <>, ভাবা যায়! {TIER_LABEL[owner.tier].bn}</>}<span class="block text-sm text-ink-soft">প্রকাশ: {bnDate(post.publishedAt)}</span></span>
+        </a>
+
+        {SITE.facebookUrl && (
+          <a href={post.fbUrl ?? SITE.facebookUrl} target="_blank" rel="noopener" class="mt-3 inline-flex items-center gap-2 font-bold text-link hover:underline"><Icon name="facebook" class="h-5 w-5" />Facebook-এ আলোচনা</a>
+        )}
+
+        <div data-peek-end data-peek-href={`/series/${s.slug}/${next.slug}`} data-peek-label={next.title} class="h-px"></div>
+      </div>
+    </div>
+  </article>
+
+  {related.length > 0 && (
+    <section class="wrap mt-14" aria-labelledby="more-title">
+      <h2 id="more-title" class="section-title mb-4">{s.title}-এর আরও পোস্ট</h2>
+      <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">
+        {related.map((p) => <PostCard post={p} />)}
+      </div>
+    </section>
+  )}
+</BaseLayout>

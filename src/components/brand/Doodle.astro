@@ -1,0 +1,7 @@
+---
+import { doodleSvg } from '../../lib/doodles';
+import type { DoodleName } from '../../data/types';
+interface Props { name: DoodleName; class?: string; title?: string }
+const { name, class: cls = 'w-10 h-10', title } = Astro.props;
+---
+<span class:list={['inline-block shrink-0', cls]} set:html={doodleSvg(name, { className: 'w-full h-full', title })} />

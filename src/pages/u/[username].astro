@@ -1,0 +1,108 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Avatar from '../../components/ui/Avatar.astro';
+import BadgeIcon from '../../components/ui/BadgeIcon.astro';
+import Icon from '../../components/ui/Icon.astro';
+import PostCard from '../../components/cards/PostCard.astro';
+import { people, getSeries, getMentor, postsOf, personProof, displayName, quizzes } from '../../lib/content';
+import { flameSvg } from '../../lib/icons';
+import { bn, bnDate, bnMonthYear, TIER_LABEL } from '../../lib/bn';
+import { BADGES } from '../../lib/badges';
+import { SITE } from '../../config/site';
+import type { Person } from '../../data/types';
+
+export function getStaticPaths() {
+  return people.filter((p) => p.id !== 'core').map((p) => ({ params: { username: p.username }, props: { p } }));
+}
+const { p } = Astro.props as { p: Person };
+const s = p.seriesSlug ? getSeries(p.seriesSlug) : undefined;
+const owns = s?.ownerId === p.id;
+const m = getMentor(p.mentorId);
+const proof = personProof(p);
+const recent = s ? postsOf(s.slug).slice(0, 4) : [];
+const name = displayName(p);
+const teen = p.ageBand === 'teen';
+const quiz = s ? quizzes.find((q) => q.kind === 'initiator' && q.seriesSlug === s.slug) : undefined;
+const following = (p.following ?? []).map((x) => getSeries(x)).filter(Boolean);
+const jsonLd = teen
+  ? undefined
+  : {
+      '@type': 'Person',
+      name,
+      description: p.bio,
+      url: `${SITE.url}/u/${p.username}`,
+      award: p.tier === 'initiator' || p.tier === 'legend' ? `ভাবা যায়! ${TIER_LABEL[p.tier].bn}` : undefined,
+      memberOf: { '@type': 'Organization', name: 'ভাবা যায়!' },
+    };
+---
+<BaseLayout title={`${name} — ${TIER_LABEL[p.tier].bn}`} description={`${name}${s ? ` · ${s.title}` : ''} — ভাবা যায়! ${TIER_LABEL[p.tier].bn}। “${p.bio}”`} type="profile" jsonLd={jsonLd} image={`/og/person/${p.username}.png`}>
+  <div class="wrap pt-5 sm:pt-8">
+    <section class="overflow-hidden rounded-[28px] bg-tint">
+      <div class="flex flex-col items-center gap-5 p-6 text-center sm:flex-row sm:p-8 sm:text-left">
+        <Avatar avatar={p.avatar} tier={p.tier} class="h-36 w-36" title={`${p.nickname}-এর অবতার`} />
+        <div class="min-w-0">
+          <div class="flex flex-wrap items-center justify-center gap-2 sm:justify-start">
+            <h1 class="font-display text-4xl leading-none">{name}</h1>
+            <span class="tag tag-sun">⭐ {TIER_LABEL[p.tier].bn}</span>
+          </div>
+          <p class="mt-1 text-ink-soft">“{p.bio}” · যোগ দিয়েছে {bnMonthYear(p.joinedAt)}{!teen && p.district ? ` · ${p.district}` : ''}</p>
+          <div class="mt-3 flex flex-wrap justify-center gap-x-5 gap-y-1 font-bold sm:justify-start">
+            <span class="inline-flex items-center gap-1.5"><Fragment set:html={flameSvg(p.stats.streak, 'h-6 w-6')} />{bn(p.stats.streak)} দিনের স্ট্রিক</span>
+            <span>🧠 {bn(p.stats.points)} পয়েন্ট</span>
+            <span>🏅 {bn(p.badges.length)} ব্যাজ</span>
+          </div>
+          {teen && <p class="mt-2 text-xs text-ink-soft"><Icon name="shield" class="mr-1 inline h-3.5 w-3.5" />১৮-এর কম বয়স: শুধু ডাকনাম আর অবতার দেখানো হয়।</p>}
+        </div>
+        {p.verifyCode && (
+          <a href={`/verify/${p.verifyCode}`} class="btn btn-ghost sm:ml-auto"><Icon name="shield" class="h-4 w-4" />খেতাব যাচাই</a>
+        )}
+      </div>
+    </section>
+
+    <div class="mt-6 grid gap-6 lg:grid-cols-2">
+      <section class="card p-5">
+        <h2 class="text-xl font-bold">{owns ? 'আমার সিরিজ' : 'যে সিরিজে কাজ করি'}</h2>
+        {s ? (
+          <a href={`/series/${s.slug}`} class="mt-3 flex items-center gap-4 rounded-2xl p-2 hover:bg-tint">
+            <span class="h-16 w-16 shrink-0 rounded-2xl" style={`background:linear-gradient(135deg, ${s.color.from}, ${s.color.to})`}></span>
+            <span>
+              <span class="block text-lg font-bold">{s.title}</span>
+              <span class="text-sm text-ink-soft">{bn(proof.posts)} পোস্ট · {bn(s.followers)} ফলোয়ার · টিম {bn(s.team.length)}</span>
+              <span class="mt-1 block"><span class="tag">{owns && (p.tier === 'initiator' || p.tier === 'legend') ? 'লাইভ ✓' : owns ? 'ইনিশিয়েটর হওয়ার পথে' : 'দলের সদস্য'}</span></span>
+            </span>
+          </a>
+        ) : <p class="mt-2 text-ink-soft">এখনো কোনো সিরিজে নেই।</p>}
+        {following.length > 0 && <p class="mt-3 text-sm"><b>ফলো করি:</b> {following.map((f, i) => <>{i > 0 && ' · '}<a href={`/series/${f!.slug}`} class="link">{f!.title}</a></>)}</p>}
+        {m && <p class="mt-2 text-sm text-ink-soft">মেন্টর: <b class="text-ink">{m.name}</b> ({m.field})</p>}
+        {quiz && <a href={`/quiz/${quiz.slug}`} class="btn btn-pill btn-sm mt-4">{p.nickname}-এর কুইজ খেলো 🎲</a>}
+      </section>
+
+      <section class="card p-5">
+        <h2 class="text-xl font-bold">ব্যাজ</h2>
+        <div class="mt-3 flex flex-wrap gap-3">
+          {BADGES.filter((b) => p.badges.includes(b.id)).map((b) => <BadgeIcon id={b.id} showLabel />)}
+        </div>
+        {p.stats.quizAvg && <p class="mt-4 text-sm"><b>কুইজ:</b> গড় {bn(p.stats.quizAvg)}%</p>}
+      </section>
+    </div>
+
+    {p.journey.length > 0 && (
+      <section class="card mt-6 p-5" aria-labelledby="jr-h">
+        <h2 id="jr-h" class="text-xl font-bold">যাত্রা</h2>
+        {p.originalQuestion && <p class="mt-2 text-lg font-semibold">শুরুর প্রশ্ন: <span class="text-coral-dark dark:text-coral">“{p.originalQuestion}”</span></p>}
+        <ol class="mt-4 grid gap-3 border-l-2 border-line pl-5">
+          {p.journey.map((j) => (
+            <li class="relative"><span class="absolute -left-[1.6rem] top-2 h-3 w-3 rounded-full bg-coral ring-4 ring-surface"></span><span class="text-sm text-ink-soft">{bnDate(j.date)}</span><p class="font-semibold">{j.label}</p></li>
+          ))}
+        </ol>
+      </section>
+    )}
+
+    {recent.length > 0 && owns && (
+      <section class="mt-8">
+        <h2 class="section-title mb-4">সাম্প্রতিক পোস্ট</h2>
+        <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-4">{recent.map((x) => <PostCard post={x} />)}</div>
+      </section>
+    )}
+  </div>
+</BaseLayout>

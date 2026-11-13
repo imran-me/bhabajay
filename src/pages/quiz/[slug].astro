@@ -1,0 +1,55 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/ui/Icon.astro';
+import QuizPlayer from '../../components/islands/QuizPlayer';
+import { quizzes, getSeries, getPerson } from '../../lib/content';
+import { bn, bnDate } from '../../lib/bn';
+import type { Quiz } from '../../data/types';
+
+export function getStaticPaths() {
+  return quizzes.filter((q) => q.kind !== 'episode').map((q) => ({ params: { slug: q.slug }, props: { q } }));
+}
+const { q } = Astro.props as { q: Quiz };
+const s = q.seriesSlug ? getSeries(q.seriesSlug) : undefined;
+const owner = s ? getPerson(s.ownerId) : undefined;
+const pool = q.kind === 'pool';
+const weekly = q.kind === 'weekly';
+const revealAt = weekly && q.opensAt ? Date.parse(q.opensAt) + 12 * 3600_000 : undefined;
+const jsonLd = {
+  '@type': 'Quiz',
+  name: q.title,
+  description: q.blurb,
+  inLanguage: 'bn',
+  educationalLevel: 'beginner',
+  ...(weekly && q.opensAt ? { datePublished: q.opensAt } : {}),
+  hasPart: q.questions.slice(0, 10).map((x) => ({ '@type': 'Question', name: x.q, eduQuestionType: 'Multiple choice' })),
+};
+---
+<BaseLayout title={q.title} description={`${q.blurb} — ${bn(pool ? 10 : q.questions.length)} প্রশ্নের বাংলা কুইজ।`} noindex={q.kind === 'secret'} jsonLd={q.kind === 'secret' ? undefined : jsonLd}>
+  <div class="wrap max-w-3xl pt-5 sm:pt-8">
+    <a href="/quiz" class="inline-flex items-center gap-1 font-bold text-link"><Icon name="arrow-left" class="h-4 w-4" />কুইজ জোন</a>
+    <h1 class="mt-2 text-[2rem] font-bold leading-tight sm:text-4xl">{q.title}</h1>
+    {s && owner && (
+      <p class="mt-1 text-ink-soft">বানিয়েছে <a href={`/u/${owner.username}`} class="font-bold text-link">{owner.nickname}</a> · সিরিজ: <a href={`/series/${s.slug}`} class="font-bold text-link">{s.title}</a></p>
+    )}
+    {weekly && q.opensAt && <p class="mt-1 text-ink-soft">খুলেছে {bnDate(q.opensAt)}, রাত ৮টা</p>}
+
+    <div class="mt-5" data-weekly-gate={weekly ? q.opensAt : undefined}>
+      <QuizPlayer client:visible quiz={q} count={pool ? 10 : undefined} shuffle={pool} revealAt={revealAt} shareUrl={`/quiz/${q.slug}`} />
+    </div>
+    {weekly && (
+      <div data-weekly-future hidden class="card mt-5 p-6 text-center">
+        <p class="text-xl font-bold">এই কুইজ এখনো খোলেনি</p>
+        <p class="mt-1 text-ink-soft">শনিবার রাত ৮টায় খুলবে। ততক্ষণ <a href="/quiz/weekly" class="font-bold text-link">এই সপ্তাহের কুইজ</a> খেলো।</p>
+      </div>
+    )}
+  </div>
+</BaseLayout>
+<script>
+  // a future weekly quiz must not be playable early (static page, so gate on the client)
+  const gate = document.querySelector<HTMLElement>('[data-weekly-gate]');
+  if (gate?.dataset.weeklyGate && Date.parse(gate.dataset.weeklyGate) > Date.now()) {
+    gate.hidden = true;
+    document.querySelector<HTMLElement>('[data-weekly-future]')!.hidden = false;
+  }
+</script>

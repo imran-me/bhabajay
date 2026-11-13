@@ -1,0 +1,314 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Bhabu from '../components/brand/Bhabu.astro';
+import Doodle from '../components/brand/Doodle.astro';
+import Icon from '../components/ui/Icon.astro';
+import Stamp from '../components/ui/Stamp.astro';
+import Avatar from '../components/ui/Avatar.astro';
+import SectionHead from '../components/ui/SectionHead.astro';
+import SeriesCover from '../components/cards/SeriesCover.astro';
+import EpisodeCard from '../components/cards/EpisodeCard.astro';
+import MythCard from '../components/cards/MythCard.astro';
+import ThoughtCard from '../components/home/ThoughtCard.astro';
+import QuizCard from '../components/home/QuizCard.astro';
+import {
+  seriesByActivity, fridayMyth, liveEpisodes, episodes, getPerson, getSeries, myths, asks, kits, cardSeries, personProof, MONTH_STAR,
+} from '../lib/content';
+import { bn, TOPIC_LABEL } from '../lib/bn';
+import { SITE } from '../config/site';
+
+const rows = seriesByActivity();
+const myth = fridayMyth();
+const newestEp = liveEpisodes.at(-1)!;
+const nextEp = episodes.find((e) => e.comingSoon);
+const stars = ['nadia', 'rafi', 'tanvir'].map((id) => getPerson(id)!).filter(Boolean);
+const star = getPerson(MONTH_STAR)!;
+const launch = cardSeries.slice().sort((a, b) => b.launchedAt.localeCompare(a.launchedAt))[0];
+const launchOwner = getPerson(launch.ownerId);
+const teaserMyths = myths.filter((m) => m.reveal && m.slug !== myth.slug).slice(0, 3);
+const ask = asks[0];
+const kit = kits[0];
+const starColors = ['before:bg-sun', 'before:bg-coral', 'before:bg-teal'];
+
+const jsonLd = [
+  {
+    '@type': 'WebSite',
+    name: 'ভাবা যায়!',
+    alternateName: 'Bhaba Jay',
+    url: SITE.url,
+    inLanguage: 'bn-BD',
+    potentialAction: { '@type': 'SearchAction', target: `${SITE.url}/search?q={query}`, 'query-input': 'required name=query' },
+  },
+  {
+    '@type': 'Organization',
+    name: 'ভাবা যায়!',
+    alternateName: 'Bhaba Jay',
+    url: SITE.url,
+    logo: `${SITE.url}/icon-512.png`,
+    slogan: 'প্রশ্ন যার, সিরিজ তার। ভাবা যায়!',
+  },
+];
+---
+<BaseLayout
+  title="ভাবা যায়! — কৌতূহলী বাংলাদেশের ঘর"
+  description="মজার বিজ্ঞান কার্ড, মিথ না সত্য যাচাই, ভাবুর দুনিয়া কার্টুন, শনিবারের কুইজ — আর তোমার প্রশ্ন থেকে তোমার নিজের সিরিজ। প্রশ্ন যার, সিরিজ তার।"
+  keywords={['বাংলা বিজ্ঞান', 'মিথ না সত্য', 'বাংলা কুইজ', 'bhaba jay', 'ভাবা যায়']}
+  jsonLd={jsonLd}
+>
+  <!-- ═════════════ MOBILE: the daily ritual (Plan p.6) ═════════════ -->
+  <div class="wrap grid grid-cols-1 gap-5 pt-4 lg:hidden">
+    <h1 class="sr-only">ভাবা যায়! — কৌতূহলী বাংলাদেশের ঘর</h1>
+    <ThoughtCard />
+
+    <section aria-labelledby="m-series">
+      <SectionHead id="m-series" title="চলছে সিরিজ" href="/series" class="!mb-3" />
+      <div class="swipe -mx-4 px-4">
+        {rows.map((s) => <SeriesCover s={s} />)}
+      </div>
+    </section>
+
+    <div class="flex items-center gap-3 rounded-[20px] bg-coral-soft p-3 pr-2">
+      <Stamp verdict={myth.verdict} size="sm" class="shrink-0" />
+      <a href={`/myth/${myth.slug}`} class="min-w-0 flex-1 font-semibold leading-snug">
+        <span class="block text-xs font-bold text-coral-dark dark:text-coral">শুক্রবারের মিথ</span>
+        {myth.question}
+      </a>
+      <button type="button" class="btn-icon shrink-0 text-coral-dark dark:text-coral" aria-label="শেয়ার করো" data-share data-share-url={`/myth/${myth.slug}`} data-share-title={myth.question} data-share-text={`${myth.question} উত্তর + সূত্র:`}
+        data-card={JSON.stringify({ kind: 'myth', verdict: myth.verdict, title: myth.claim, line: myth.short, source: myth.sources[0]?.label })}>
+        <Icon name="share" />
+      </button>
+    </div>
+
+    <QuizCard variant="strip" />
+
+    <a href="/initiator" class="press pattern-deep relative block overflow-hidden rounded-[22px] p-5 text-white">
+      <div class="rounded-2xl bg-deep/80 p-4">
+        <p class="text-xl font-bold text-sun">তোমার প্রশ্নই হতে পারে সিরিজ</p>
+        <p class="mt-1 font-semibold">ইনিশিয়েটর হও <span aria-hidden="true">→</span></p>
+      </div>
+    </a>
+  </div>
+
+  <!-- ═════════════ DESKTOP: hero = the Initiator invitation (Plan p.7) ═════════════ -->
+  <div class="wrap hidden pt-8 lg:block">
+    <div class="grid grid-cols-[1.55fr_1fr] gap-8">
+      <section class="pattern-teal relative overflow-hidden rounded-[32px] p-10 text-white shadow-[var(--shadow-lift)]" aria-labelledby="hero-title">
+        <div class="relative z-10 max-w-[58%] rounded-3xl bg-teal/70 p-1 backdrop-blur-[1px]">
+          <p class="font-display text-xl text-sun">প্রশ্ন যার, সিরিজ তার</p>
+          <h1 id="hero-title" class="mt-2 font-display text-[3.4rem] leading-[1.12]">কৌতূহল থেকে শুরু হোক তোমার সিরিজ</h1>
+          <p class="mt-4 max-w-md text-lg text-white/90">একটা প্রশ্ন পাঠাও। মেন্টর, ব্র্যান্ড কিট আর দল পাও। নিজের নামে সিরিজ চালাও — ওয়াল অফ ফেমে জায়গা নাও।</p>
+          <div class="mt-7 flex flex-wrap gap-3">
+            <a href="/initiator/pitch" class="btn btn-primary btn-lg">আইডিয়া পাঠাও</a>
+            <a href="/initiator" class="btn btn-ghost-light btn-lg">কীভাবে কাজ করে</a>
+          </div>
+          <p class="mt-6 inline-flex items-center gap-2 rounded-full bg-deep/50 py-1 pl-1 pr-3 text-sm" data-launch>
+            {launchOwner && <Avatar avatar={launchOwner.avatar} tier={launchOwner.tier} class="h-7 w-7" />}
+            এই সপ্তাহের লঞ্চ: <a href={`/series/${launch.slug}`} class="font-bold text-sun hover:underline">{launch.title}</a> — {launchOwner?.nickname}
+          </p>
+        </div>
+        <div class="pointer-events-none absolute bottom-0 right-6 top-0 flex w-[40%] items-center justify-center" aria-hidden="true">
+          <div class="absolute bottom-[-12%] right-0 h-[105%] w-[92%] rounded-t-full bg-white/10"></div>
+          <Doodle name="planet" class="absolute right-[6%] top-[8%] h-20 w-20 animate-float" />
+          <Doodle name="sparkle" class="absolute left-[4%] top-[18%] h-10 w-10 animate-float [animation-delay:-2s]" />
+          <Doodle name="bulb" class="absolute bottom-[12%] left-0 h-14 w-14 rotate-[-12deg] animate-float [animation-delay:-1s]" />
+          <Bhabu face="wow" body="coral" dot="sun" brows="light" animateSparks class="relative w-[62%] max-w-[15rem] drop-shadow-[0_18px_30px_rgb(0_0_0/.25)]" />
+        </div>
+      </section>
+
+      <div class="grid content-start gap-6">
+        <a href={`/bhabur-duniya/${newestEp.slug}`} class="card card-hover press group grid grid-cols-[44%_1fr] items-center gap-4 p-3">
+          <span class="placeholder-stripes relative grid aspect-[4/3] place-items-center overflow-hidden rounded-2xl">
+            <Doodle name={newestEp.doodle} class="absolute left-3 top-3 h-10 w-10" />
+            <span class="grid h-14 w-14 place-items-center rounded-full bg-teal text-white shadow-[0_4px_0_#063C43] transition-transform group-hover:scale-110"><Icon name="play" class="ml-1 h-7 w-7" /></span>
+          </span>
+          <span>
+            <span class="tag tag-coral">নতুন পর্ব</span>
+            <span class="mt-2 block text-xl font-bold leading-snug">ভাবুর দুনিয়া · পর্ব {bn(newestEp.number)}: {newestEp.title}</span>
+            <span class="mt-1 block text-sm text-ink-soft">{newestEp.duration} মিনিট · ৩ প্রশ্নের কুইজ</span>
+          </span>
+        </a>
+
+        <a href={`/myth/${myth.slug}`} class="card card-hover press grid grid-cols-[38%_1fr] items-center gap-5 p-4">
+          <span class="grid aspect-square rotate-[-6deg] place-items-center rounded-3xl border-[3px] border-coral bg-coral-soft">
+            <Stamp verdict={myth.verdict} size="lg" bang />
+          </span>
+          <span>
+            <span class="tag tag-sun">শুক্রবারের মিথ</span>
+            <span class="mt-2 block text-xl font-bold leading-snug">{myth.question}</span>
+            <span class="mt-1 block text-sm text-ink-soft">উত্তর + সূত্র · শেয়ার কার্ড</span>
+          </span>
+        </a>
+      </div>
+    </div>
+
+    <div class="mt-8 grid grid-cols-[1.55fr_1fr] gap-8">
+      <section aria-labelledby="stars-title">
+        <SectionHead id="stars-title" title="এই মাসের তারকা ইনিশিয়েটর" href="/wall-of-fame" class="!mb-4" />
+        <div class="grid grid-cols-3 gap-4">
+          {stars.map((p, i) => {
+            const s = getSeries(p.seriesSlug!);
+            return (
+              <a href={`/u/${p.username}`} class:list={['card card-hover press relative overflow-hidden p-4 pt-5 before:absolute before:inset-x-0 before:top-0 before:h-1.5', starColors[i]]}>
+                <div class="flex items-center gap-3">
+                  <Avatar avatar={p.avatar} tier={p.tier} class="h-12 w-12" />
+                  <div class="min-w-0">
+                    <p class="truncate text-lg font-bold">{p.nickname}</p>
+                    <p class="truncate text-sm text-ink-soft">{s?.title}</p>
+                  </div>
+                </div>
+              </a>
+            );
+          })}
+        </div>
+      </section>
+      <QuizCard variant="big" />
+    </div>
+  </div>
+
+  <!-- ═════════════ DESKTOP: today's thought + your day ═════════════ -->
+  <div class="wrap mt-12 hidden gap-8 lg:grid lg:grid-cols-[1.55fr_1fr]">
+    <ThoughtCard />
+    <aside class="card flex flex-col p-6" aria-labelledby="day-title" data-my-day>
+      <h2 id="day-title" class="text-xl font-bold">তোমার আজকের দিন</h2>
+      <div class="mt-4 grid grid-cols-3 gap-3 text-center">
+        <div class="rounded-2xl bg-coral-soft p-3"><p class="font-display text-3xl text-coral-dark dark:text-coral" data-day-streak>০</p><p class="text-xs font-semibold text-ink-soft">দিনের স্ট্রিক</p></div>
+        <div class="rounded-2xl bg-tint p-3"><p class="font-display text-3xl text-link" data-day-points>০</p><p class="text-xs font-semibold text-ink-soft">পয়েন্ট</p></div>
+        <div class="rounded-2xl bg-sun-soft p-3"><p class="font-display text-3xl text-mustard dark:text-sun" data-day-badges>০</p><p class="text-xs font-semibold text-ink-soft">ব্যাজ</p></div>
+      </div>
+      <p class="mt-4 text-sm text-ink-soft" data-day-nudge>আজকের ভাবনা উল্টাও, একটা মিথ পড়ো, কুইজ খেলো — স্ট্রিক জ্বলবে ৩, ৭ আর ৩০ দিনে।</p>
+      <a href="/me" class="btn btn-ghost mt-auto self-start">আমার ভাবা যায়</a>
+    </aside>
+  </div>
+
+  <!-- ═════════════ চলছে সিরিজ (desktop placement) ═════════════ -->
+  <section class="wrap mt-12 hidden lg:block" aria-labelledby="d-series">
+    <SectionHead id="d-series" title="চলছে সিরিজ" eyebrow="নতুন পোস্ট আগে" href="/series" />
+    <div class="swipe">
+      {rows.map((s) => <SeriesCover s={s} />)}
+    </div>
+  </section>
+
+  <!-- ═════════════ ভাবুর দুনিয়া ═════════════ -->
+  <section class="mt-12 bg-tint py-10" aria-labelledby="cartoon-title">
+    <div class="wrap">
+      <SectionHead id="cartoon-title" eyebrow="কার্টুন সিরিজ" title="ভাবুর দুনিয়া" href="/bhabur-duniya" linkText="সব পর্ব" />
+      <div class="swipe -mx-4 px-4 [grid-auto-columns:78%] sm:mx-0 sm:grid sm:grid-flow-row sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4">
+        {liveEpisodes.slice().reverse().map((ep) => <EpisodeCard ep={ep} />)}
+      </div>
+      {nextEp && <p class="mt-4 text-sm font-semibold text-ink-soft">পরের পর্ব: <span class="text-ink">“{nextEp.title}”</span> — শীঘ্রই আসছে।</p>}
+    </div>
+  </section>
+
+  <!-- ═════════════ Wall of Fame: this month's star (mobile + desktop) ═════════════ -->
+  <section class="wrap mt-12" aria-labelledby="fame-title">
+    <div class="pattern-teal overflow-hidden rounded-[28px] p-5 text-white sm:p-8">
+      <div class="grid items-center gap-6 rounded-3xl bg-deep/85 p-5 sm:p-7 lg:grid-cols-[auto_1fr_auto]">
+        <Avatar avatar={star.avatar} tier={star.tier} class="mx-auto h-28 w-28 lg:mx-0" title={star.nickname} />
+        <div class="text-center lg:text-left">
+          <p class="font-bold text-sun">নভেম্বরের তারকা</p>
+          <h2 id="fame-title" class="mt-1 font-display text-3xl sm:text-4xl">{star.nickname} · {getSeries(star.seriesSlug!)?.title}</h2>
+          <p class="mt-2 text-white/85">“{star.originalQuestion}” — একটা প্রশ্ন থেকে {bn(personProof(star).posts)}টি পোস্ট আর {bn(personProof(star).videos)}টি ভিডিও। বয়স ১৫, তাই শুধু ডাকনাম আর অবতার দেখাই।</p>
+        </div>
+        <div class="flex flex-wrap justify-center gap-3">
+          <a href="/wall-of-fame" class="btn btn-pill">ওয়াল অফ ফেম</a>
+          <a href={`/u/${star.username}`} class="btn btn-ghost-light">প্রোফাইল</a>
+        </div>
+      </div>
+      <div class="mt-4 grid grid-cols-2 gap-3 lg:hidden">
+        {stars.filter((p) => p.id !== star.id).map((p) => (
+          <a href={`/u/${p.username}`} class="flex items-center gap-2 rounded-2xl bg-deep/90 p-2.5">
+            <Avatar avatar={p.avatar} tier={p.tier} class="h-10 w-10" />
+            <span class="min-w-0 leading-tight"><span class="block truncate font-bold">{p.nickname}</span><span class="block truncate text-xs text-white/70">{getSeries(p.seriesSlug!)?.title}</span></span>
+          </a>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- ═════════════ The big idea: Watch · Play · Pitch ═════════════ -->
+  <section class="wrap mt-14" aria-labelledby="idea-title">
+    <div class="max-w-2xl">
+      <p class="eyebrow">একটা পেজ থেকে একটা ঘর</p>
+      <h2 id="idea-title" class="mt-1 font-display text-[2rem] leading-tight sm:text-[2.6rem]">শুধু ফলো করার পেজ না, <span class="text-coral">নিজের জায়গা</span></h2>
+    </div>
+    <div class="mt-6 grid gap-4 md:grid-cols-3">
+      <a href="/series" class="card card-hover press p-6">
+        <p class="font-display text-5xl text-coral">১</p>
+        <h3 class="mt-2 text-xl font-bold">দেখো আর শেখো</h3>
+        <p class="mt-1 text-ink-soft">প্রতিটা কার্ড, মিথ, কুইজ আর ভাবুর দুনিয়ার পর্ব — এক জায়গায়, খুঁজে পাওয়া যায় এমন বাংলা লাইব্রেরিতে। ফেসবুক ফিডে হারায় না।</p>
+      </a>
+      <a href="/id" class="card card-hover press p-6">
+        <p class="font-display text-5xl text-coral">২</p>
+        <h3 class="mt-2 text-xl font-bold">খেলো আর জমাও</h3>
+        <p class="mt-1 text-ink-soft">ফ্রি ভাবা যায় আইডি: কুইজ স্কোর, স্ট্রিক, ব্যাজ, আর নিজের হাতে বানানো ভাবু অবতার।</p>
+      </a>
+      <a href="/initiator" class="press relative overflow-hidden rounded-[22px] bg-deep p-6 text-white shadow-[var(--shadow-card)] transition-transform hover:-translate-y-1">
+        <p class="font-display text-5xl text-sun">৩</p>
+        <h3 class="mt-2 text-xl font-bold">পিচ করো, নেতৃত্ব দাও</h3>
+        <p class="mt-1 text-white/85">সিরিজ পিচ করো, <b class="text-sun">ভাবা যায় ইনিশিয়েটর</b> হও, <b>ওয়াল অফ ফেমে</b> জায়গা নাও। ভালো আইডিয়া যায় <b>ডেল্টা ইনিশিয়েটিভস</b> ফোরামে।</p>
+      </a>
+    </div>
+  </section>
+
+  <!-- ═════════════ Myth teaser with "ভাবা যায়!" reveal ═════════════ -->
+  <section class="wrap mt-14" aria-labelledby="myth-title">
+    <SectionHead id="myth-title" eyebrow="পারিবারিক গ্রুপের তর্ক মেটাও" title="মিথ না সত্য?" href="/myth" linkText="মিথ লাইব্রেরি" />
+    <div class="grid gap-4 md:grid-cols-3">
+      {teaserMyths.map((m) => (
+        <div class="grid gap-3">
+          <MythCard myth={m} compact />
+          {m.reveal && (
+            <button type="button" data-reveal class="relative overflow-hidden rounded-[18px] border-2 border-dashed border-sun bg-sun-soft p-4 text-left">
+              <span data-reveal-cover class="flex items-center gap-3">
+                <span class="font-display text-2xl text-mustard dark:text-sun">ভাবা যায়!</span>
+                <span class="text-sm font-semibold text-ink-soft">চমকে দেওয়া সংখ্যাটা দেখতে চাপো</span>
+              </span>
+              <span data-reveal-content hidden class="block">
+                <span class="font-stamp block text-4xl text-coral-dark dark:text-coral">{m.reveal.value}</span>
+                <span class="mt-1 block text-sm font-semibold">{m.reveal.label}</span>
+              </span>
+            </button>
+          )}
+        </div>
+      ))}
+    </div>
+    <div class="mt-5 flex items-center gap-4 rounded-[22px] bg-deep p-4 text-white sm:p-5">
+      <span class="w-10 shrink-0" aria-hidden="true"><Bhabu face="wink" body="coral" dot="sun" brows="light" sparks={false} class="w-10" /></span>
+      <p class="flex-1">তোমার পরিবারের কোনো মিথ আছে? <a href="/myth#dadu" class="font-bold text-sun underline-offset-4 hover:underline">ভাবুকে পাঠাও</a> → প্রতি শুক্রবার সেরাটার উত্তর।</p>
+    </div>
+  </section>
+
+  <!-- ═════════════ Ask ভাবু + Teacher kit ═════════════ -->
+  <section class="wrap mt-14 grid gap-5 lg:grid-cols-2">
+    <a href="/ask" class="card card-hover press flex flex-col p-6">
+      <p class="eyebrow">ভাবুকে জিজ্ঞেস করো</p>
+      <h2 class="mt-1 text-2xl font-bold leading-snug">“{ask.q}”</h2>
+      <p class="mt-2 line-clamp-3 text-ink-soft">{ask.a}</p>
+      <p class="mt-3 text-sm font-semibold text-ink-soft">— প্রশ্ন করেছে {ask.askedBy}</p>
+      <span class="btn btn-secondary mt-5 self-start">তোমার প্রশ্ন পাঠাও</span>
+    </a>
+    <a href={`/teachers/${kit.slug}`} class="card card-hover press relative flex flex-col overflow-hidden p-6">
+      <Doodle name="book" class="absolute -right-3 -top-3 h-24 w-24 rotate-12 opacity-90" />
+      <p class="eyebrow">শিক্ষকদের জন্য</p>
+      <h2 class="mt-1 max-w-[80%] text-2xl font-bold leading-snug">{kit.title}</h2>
+      <p class="mt-2 max-w-[85%] text-ink-soft">{kit.summary}</p>
+      <p class="mt-3 flex flex-wrap gap-2"><span class="tag">{kit.grades}</span><span class="tag">{bn(kit.minutes)} মিনিট</span><span class="tag tag-sun">{TOPIC_LABEL[kit.topic]}</span></p>
+      <span class="btn btn-ghost mt-5 self-start"><Icon name="printer" class="h-4 w-4" />প্রিন্ট-রেডি কিট</span>
+    </a>
+  </section>
+</BaseLayout>
+
+<script>
+  import { getState, currentStreak, subscribe } from '../lib/store';
+  import { bn } from '../lib/bn';
+  function paint() {
+    const s = getState();
+    const set = (sel: string, v: string) => document.querySelectorAll(sel).forEach((el) => (el.textContent = v));
+    set('[data-day-streak]', bn(currentStreak(s)));
+    set('[data-day-points]', bn(s.points));
+    set('[data-day-badges]', bn(Object.keys(s.badges).length));
+    if (!s.user) set('[data-day-nudge]', 'আইডি ছাড়াও খেলা যায় — কিন্তু আইডি থাকলে স্কোর, ব্যাজ আর স্ট্রিক হারায় না।');
+  }
+  paint();
+  subscribe(paint);
+</script>

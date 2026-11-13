@@ -1,0 +1,51 @@
+---
+/**
+ * Lite embed: poster + play button; the heavy YouTube/Facebook player loads
+ * only on tap (keeps pages fast on 3G). With no video ID yet, shows a poster
+ * with a clear "coming" note instead of a broken player.
+ */
+import Doodle from '../brand/Doodle.astro';
+import Icon from './Icon.astro';
+import type { DoodleName } from '../../data/types';
+interface Props { youtubeId?: string | null; facebookUrl?: string | null; title: string; doodle?: DoodleName; class?: string }
+const { youtubeId, facebookUrl, title, doodle = 'sparkle', class: cls } = Astro.props;
+const src = youtubeId
+  ? `https://www.youtube-nocookie.com/embed/${youtubeId}?autoplay=1&rel=0&cc_lang_pref=bn&enablejsapi=1`
+  : facebookUrl
+    ? `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(facebookUrl)}&autoplay=1`
+    : null;
+const poster = youtubeId ? `https://i.ytimg.com/vi/${youtubeId}/hqdefault.jpg` : null;
+---
+<div class:list={['pattern-deep relative aspect-video overflow-hidden rounded-[22px]', cls]} data-lite-video={src ?? ''}>
+  {poster && <img src={poster} alt="" loading="lazy" decoding="async" class="absolute inset-0 h-full w-full object-cover opacity-80" />}
+  {!poster && <Doodle name={doodle} class="absolute left-5 top-5 h-16 w-16" />}
+  {src ? (
+    <button type="button" class="group absolute inset-0 grid place-items-center" aria-label={`ভিডিও চালাও: ${title}`} data-lite-play>
+      <span class="grid h-20 w-20 place-items-center rounded-full bg-coral text-white shadow-[0_5px_0_#D94A3B] transition-transform group-hover:scale-110"><Icon name="play" class="ml-1.5 h-9 w-9" /></span>
+    </button>
+  ) : (
+    <div class="absolute inset-0 grid place-items-center p-6 text-center text-white">
+      <div class="rounded-2xl bg-deep/80 px-5 py-4">
+        <Icon name="video" class="mx-auto h-8 w-8 text-sun" />
+        <p class="mt-2 font-bold">ভিডিওটা শীঘ্রই এখানে চলবে</p>
+        <p class="text-sm text-white/75">এখন ফেসবুক পেজে দেখা যাচ্ছে। লিংক যুক্ত হলেই এখানে লোড হবে।</p>
+      </div>
+    </div>
+  )}
+  <span class="absolute bottom-0 left-0 h-1.5 w-1/4 bg-sun" aria-hidden="true"></span>
+</div>
+<script>
+  document.querySelectorAll<HTMLElement>('[data-lite-video]').forEach((box) => {
+    box.querySelector('[data-lite-play]')?.addEventListener('click', () => {
+      const src = box.dataset.liteVideo;
+      if (!src) return;
+      const f = document.createElement('iframe');
+      f.src = src;
+      f.title = 'ভিডিও';
+      f.allow = 'accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture';
+      f.allowFullscreen = true;
+      f.className = 'absolute inset-0 h-full w-full';
+      box.replaceChildren(f);
+    });
+  });
+</script>

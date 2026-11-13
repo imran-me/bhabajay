@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import MeDashboard from '../components/islands/MeDashboard';
+import { posts, myths, liveEpisodes, series, quizzes, schools, getSeries } from '../lib/content';
+import { TOPIC_LABEL } from '../lib/bn';
+import { DISTRICTS } from '../data/districts';
+
+const catalog = {
+  post: posts.map((p) => ({ id: p.slug, title: p.title, url: `/series/${p.seriesSlug}/${p.slug}` })),
+  myth: myths.map((m) => ({ id: m.slug, title: m.question, url: `/myth/${m.slug}` })),
+  episode: liveEpisodes.map((e) => ({ id: e.slug, title: `পর্ব ${e.number}: ${e.title}`, url: `/bhabur-duniya/${e.slug}` })),
+  series: series.map((s) => ({ id: s.slug, title: s.title, url: s.kind === 'cartoon' ? '/bhabur-duniya' : `/series/${s.slug}` })),
+};
+// quiz → topic label (for "সেরা বিষয়")
+const quizTopics: Record<string, string> = {};
+for (const q of quizzes) {
+  const t = q.seriesSlug ? getSeries(q.seriesSlug)?.topic : q.episodeSlug ? 'biology' : q.questions[0]?.topic;
+  if (t) quizTopics[q.slug] = TOPIC_LABEL[t];
+}
+---
+<BaseLayout title="আমার ভাবা যায়" description="তোমার স্কোর, স্ট্রিক, ব্যাজ, অবতার আর পিচ — এক পেজে।" noindex>
+  <div class="wrap pt-5 sm:pt-8">
+    <MeDashboard client:only="react" catalog={catalog} quizTopics={quizTopics} schools={schools} districts={DISTRICTS}>
+      <div slot="fallback" class="grid h-64 place-items-center text-ink-soft">তোমার পেজ সাজাচ্ছি…</div>
+    </MeDashboard>
+  </div>
+</BaseLayout>

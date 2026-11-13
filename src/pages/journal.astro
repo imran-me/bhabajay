@@ -1,0 +1,46 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Doodle from '../components/brand/Doodle.astro';
+import InboxForm from '../components/islands/InboxForm';
+import { posts, getPerson, getSeries } from '../lib/content';
+import { bnDate } from '../lib/bn';
+
+const notes = posts.filter((p) => p.format === 'blog');
+---
+<BaseLayout title="জার্নাল — তরুণ গবেষকদের লেখা" description="ভাবা যায়! জার্নাল: ইনিশিয়েটরদের গবেষণা নোট আর দীর্ঘ লেখা। ম্যাগাজিন সংখ্যা আসছে।">
+  <section class="wrap pt-6 sm:pt-10">
+    <div class="grid items-center gap-6 rounded-[28px] bg-deep p-6 text-white sm:p-10 lg:grid-cols-[1fr_auto]">
+      <div>
+        <span class="tag tag-sun">শীঘ্রই · v3</span>
+        <h1 class="mt-3 font-display text-[2.3rem] leading-tight sm:text-5xl">ভাবা যায়! জার্নাল</h1>
+        <p class="mt-2 max-w-xl text-lg text-white/85">কিংবদন্তি স্তরের ইনিশিয়েটরদের গবেষণা নোট, মেন্টরের রিভিউসহ — ছাপা ম্যাগাজিন সংখ্যা আর অনলাইন আর্কাইভ। প্রথম সংখ্যার কাজ চলছে।</p>
+      </div>
+      <Doodle name="book" class="hidden h-32 w-32 lg:block" />
+    </div>
+  </section>
+
+  <section class="wrap mt-10 grid gap-6 lg:grid-cols-[1fr_24rem]">
+    <div>
+      <h2 class="section-title mb-4">এখন পড়া যায়: দীর্ঘ লেখা</h2>
+      <div class="grid gap-3">
+        {notes.map((n) => {
+          const s = getSeries(n.seriesSlug)!;
+          const o = getPerson(s.ownerId);
+          return (
+            <a href={`/series/${s.slug}/${n.slug}`} class="card card-hover press flex items-center gap-4 p-4">
+              <Doodle name={n.art.doodle} class="h-12 w-12" />
+              <span class="min-w-0"><span class="block font-bold leading-snug">{n.title}</span><span class="text-sm text-ink-soft">{s.title} · {o?.id === 'core' ? 'কোর টিম' : o?.nickname} · {bnDate(n.publishedAt)}</span></span>
+            </a>
+          );
+        })}
+      </div>
+    </div>
+    <div class="card p-6">
+      <h2 class="text-xl font-bold">প্রথম সংখ্যা বেরোলে জানাব</h2>
+      <div class="mt-4">
+        <InboxForm client:visible kind="contact" hidden={{ type: 'journal-waitlist' }} submitLabel="জানিও" successTitle="তালিকায় আছ!" successBody="প্রথম সংখ্যা বেরোলেই ইমেইল পাবে।"
+          fields={[{ name: 'email', label: 'ইমেইল', type: 'email', required: true }]} />
+      </div>
+    </div>
+  </section>
+</BaseLayout>

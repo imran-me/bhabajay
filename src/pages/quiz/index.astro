@@ -1,0 +1,129 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/ui/Icon.astro';
+import Bhabu from '../../components/brand/Bhabu.astro';
+import Doodle from '../../components/brand/Doodle.astro';
+import QuizCard from '../../components/home/QuizCard.astro';
+import Leaderboard from '../../components/islands/Leaderboard';
+import { quizzes, liveEpisodes, getSeries, getPerson, weeklies } from '../../lib/content';
+import { bn } from '../../lib/bn';
+
+const episodeQuizzes = liveEpisodes.map((e) => ({ e, q: quizzes.find((q) => q.slug === e.quizSlug)! }));
+const seriesQuizzes = quizzes.filter((q) => q.kind === 'initiator');
+const pastWeeklies = weeklies.slice().sort((a, b) => b.opensAt!.localeCompare(a.opensAt!));
+const pool = quizzes.find((q) => q.kind === 'pool')!;
+const modes = [
+  { name: 'শনিবারের কুইজ', how: '৫ প্রশ্ন, শনিবার রাত ৮টা; উত্তর আর ব্যাখ্যা পরদিন সকালে', why: 'সাপ্তাহিক অভ্যাস', href: '/quiz/weekly', doodle: 'sparkle' },
+  { name: 'পর্বের কুইজ', how: 'প্রতিটি কার্টুন পর্বের পর ৩ প্রশ্ন', why: 'দেখাকে শেখায় বদলে দেয়', href: '#episode', doodle: 'mosquito' },
+  { name: 'দ্রুত ১০', how: '১০ প্রশ্ন, প্রতিটায় ১০ সেকেন্ড, যেকোনো বিষয়', why: 'বাসে বসে বিরক্ত? এটা খেলো', href: `/quiz/${pool.slug}`, doodle: 'bolt' },
+  { name: 'স্কুল বনাম স্কুল', how: 'ক্লাস বা ক্লাবের স্কোর যোগ হয় স্কুলের লিডারবোর্ডে', why: 'শিক্ষকেরা ছড়িয়ে দেন', href: '/quiz/leaderboard?scope=schools', doodle: 'book' },
+  { name: 'ইনিশিয়েটর কুইজ', how: 'প্রতিটি সিরিজের মালিক নিজের বিষয়ে কুইজ বানান', why: 'ইনিশিয়েটররা দর্শক পান', href: '#initiator', doodle: 'bulb' },
+] as const;
+---
+<BaseLayout title="কুইজ জোন — গেম-শোর মতো বাংলা কুইজ" description="শনিবারের কুইজ, পর্বের কুইজ, দ্রুত ১০, স্কুল বনাম স্কুল আর ইনিশিয়েটরদের কুইজ। ঠিক উত্তরে +১০, চেষ্টায় +২ — ভুলে লজ্জা নেই।">
+  <section class="wrap pt-6 sm:pt-10">
+    <div class="grid items-center gap-6 lg:grid-cols-[1fr_24rem]">
+      <div>
+        <p class="eyebrow">ভুলে লজ্জা নেই, চেষ্টায়ও পয়েন্ট</p>
+        <h1 class="mt-1 font-display text-[2.4rem] leading-tight sm:text-6xl">কুইজ জোন</h1>
+        <p class="mt-2 max-w-xl text-lg text-ink-soft">ঠিক উত্তরে ভাবু নাচে, কনফেটি ওড়ে, +১০। ভুল হলে ভাবু ভাবে, তথ্যটা দেখায় — তবু +২। শেষে স্কোর কার্ড এক চাপে হোয়াটসঅ্যাপে।</p>
+        <div class="mt-5 grid max-w-md grid-cols-3 gap-2 text-center" data-my-quiz>
+          <div class="rounded-2xl bg-tint p-3"><p class="font-display text-2xl text-link" data-mq-plays>০</p><p class="text-xs font-semibold text-ink-soft">কুইজ খেলেছ</p></div>
+          <div class="rounded-2xl bg-sun-soft p-3"><p class="font-display text-2xl text-mustard dark:text-sun" data-mq-points>০</p><p class="text-xs font-semibold text-ink-soft">পয়েন্ট</p></div>
+          <div class="rounded-2xl bg-coral-soft p-3"><p class="font-display text-2xl text-coral-dark dark:text-coral" data-mq-perfect>০</p><p class="text-xs font-semibold text-ink-soft">পুরো নম্বর</p></div>
+        </div>
+      </div>
+      <QuizCard variant="big" />
+    </div>
+  </section>
+
+  <section class="wrap mt-12" aria-labelledby="modes-h">
+    <h2 id="modes-h" class="section-title mb-4">পাঁচ রকম খেলা</h2>
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-5">
+      {modes.map((m) => (
+        <a href={m.href} class="card card-hover press flex flex-col p-4">
+          <Doodle name={m.doodle} class="h-10 w-10" />
+          <h3 class="mt-2 text-lg font-bold">{m.name}</h3>
+          <p class="mt-1 text-sm text-ink-soft">{m.how}</p>
+          <p class="mt-auto pt-3 text-xs font-bold text-coral-dark dark:text-coral">কেন: {m.why}</p>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section id="episode" class="wrap mt-12 scroll-mt-24" aria-labelledby="ep-h">
+    <h2 id="ep-h" class="section-title mb-4">পর্বের কুইজ</h2>
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {episodeQuizzes.map(({ e, q }) => (
+        <a href={`/bhabur-duniya/${e.slug}#episode-quiz`} class="card card-hover press flex items-center gap-3 p-4">
+          <Doodle name={e.doodle} class="h-11 w-11" />
+          <span class="min-w-0"><span class="block text-xs font-bold text-coral-dark dark:text-coral">পর্ব {bn(e.number)} · {bn(q.questions.length)} প্রশ্ন</span><span class="line-clamp-2 font-bold leading-snug">{e.title}</span></span>
+        </a>
+      ))}
+    </div>
+  </section>
+
+  <section id="initiator" class="wrap mt-12 scroll-mt-24" aria-labelledby="in-h">
+    <h2 id="in-h" class="section-title mb-4">ইনিশিয়েটরদের কুইজ</h2>
+    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {seriesQuizzes.map((q) => {
+        const s = getSeries(q.seriesSlug!)!;
+        const o = getPerson(s.ownerId);
+        return (
+          <a href={`/quiz/${q.slug}`} class="card card-hover press overflow-hidden">
+            <div class="flex h-20 items-center justify-between px-4" style={`background:linear-gradient(120deg, ${s.color.from}, ${s.color.to})`}>
+              <span class:list={['font-bold', s.color.ink === 'light' ? 'text-white' : 'text-deep']}>{s.title}</span>
+              <Doodle name={s.doodle} class="h-12 w-12" />
+            </div>
+            <div class="p-4">
+              <p class="font-bold leading-snug">{q.title}</p>
+              <p class="mt-1 text-sm text-ink-soft">{o?.nickname}-এর বানানো · {bn(q.questions.length)} প্রশ্ন</p>
+            </div>
+          </a>
+        );
+      })}
+    </div>
+  </section>
+
+  <section class="wrap mt-12 grid gap-6 lg:grid-cols-[1fr_22rem]">
+    <div>
+      <div class="mb-4 flex items-end gap-3">
+        <h2 class="section-title">লিডারবোর্ড</h2>
+        <a href="/quiz/leaderboard" class="ml-auto font-bold text-link">পুরোটা দেখো →</a>
+      </div>
+      <Leaderboard client:visible limit={8} />
+    </div>
+    <div>
+      <h2 class="section-title mb-4">আগের শনিবারগুলো</h2>
+      <ul class="grid gap-2" data-past-weeklies>
+        {pastWeeklies.map((w) => (
+          <li data-opens={w.opensAt}>
+            <a href={`/quiz/${w.slug}`} class="card card-hover flex items-center gap-3 p-3">
+              <span class="grid h-10 w-10 place-items-center rounded-xl bg-sun-soft"><Icon name="calendar" class="h-5 w-5 text-mustard dark:text-sun" /></span>
+              <span class="font-semibold">{w.title}</span>
+              <Icon name="chevron-right" class="ml-auto h-5 w-5 text-ink-soft" />
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div class="mt-5 flex items-center gap-3 rounded-2xl bg-deep p-4 text-white">
+        <Bhabu face="think" body="coral" dot="sun" brows="light" sparks={false} class="w-9" />
+        <p class="text-sm">একটা গোপন কুইজও আছে… <span class="text-white/70">খোঁজার পেজে ভাবুর নাম লিখে দেখো।</span></p>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  import { getState } from '../../lib/store';
+  import { bn } from '../../lib/bn';
+  const s = getState();
+  const set = (sel: string, v: string) => document.querySelectorAll(sel).forEach((el) => (el.textContent = v));
+  set('[data-mq-plays]', bn(s.quizPlays));
+  set('[data-mq-points]', bn(s.points));
+  set('[data-mq-perfect]', bn(Object.values(s.quizzes).filter((q) => q.best === q.total).length));
+  // hide weekly quizzes that haven't dropped yet
+  document.querySelectorAll<HTMLElement>('[data-past-weeklies] [data-opens]').forEach((li) => {
+    if (Date.parse(li.dataset.opens!) > Date.now()) li.hidden = true;
+  });
+</script>

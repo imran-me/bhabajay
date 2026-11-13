@@ -1,0 +1,22 @@
+---
+/** Short links used in Facebook captions: bhabajay.com/m/42 → /myth/<slug> */
+import { myths } from '../../lib/content';
+import { SITE } from '../../config/site';
+export function getStaticPaths() {
+  return myths.map((m) => ({ params: { id: String(m.id) }, props: { slug: m.slug, q: m.question } }));
+}
+const { slug, q } = Astro.props as { slug: string; q: string };
+const target = `/myth/${slug}`;
+---
+<!doctype html>
+<html lang="bn">
+  <head>
+    <meta charset="utf-8" />
+    <title>{q} | ভাবা যায়!</title>
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={`${SITE.url}${target}`} />
+    <meta http-equiv="refresh" content={`0; url=${target}`} />
+    <script is:inline define:vars={{ target }}>location.replace(target + location.search);</script>
+  </head>
+  <body><a href={target}>{q}</a></body>
+</html>

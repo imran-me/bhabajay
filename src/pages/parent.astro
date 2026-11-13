@@ -1,0 +1,36 @@
+---
+/** Parent confirmation link (emailed for 13–17 accounts): /parent?token=… */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Bhabu from '../components/brand/Bhabu.astro';
+---
+<BaseLayout title="অভিভাবকের নিশ্চিতকরণ" description="সন্তানের ভাবা যায় আইডি নিশ্চিত করুন।" noindex>
+  <div class="wrap max-w-xl pt-8 sm:pt-12">
+    <div class="card p-6 text-center sm:p-8">
+      <Bhabu face="happy" body="teal" dot="coral" class="mx-auto w-14" />
+      <h1 class="mt-3 text-2xl font-bold">অভিভাবকের নিশ্চিতকরণ</h1>
+      <div data-parent-state class="mt-3 text-ink-soft">যাচাই করছি…</div>
+      <ul class="mx-auto mt-5 grid max-w-sm gap-1.5 text-left text-sm text-ink-soft">
+        <li>✓ প্রোফাইল সবসময় ব্যক্তিগত; পাবলিক নাম শুধু ডাকনাম + অবতার</li>
+        <li>✓ ব্যবহারকারীদের মধ্যে সরাসরি মেসেজ নেই; সব মন্তব্য মডারেট হয়</li>
+        <li>✓ নিশ্চিত করলে আপনার সন্তান সিরিজ পিচ করতে আর স্কুল যোগ করতে পারবে</li>
+        <li>✓ যেকোনো সময় লিখে অ্যাকাউন্ট মুছে দিতে বলতে পারেন</li>
+      </ul>
+      <p class="mt-5 text-sm"><a href="/privacy#parents" class="link">গোপনীয়তা নীতি পড়ুন</a></p>
+    </div>
+  </div>
+</BaseLayout>
+<script>
+  import { getBackend } from '../lib/backend';
+  const box = document.querySelector<HTMLElement>('[data-parent-state]')!;
+  const token = new URLSearchParams(location.search).get('token');
+  void getBackend().then(async (b) => {
+    if (!token && b.mode !== 'demo') {
+      box.textContent = 'লিংকটা অসম্পূর্ণ মনে হচ্ছে। ইমেইলের লিংকটা আবার চাপুন।';
+      return;
+    }
+    const nick = await b.confirmParent(token ?? '');
+    box.innerHTML = nick
+      ? `<b class="text-ink">ধন্যবাদ!</b> “${nick.replace(/[<>&]/g, '')}”-এর ভাবা যায় আইডি নিশ্চিত হয়েছে।`
+      : 'এই লিংক আগেই ব্যবহার হয়েছে বা মেয়াদ শেষ। সমস্যা হলে hello@bhabajay.com-এ লিখুন।';
+  });
+</script>

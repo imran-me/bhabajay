@@ -1,0 +1,122 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Bhabu from '../components/brand/Bhabu.astro';
+import Icon from '../components/ui/Icon.astro';
+import Logo from '../components/brand/Logo.astro';
+import { mentors, series, posts, myths, liveEpisodes, wallPeople } from '../lib/content';
+import { bn, TOPIC_LABEL } from '../lib/bn';
+import { SITE, DEMO_MODE } from '../config/site';
+
+const MC = { teal: 'bg-teal text-white', coral: 'bg-coral text-white', sun: 'bg-sun text-deep', deep: 'bg-deep text-sun', mint: 'bg-mint text-deep' } as const;
+const stats = [
+  { n: series.length, l: 'সিরিজ' },
+  { n: posts.length, l: 'কার্ড ও লেখা' },
+  { n: myths.length, l: 'যাচাই করা মিথ' },
+  { n: liveEpisodes.length, l: 'কার্টুন পর্ব' },
+  { n: wallPeople.length, l: 'ওয়াল অফ ফেমে' },
+];
+const jobs = [
+  { t: 'সিরিজের ঘর', d: 'সব সিরিজ, পর্ব আর কার্ড — একটানা দেখা আর শেয়ার করার মতো করে সাজানো।', tag: '' },
+  { t: 'কমিউনিটি', d: 'আইডি, স্ট্রিক, প্রশ্নে মন্তব্য, “ভাবুকে জিজ্ঞেস করো”।', tag: 'tag-coral' },
+  { t: 'ইনিশিয়েটর', d: 'পিচ, মেন্টর, প্রকাশ, ক্রেডিট, সুপারিশ।', tag: 'tag-sun' },
+  { t: 'শেখা', d: 'মিথ লাইব্রেরি, কুইজ, শিক্ষকদের কিট, জার্নাল।', tag: 'tag-deep' },
+];
+const deltaHref = SITE.deltaUrl || '#delta';
+---
+<BaseLayout title="আমাদের কথা — ভাবা যায়! কারা, কেন" description="ভাবা যায়! কৌতূহলী বাংলাদেশের ঘর। আমরা কনটেন্ট বানাই না, কনটেন্ট নির্মাতা বানাই। দল, মেন্টর, তথ্য-যাচাইয়ের নিয়ম আর ডেল্টা ইনিশিয়েটিভসের সাথে অংশীদারত্ব।">
+  <section class="pattern-warm">
+    <div class="wrap grid items-center gap-8 py-10 sm:py-14 lg:grid-cols-[1fr_auto]">
+      <div class="rounded-3xl bg-warm/90 p-1 dark:bg-transparent">
+        <p class="eyebrow">আমাদের কথা</p>
+        <h1 class="mt-1 font-display text-[2.3rem] leading-tight text-deep sm:text-6xl dark:text-ink">কৌতূহলী বাংলাদেশের ঘর</h1>
+        <p class="mt-4 max-w-2xl text-xl font-semibold text-deep dark:text-ink">“আমরা কনটেন্ট বানাই না। আমরা কনটেন্ট নির্মাতা বানাই।”</p>
+        <p class="mt-2 max-w-2xl text-lg text-deep/80 dark:text-ink-soft">ভাবা যায়! শুরু হয়েছিল একটা ফেসবুক পেজ হিসেবে। এই সাইট সেই পেজকে একটা ঘরে বদলে দেয় — যেখানে দর্শক থেকে নির্মাতা হওয়া যায়, আর প্রতিটা নির্মাতার কাজের প্রমাণ থাকে।</p>
+      </div>
+      <div class="hidden lg:block"><Bhabu face="happy" body="teal" dot="coral" animateSparks class="w-36" /></div>
+    </div>
+  </section>
+
+  <section class="wrap mt-10 grid grid-cols-2 gap-3 sm:grid-cols-5">
+    {stats.map((s) => <div class="card p-4 text-center"><p class="font-display text-4xl text-coral">{bn(s.n)}</p><p class="text-sm font-semibold text-ink-soft">{s.l}</p></div>)}
+  </section>
+
+  <section class="wrap mt-12" aria-labelledby="jobs-h">
+    <h2 id="jobs-h" class="section-title">সাইটের চারটা কাজ</h2>
+    <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      {jobs.map((j) => <div class="card p-5"><span class:list={['tag', j.tag]}>{j.t}</span><p class="mt-3">{j.d}</p></div>)}
+    </div>
+  </section>
+
+  <section class="wrap mt-12 grid gap-6 lg:grid-cols-2" aria-labelledby="fc-h">
+    <div class="card p-6">
+      <h2 id="fc-h" class="text-2xl font-bold">আমরা কীভাবে তথ্য যাচাই করি</h2>
+      <ol class="mt-3 grid gap-2">
+        <li class="flex gap-3"><span class="font-display text-coral">১</span>প্রতিটা দাবির জন্য অন্তত একটা নির্ভরযোগ্য সূত্র (যেমন WHO, CDC, NASA, icddr,b) — কার্ডেই লেখা থাকে।</li>
+        <li class="flex gap-3"><span class="font-display text-coral">২</span>সিরিজের প্রথম ৪টা কাজ মেন্টর নিজে দেখেন; পরেও স্বাস্থ্য-বিষয়ক সব কিছু দ্বিতীয়বার যাচাই হয়।</li>
+        <li class="flex gap-3"><span class="font-display text-coral">৩</span>বিজ্ঞান যেখানে নিশ্চিত নয়, সেখানে আমরা সেটাই বলি — তাই “আংশিক” স্ট্যাম্প আছে।</li>
+        <li class="flex gap-3"><span class="font-display text-coral">৪</span>ভুল পেলে জানাও — ঠিক করে পাতায় সংশোধনের তারিখ লিখে দিই। <a href="/contact" class="link">যোগাযোগ</a></li>
+      </ol>
+    </div>
+    <div class="card p-6">
+      <h2 class="text-2xl font-bold">একবার ফেসবুকে, চিরকাল সাইটে</h2>
+      <p class="mt-2 text-ink-soft">ফেসবুকের প্রতিটা কার্ড, রিল আর পর্ব রাতে স্বয়ংক্রিয়ভাবে সাইটে আসে; সম্পাদক ৫ মিনিটে শিরোনাম, স্লাগ আর ক্রেডিট ঠিক করেন। সাইট নিজের কপি রাখে — ফেসবুকে পোস্ট হারালেও লাইব্রেরি ভাঙে না।</p>
+      <p class="mt-3 text-sm text-ink-soft">প্রতিটা ফেসবুক ক্যাপশনের শেষে থাকে সাইটের লিংক (“পুরো উত্তর + সূত্র: bhabajay.com/m/৪২”), আর প্রতিটা সাইট-পাতায় “ফেসবুকে আলোচনা”।</p>
+    </div>
+  </section>
+
+  <section id="mentors" class="wrap mt-12 scroll-mt-24" aria-labelledby="mt-h">
+    <div class="flex items-end gap-3">
+      <h2 id="mt-h" class="section-title">মেন্টররা</h2>
+      <a href="/mentors" class="ml-auto font-bold text-link">মেন্টর হতে চান? →</a>
+    </div>
+    <div class="mt-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {mentors.map((m) => (
+        <div class="card flex gap-4 p-5">
+          <span class:list={['grid h-14 w-14 shrink-0 place-items-center rounded-2xl font-display text-2xl', MC[m.color]]}>{m.name.replace(/^(ড\.|ডা\.)\s*/, '').slice(0, 1)}</span>
+          <div>
+            <p class="text-lg font-bold">{m.name}</p>
+            <p class="text-sm font-semibold text-coral-dark dark:text-coral">{m.title} · {m.field}</p>
+            <p class="mt-1 text-sm text-ink-soft">{m.bio}</p>
+            <p class="mt-2 flex flex-wrap gap-1">{m.topics.map((t) => <span class="tag !py-0 text-xs">{TOPIC_LABEL[t]}</span>)}</p>
+          </div>
+        </div>
+      ))}
+    </div>
+    <p class="mt-3 text-sm text-ink-soft">কোর টিম: সম্পাদনা, তথ্য-যাচাই, ডিজাইন আর কমিউনিটি — ছোট একটা দল, বড় একটা নিয়ম: প্রতিটা পিচের উত্তর ৭ দিনের মধ্যে।</p>
+  </section>
+
+  <section id="delta" class="wrap mt-12 scroll-mt-24">
+    <div class="grid gap-6 rounded-[28px] bg-deep p-6 text-white sm:p-8 lg:grid-cols-[auto_1fr]">
+      <span class="grid h-20 w-20 place-items-center rounded-3xl bg-coral font-display text-4xl">Δ</span>
+      <div>
+        <p class="font-bold text-sun">সহযোগী</p>
+        <h2 class="text-3xl font-bold">ডেল্টা ইনিশিয়েটিভস</h2>
+        <p class="mt-2 max-w-2xl text-white/85">ফোরাম আর থিংক ট্যাংক। ভাবা যায়!-এর সেরা আইডিয়াগুলো এখান থেকে বড় মঞ্চে যায়: কিংবদন্তি স্তরের ইনিশিয়েটররা ফোরামে বক্তৃতা আর রেফারেলের সুযোগ পান, আর বার্ষিক “ভাবা যায়! অ্যাওয়ার্ডস” রাত হয় যৌথভাবে।</p>
+        {SITE.deltaUrl ? (
+          <a href={deltaHref} target="_blank" rel="noopener" class="btn btn-pill mt-4">ডেল্টা ইনিশিয়েটিভস দেখুন <Icon name="external" class="h-4 w-4" /></a>
+        ) : (
+          <p class="mt-3 text-sm text-white/60">লোগো ব্যবহার, রেফারেল পথ আর যৌথ অনুষ্ঠানের বিস্তারিত চূড়ান্ত হচ্ছে।</p>
+        )}
+      </div>
+    </div>
+  </section>
+
+  <section id="demo" class="wrap mt-12 scroll-mt-24">
+    <div class="card p-6">
+      <div class="flex items-center gap-3"><Logo size="sm" /><span class:list={['tag', DEMO_MODE ? 'tag-sun' : '']}>{DEMO_MODE ? 'ডেমো মোড চালু' : 'লাইভ ডেটাবেস যুক্ত'}</span></div>
+      <h2 class="mt-3 text-xl font-bold">এই সাইট কীভাবে চলছে</h2>
+      {DEMO_MODE ? (
+        <ul class="mt-2 grid list-disc gap-1.5 pl-5 text-ink-soft">
+          <li>ডেটাবেস (Supabase) এখনো যুক্ত হয়নি। তাই আইডি, স্কোর, ব্যাজ, পিচ, মন্তব্য আর ইনবক্স — সব শুধু <b>এই ব্রাউজারে</b> সেভ হচ্ছে, কোথাও পাঠানো হচ্ছে না।</li>
+          <li>Google লগ ইন আর ম্যাজিক লিংক ইমেইল অনুকরণ করা; অভিভাবকের নিশ্চিতকরণও এক চাপে অনুকরণ।</li>
+          <li>লিডারবোর্ড আর “কতজন খেলেছে” সংখ্যায় নমুনা ডেটা মেশানো।</li>
+          <li>সিরিজ, মিথ, কুইজ আর মানুষের প্রোফাইল নমুনা কনটেন্ট — উপস্থাপনার জন্য লেখা।</li>
+          <li>কার্টুন পর্বগুলো আসল ভিডিওর জায়গায় স্ক্রিপ্ট থেকে বানানো ডেমো অ্যানিমেটিক দেখায়।</li>
+          <li>কোর টিমের রিভিউ প্যানেল: <a href="/admin" class="link">/admin</a> — এখান থেকে পিচ এগিয়ে নিলে তোমার নোটিফিকেশন আর ট্র্যাকার বদলায়।</li>
+        </ul>
+      ) : (
+        <p class="mt-2 text-ink-soft">আইডি, স্কোর আর পিচ নিরাপদে Supabase ডেটাবেসে থাকে; প্রতিটা টেবিল row-level security দিয়ে সুরক্ষিত।</p>
+      )}
+    </div>
+  </section>
+</BaseLayout>

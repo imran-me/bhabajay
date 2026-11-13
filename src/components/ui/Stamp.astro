@@ -1,0 +1,10 @@
+---
+import { VERDICT_LABEL } from '../../lib/bn';
+import type { Verdict } from '../../data/types';
+interface Props { verdict: Verdict; size?: 'sm' | 'md' | 'lg' | 'xl'; class?: string; bang?: boolean }
+const { verdict, size = 'md', class: cls, bang = false } = Astro.props;
+const sizes = { sm: 'text-base', md: 'text-xl', lg: 'text-3xl', xl: 'text-5xl' };
+---
+<span class:list={['stamp', `stamp-${verdict}`, sizes[size], cls]} aria-label={`রায়: ${VERDICT_LABEL[verdict]}`}>
+  {VERDICT_LABEL[verdict]}{bang && '!'}
+</span>

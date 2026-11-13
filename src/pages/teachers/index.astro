@@ -1,0 +1,51 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Doodle from '../../components/brand/Doodle.astro';
+import Icon from '../../components/ui/Icon.astro';
+import InboxForm from '../../components/islands/InboxForm';
+import { kits, quizzes, liveEpisodes } from '../../lib/content';
+import { bn, TOPIC_LABEL } from '../../lib/bn';
+import { DOODLE_FOR_TOPIC } from '../../lib/doodles';
+---
+<BaseLayout title="শিক্ষকদের কিট — ক্লাসে দেখানোর মতো বিজ্ঞান" description="প্রিন্ট-রেডি পাঠ পরিকল্পনা, ওয়ার্কশিট, ক্লাসের কুইজ সেট আর ভাবুর দুনিয়ার পর্ব — বিনামূল্যে, বাংলায়।">
+  <section class="wrap pt-6 sm:pt-10">
+    <p class="eyebrow">“ক্লাসে দেখাতে চাই।”</p>
+    <h1 class="mt-1 font-display text-[2.3rem] leading-tight sm:text-5xl">শিক্ষকদের কিট</h1>
+    <p class="mt-2 max-w-2xl text-lg text-ink-soft">প্রতিটা কিটে ৪০–৫০ মিনিটের পাঠ পরিকল্পনা, আলোচনার প্রশ্ন, ছাপানো যায় এমন ওয়ার্কশিট আর পুরো ক্লাস মিলে খেলার কুইজ। বিনামূল্যে।</p>
+  </section>
+
+  <section class="wrap mt-8 grid gap-4 md:grid-cols-2">
+    {kits.map((k) => (
+      <a href={`/teachers/${k.slug}`} class="card card-hover press relative flex flex-col overflow-hidden p-6">
+        <Doodle name={DOODLE_FOR_TOPIC[k.topic]} class="absolute -right-2 -top-2 h-20 w-20 rotate-12" />
+        <p class="flex flex-wrap gap-2"><span class="tag">{k.grades}</span><span class="tag tag-sun">{bn(k.minutes)} মিনিট</span><span class="tag tag-coral">{TOPIC_LABEL[k.topic]}</span></p>
+        <h2 class="mt-3 max-w-[85%] text-2xl font-bold leading-snug">{k.title}</h2>
+        <p class="mt-2 text-ink-soft">{k.summary}</p>
+        <span class="mt-4 inline-flex items-center gap-1 font-bold text-link"><Icon name="printer" class="h-4 w-4" />কিট খোলো</span>
+      </a>
+    ))}
+  </section>
+
+  <section class="wrap mt-12 grid gap-6 lg:grid-cols-2">
+    <div class="card p-6">
+      <h2 class="text-xl font-bold">ক্লাসের কুইজ সেট</h2>
+      <p class="mt-1 text-ink-soft">প্রজেক্টরে খুলে পুরো ক্লাস মিলে খেলুন — ১ থেকে ৪ চাপলেই উত্তর বাছাই।</p>
+      <ul class="mt-3 grid gap-1.5">
+        {liveEpisodes.map((e) => <li><a href={`/bhabur-duniya/${e.slug}#episode-quiz`} class="link">পর্ব {bn(e.number)}: {e.title}</a></li>)}
+        {quizzes.filter((q) => q.kind === 'initiator').map((q) => <li><a href={`/quiz/${q.slug}`} class="link">{q.title}</a></li>)}
+      </ul>
+    </div>
+    <div class="card bg-tint p-6">
+      <h2 class="text-xl font-bold">স্কুল / ক্লাব অ্যাকাউন্ট</h2>
+      <p class="mt-1 text-ink-soft">ক্লাসের স্কোর একসাথে জমা হবে “স্কুল বনাম স্কুল” লিডারবোর্ডে। শিক্ষক-নিয়ন্ত্রিত, শিক্ষার্থীর ব্যক্তিগত তথ্য ছাড়া। (v3 — আগ্রহ জানালে আগে পাবেন)</p>
+      <div class="mt-4">
+        <InboxForm client:visible kind="contact" hidden={{ type: 'club-account' }} submitLabel="আগ্রহ জানাই" successTitle="ধন্যবাদ!" successBody="ক্লাব অ্যাকাউন্ট চালু হলে প্রথমেই আপনাকে জানাব।"
+          fields={[
+            { name: 'name', label: 'আপনার নাম', required: true, maxLength: 80 },
+            { name: 'school', label: 'স্কুল / ক্লাব ও জেলা', required: true, maxLength: 120 },
+            { name: 'email', label: 'ইমেইল', type: 'email', required: true },
+          ]} />
+      </div>
+    </div>
+  </section>
+</BaseLayout>

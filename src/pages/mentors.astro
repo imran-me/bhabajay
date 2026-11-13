@@ -1,0 +1,41 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Doodle from '../components/brand/Doodle.astro';
+import InboxForm from '../components/islands/InboxForm';
+import { mentors } from '../lib/content';
+import { bn } from '../lib/bn';
+---
+<BaseLayout title="মেন্টর হোন — রিচ মাইন্ডস ট্র্যাক" description="গবেষক, পেশাজীবী আর উদ্যোক্তাদের জন্য: তরুণ ইনিশিয়েটরদের তথ্য-যাচাই, গবেষণা আর ক্যারিয়ারে পথ দেখান। মাসে কয়েক ঘণ্টা।">
+  <section class="wrap pt-6 sm:pt-10">
+    <div class="grid gap-8 lg:grid-cols-[1fr_28rem]">
+      <div>
+        <p class="eyebrow">রিচ মাইন্ডস ট্র্যাক</p>
+        <h1 class="mt-1 font-display text-[2.3rem] leading-tight sm:text-5xl">মেন্টর হোন</h1>
+        <p class="mt-3 max-w-xl text-lg text-ink-soft">একজন কিশোর একটা প্রশ্ন নিয়ে এসেছে। আপনার এক ঘণ্টার পরামর্শ তাকে একটা গুজবের বদলে একটা সত্য ছড়াতে শেখাবে। এখন {bn(mentors.length)} জন মেন্টর আছেন।</p>
+        <div class="mt-6 grid gap-3 sm:grid-cols-3">
+          <div class="card p-4"><Doodle name="eye" class="h-10 w-10" /><p class="mt-2 font-bold">তথ্য যাচাই</p><p class="text-sm text-ink-soft">প্রথম ৪টা পোস্ট রিভিউ, সূত্র দেখা।</p></div>
+          <div class="card p-4"><Doodle name="flask" class="h-10 w-10" /><p class="mt-2 font-bold">গবেষণা</p><p class="text-sm text-ink-soft">কিংবদন্তির পথে গবেষণা নোটে সাহায্য।</p></div>
+          <div class="card p-4"><Doodle name="bulb" class="h-10 w-10" /><p class="mt-2 font-bold">ক্যারিয়ার ও স্টার্টআপ</p><p class="text-sm text-ink-soft">অফিস আওয়ার, সুপারিশপত্র।</p></div>
+        </div>
+        <ul class="mt-6 grid list-disc gap-1.5 pl-5 text-ink-soft">
+          <li>বিষয় মিলিয়ে ইনিশিয়েটরের সাথে জোড়া করা হয়।</li>
+          <li>সময়: মাসে ২–৪ ঘণ্টা, সব অনলাইনে।</li>
+          <li>শিশু-সুরক্ষা নীতি মানতে হয়: কিশোরদের সাথে কথা শুধু প্ল্যাটফর্মের ভেতরে বা অভিভাবক/কোর টিমের উপস্থিতিতে।</li>
+        </ul>
+      </div>
+      <div class="card p-6">
+        <h2 class="text-xl font-bold">আগ্রহ জানান</h2>
+        <div class="mt-4">
+          <InboxForm client:visible kind="mentor" submitLabel="মেন্টর হতে চাই" successTitle="ধন্যবাদ!" successBody="কোর টিম এক সপ্তাহের মধ্যে যোগাযোগ করবে।"
+            fields={[
+              { name: 'name', label: 'নাম', required: true, maxLength: 80 },
+              { name: 'email', label: 'ইমেইল', type: 'email', required: true },
+              { name: 'field', label: 'আপনার ক্ষেত্র', required: true, maxLength: 120, placeholder: 'যেমন: আবহাওয়া বিজ্ঞান, জনস্বাস্থ্য' },
+              { name: 'help', label: 'কীভাবে সাহায্য করবেন?', type: 'select', required: true, options: ['তথ্য যাচাই', 'গবেষণা', 'ক্যারিয়ার পরামর্শ', 'স্টার্টআপ', 'সব'] },
+              { name: 'note', label: 'কিছু বলার থাকলে', type: 'textarea', maxLength: 500 },
+            ]} />
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
