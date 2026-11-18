@@ -142,7 +142,7 @@ export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty
               <p className="mt-5 text-sm text-ink-soft">
                 সূত্র:{' '}
                 {open.sources.map((s, i) => (
-                  <span key={s.url}>{i > 0 && ' · '}<a href={s.url} target="_blank" rel="noopener nofollow" className="font-semibold text-link underline-offset-2 hover:underline">{s.label}</a></span>
+                  <span key={s.label + i}>{i > 0 && ' · '}{s.url ? <a href={s.url} target="_blank" rel="noopener nofollow" className="font-semibold text-link underline-offset-2 hover:underline">{s.label}</a> : <b>{s.label}</b>}</span>
                 ))}
               </p>
             )}
