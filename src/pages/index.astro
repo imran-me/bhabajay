@@ -16,6 +16,8 @@ import {
 } from '../lib/content';
 import { bn, TOPIC_LABEL } from '../lib/bn';
 import { SITE } from '../config/site';
+import LivePosts from '../components/islands/LivePosts';
+import { libraryTitles } from '../lib/library';
 
 const rows = seriesByActivity();
 const myth = fridayMyth();
@@ -186,6 +188,11 @@ const jsonLd = [
     <div class="swipe">
       {rows.map((s) => <SeriesCover s={s} />)}
     </div>
+  </section>
+
+  <!-- ═════════════ newest core-team posts (from the API; hidden when there are none) ═════════════ -->
+  <section class="wrap mt-12">
+    <LivePosts client:visible limit={8} seriesTitles={libraryTitles} heading="ভাবা যায়!-এর নতুন পোস্ট" />
   </section>
 
   <!-- ═════════════ ভাবুর দুনিয়া ═════════════ -->
