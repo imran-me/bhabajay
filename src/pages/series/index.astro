@@ -6,9 +6,12 @@ import SectionHead from '../../components/ui/SectionHead.astro';
 import Bhabu from '../../components/brand/Bhabu.astro';
 import { seriesByActivity, posts, getSeries } from '../../lib/content';
 import { bn, TOPIC_LABEL } from '../../lib/bn';
+import Doodle from '../../components/brand/Doodle.astro';
+import LivePosts from '../../components/islands/LivePosts';
+import { library, libraryTitles } from '../../lib/library';
 
 const all = seriesByActivity();
-const topics = [...new Set(all.map((s) => s.topic))];
+const topics = [...new Set([...all.map((s) => s.topic), ...library.map((s) => s.topic)])];
 const latest = posts.slice(0, 8);
 ---
 <BaseLayout title="সব সিরিজ" description="রান্নাঘরের বিজ্ঞান, মশার জীবন, হাওরের মাছ, তারার গল্প — তরুণ ইনিশিয়েটরদের বানানো বাংলা বিজ্ঞান সিরিজ। প্রতিটা সিরিজের একটা ঘর, একটা মুখ আর একজন মালিক।">
@@ -34,6 +37,26 @@ const latest = posts.slice(0, 8);
       </a>
     </div>
   </section>
+
+  {library.length > 0 && (
+    <section class="wrap mt-14" aria-labelledby="core-title">
+      <SectionHead id="core-title" title="ভাবা যায়! কোর টিমের সিরিজ" eyebrow={`${bn(library.length)}টি সিরিজ · প্রতি সপ্তাহে নতুন পোস্ট`} />
+      <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4" role="list">
+        {library.map((s) => (
+          <li data-series-item data-topic={s.topic}>
+            <a href={`/series/${s.slug}`} class="press relative flex min-h-[8.5rem] flex-col justify-end overflow-hidden rounded-[22px] p-4 shadow-sm focus-visible:outline-offset-2" style={`background: linear-gradient(120deg, ${s.color.from}, ${s.color.to})`}>
+              <Doodle name={s.doodle} class="absolute -right-2 -top-2 h-16 w-16 rotate-12 opacity-80" />
+              <span class:list={['relative text-lg font-bold leading-snug', s.color.ink === 'light' ? 'text-white' : 'text-deep']}>{s.title}</span>
+              <span class:list={['relative mt-0.5 line-clamp-2 text-[.85rem] leading-snug', s.color.ink === 'light' ? 'text-white/85' : 'text-deep/75']}>{s.tagline}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div class="mt-8">
+        <LivePosts client:visible limit={8} seriesTitles={libraryTitles} heading="কোর টিমের নতুন পোস্ট" />
+      </div>
+    </section>
+  )}
 
   <section class="wrap mt-14" aria-labelledby="latest-title">
     <SectionHead id="latest-title" title="সবশেষ পোস্ট" eyebrow={`মোট ${bn(posts.length)}টি পোস্ট`} />

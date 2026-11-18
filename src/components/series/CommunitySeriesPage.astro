@@ -1,17 +1,14 @@
 ---
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import Doodle from '../../../components/brand/Doodle.astro';
-import Icon from '../../../components/ui/Icon.astro';
-import Avatar from '../../../components/ui/Avatar.astro';
-import PostCard from '../../../components/cards/PostCard.astro';
-import InboxForm from '../../../components/islands/InboxForm';
-import { cardSeries, getPerson, getMentor, postsOf, quizzes, seriesStats } from '../../../lib/content';
-import { bn, bnDate, TIER_LABEL } from '../../../lib/bn';
-import type { Series } from '../../../data/types';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Doodle from '../../components/brand/Doodle.astro';
+import Icon from '../../components/ui/Icon.astro';
+import Avatar from '../../components/ui/Avatar.astro';
+import PostCard from '../../components/cards/PostCard.astro';
+import InboxForm from '../../components/islands/InboxForm';
+import { getPerson, getMentor, postsOf, quizzes, seriesStats } from '../../lib/content';
+import { bn, bnDate, TIER_LABEL } from '../../lib/bn';
+import type { Series } from '../../data/types';
 
-export function getStaticPaths() {
-  return cardSeries.map((s) => ({ params: { slug: s.slug }, props: { s } }));
-}
 const { s } = Astro.props as { s: Series };
 const owner = getPerson(s.ownerId)!;
 const mentor = getMentor(s.mentorId);

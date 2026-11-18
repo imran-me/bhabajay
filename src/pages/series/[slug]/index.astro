@@ -1,0 +1,17 @@
+---
+import CommunitySeriesPage from '../../../components/series/CommunitySeriesPage.astro';
+import LibrarySeriesPage from '../../../components/series/LibrarySeriesPage.astro';
+import { cardSeries } from '../../../lib/content';
+import { library, type LibrarySeries } from '../../../lib/library';
+import type { Series } from '../../../data/types';
+
+export function getStaticPaths() {
+  const taken = new Set(cardSeries.map((s) => s.slug));
+  return [
+    ...cardSeries.map((s) => ({ params: { slug: s.slug }, props: { s, lib: false } })),
+    ...library.filter((s) => !taken.has(s.slug)).map((s) => ({ params: { slug: s.slug }, props: { s, lib: true } })),
+  ];
+}
+const { s, lib } = Astro.props as { s: Series | LibrarySeries; lib: boolean };
+---
+{lib ? <LibrarySeriesPage s={s as LibrarySeries} /> : <CommunitySeriesPage s={s as Series} />}
