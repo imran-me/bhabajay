@@ -47,6 +47,8 @@ export interface Pitch {
   history: { status: PitchStatus; at: string; note?: string }[];
   payload?: PitchPayload;
   mine?: boolean;
+  /** php: hidden from the public tracker by the core team */
+  hidden?: boolean;
 }
 
 export interface PublicPitchStatus {
@@ -110,13 +112,15 @@ export interface ProfileInput {
 }
 
 export interface Backend {
-  mode: 'demo' | 'supabase';
+  mode: 'demo' | 'supabase' | 'php';
 
   /* Bhaba Jay ID */
   startGoogle(): Promise<{ demo?: true }>;
   sendMagicLink(email: string): Promise<{ demoLink?: string }>;
   /** demo: complete the simulated OAuth / magic link with an email */
   completeDemoSignIn?(email: string, method: 'google' | 'magic'): Promise<void>;
+  /** php: email + password account on the server */
+  passwordSignIn?(email: string, password: string, mode: 'login' | 'register'): Promise<{ hasProfile: boolean }>;
   getSession(): Promise<SessionInfo | null>;
   saveProfile(input: ProfileInput): Promise<LocalUser>;
   signOut(): Promise<void>;
@@ -147,6 +151,8 @@ export interface Backend {
     updatePitch(code: string, status: PitchStatus, opts?: { feedback?: string; mentorName?: string }): Promise<void>;
     pendingComments(): Promise<Comment[]>;
     moderate(id: string, status: 'approved' | 'rejected'): Promise<void>;
+    /** php: hide/unhide a pitch from the public tracker */
+    hidePitch?(code: string, hidden: boolean): Promise<void>;
     inbox(kind?: InboxItem['kind']): Promise<InboxItem[]>;
     markInbox(id: string, status: InboxItem['status']): Promise<void>;
   };

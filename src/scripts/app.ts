@@ -364,4 +364,4 @@ const waved = waveHello();
 if (!waved) dailyFact();
 
 // Under Supabase, refresh the session mirror (magic-link / OAuth return)
-void getBackend().then((b) => { if (b.mode === 'supabase') void b.getSession(); });
+void getBackend().then((b) => { if (b.mode !== 'demo') void b.getSession(); });
