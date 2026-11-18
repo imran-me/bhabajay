@@ -302,7 +302,7 @@ function waveHello() {
   setFlag('waveDay', today);
   const name = s.user?.nickname;
   const wrap = document.createElement('div');
-  wrap.className = 'fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-3 z-[70] flex items-end gap-2 lg:bottom-6 lg:left-6';
+  wrap.className = 'fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom))] left-3 z-[70] flex pointer-events-none items-end gap-2 lg:bottom-6 lg:left-6';
   wrap.setAttribute('role', 'status');
   wrap.innerHTML = `<span data-wave class="block w-20 origin-bottom" style="animation:var(--animate-wave)">${bhabuSvg({ face: 'happy', body: 'coral', dot: 'sun', brows: 'dark', animateSparks: true, className: 'w-full h-auto' })}</span>
     <span class="mb-14 rounded-2xl rounded-bl-sm bg-surface px-3.5 py-2 font-semibold shadow-[var(--shadow-lift)] ring-1 ring-line reveal-up">${greeting()}${name ? ` ${name}` : ''}<span class="block text-sm font-normal text-ink-soft">আজকের ভাবনা দেখেছ?</span></span>`;
