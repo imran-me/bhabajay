@@ -1,0 +1,39 @@
+# Every push to main: build the static site and publish dist/ to the
+# `deploy` branch. The Hostinger cron (deploy/hostinger-deploy.sh) pulls
+# that branch into domains/bhabajay.com/public_html every minute.
+name: build-for-hostinger
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: deploy-hostinger
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          PUBLIC_SITE_URL: https://bhabajay.com
+      - name: Push dist to deploy branch
+        run: |
+          cd dist
+          git init -q -b deploy
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add -A
+          git commit -q -m "build ${GITHUB_SHA::7}"
+          git push -f "https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.com/${{ github.repository }}.git" deploy
