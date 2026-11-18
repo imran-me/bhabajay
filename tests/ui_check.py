@@ -46,16 +46,20 @@ TARGETS = r"""
 (mobile) => {
   const res = { covered: [], small: [] };
   const els = [...document.querySelectorAll('a[href], button, input, select, textarea, [role=button], summary')];
-  const name = (el) => el.tagName.toLowerCase() + ' "' + ((el.innerText || el.getAttribute('aria-label') || el.getAttribute('name') || '').trim().slice(0, 30)) + '"';
+  const name = (el) => el.tagName.toLowerCase() + ' "' + ((el.innerText || el.getAttribute('aria-label') || el.getAttribute('name') || el.getAttribute('href') || '').trim().slice(0, 30)) + '"';
   for (const el of els) {
     const s = getComputedStyle(el); const r = el.getBoundingClientRect();
     if (s.visibility === 'hidden' || s.display === 'none' || r.width < 2 || r.height < 2 || el.closest('[hidden],[aria-hidden=true],dialog:not([open])')) continue;
     if (s.position === 'fixed' || el.closest('[data-bottom-tabs],[data-topbar]')) continue;
+    // the hidden side of a flip card is not tappable by design
+    if (el.closest('.flip:not(.is-flipped) .flip-back, .flip.is-flipped .flip-front')) continue;
+    if (!el.matches('summary') && el.closest('details:not([open])') && !el.closest('summary')) continue;
     el.scrollIntoView({ block: 'center' });
     const q = el.getBoundingClientRect();
     if (q.bottom < 0 || q.top > innerHeight || q.right < 0 || q.left > innerWidth) continue;
     const x = Math.min(Math.max(q.left + q.width / 2, 1), innerWidth - 1), y = Math.min(Math.max(q.top + q.height / 2, 1), innerHeight - 1);
     const hit = document.elementFromPoint(x, y);
+    if (hit && hit.closest('[role=status],[data-transient]') && getComputedStyle(hit.closest('[role=status],[data-transient]')).pointerEvents === 'none') continue;
     if (hit && hit !== el && !el.contains(hit) && !hit.contains(el)) {
       // a label wrapping the input is fine
       if (!(hit.tagName === 'LABEL' && hit.contains(el)) && !(el.labels && [...el.labels].includes(hit)))
@@ -75,7 +79,7 @@ TARGETS = r"""
 def main():
     sys.stdout.reconfigure(encoding='utf-8')
     ap = argparse.ArgumentParser()
-    ap.add_argument('--base', default='http://localhost:4321')
+    ap.add_argument('--base', default='http://localhost:4321', help='the URL `npm run preview` printed (port may differ)')
     ap.add_argument('--routes', default=','.join(DEFAULT_ROUTES))
     ap.add_argument('--widths', default=','.join(map(str, WIDTHS)))
     ap.add_argument('--shots', default='')
