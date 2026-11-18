@@ -267,7 +267,8 @@ export default function PitchForm({ districts }: { districts: string[] }) {
         {step === 3 && (
           <>
             <F label="একটা নমুনা (ছবি, ডক বা লিংক) — ঐচ্ছিক" err={errors.sampleLink} id="pf-sample" hint="গুগল ড্রাইভ/ফেসবুক পোস্টের লিংক দিতে পারো। ফাইল আপলোড আসছে v2-তে।">
-              <input id="pf-sample" className="field font-en" inputMode="url" value={d.sampleLink} onChange={(e) => set('sampleLink', e.target.value)} aria-invalid={!!errors.sampleLink} placeholder="https://" />
+              <input id="pf-sample" className="field font-en" inputMode="url" value={d.sampleLink} onChange={(e) => set('sampleLink', e.target.value)}
+                onBlur={(e) => { const v = e.target.value.trim(); if (v && !/^https?:\/\//i.test(v) && /\S+\.\S+/.test(v)) set('sampleLink', `https://${v}`); }} aria-invalid={!!errors.sampleLink} placeholder="https://" />
             </F>
             <div className="grid gap-4 sm:grid-cols-2">
               <F label="যা পারো" err={errors.skillsHave} id="pf-have"><textarea id="pf-have" className="field !min-h-24" value={d.skillsHave} onChange={(e) => set('skillsHave', e.target.value)} aria-invalid={!!errors.skillsHave} placeholder="লেখা, আঁকা, ভিডিও এডিট…" maxLength={300} /></F>

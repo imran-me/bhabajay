@@ -52,7 +52,7 @@ export default function AvatarStudio({ value, tier, badges, onSave, locked = fal
           <button type="button" className="btn btn-primary btn-sm" disabled={!dirty || locked} onClick={() => onSave(a)}>সেভ করো</button>
           <button type="button" className="btn btn-ghost btn-sm" disabled={!dirty} onClick={() => setA(value)}>আগের মতো</button>
         </div>
-        <button type="button" className="text-sm font-bold text-link underline-offset-4 hover:underline" onClick={() => {
+        <button type="button" className="inline-flex min-h-11 items-center px-1 text-sm font-bold text-link underline-offset-4 hover:underline" onClick={() => {
           const r = <T,>(xs: { id: T; badge?: string }[]) => { const ok = xs.filter((x) => !x.badge || badges[x.badge]); return ok[Math.floor(Math.random() * ok.length)].id; };
           set({ face: r(FACE_OPTIONS), hat: r(HAT_OPTIONS), prop: r(PROP_OPTIONS), ground: r(GROUND_OPTIONS), body: r(BODY_OPTIONS) });
         }}>🎲 এলোমেলো</button>
@@ -61,7 +61,7 @@ export default function AvatarStudio({ value, tier, badges, onSave, locked = fal
         <div role="tablist" className="flex gap-1 overflow-x-auto rounded-2xl bg-tint p-1" aria-label="অবতারের অংশ">
           {TABS.map((t) => (
             <button key={t.id} type="button" role="tab" aria-selected={tab === t.id} onClick={() => setTab(t.id)}
-              className={`flex-1 shrink-0 rounded-xl px-3 py-2 text-sm font-bold ${tab === t.id ? 'bg-surface shadow-sm' : 'text-ink-soft'}`}>{t.bn}</button>
+              className={`min-h-11 min-w-11 flex-1 shrink-0 rounded-xl px-2 py-2 text-sm font-bold ${tab === t.id ? 'bg-surface shadow-sm' : 'text-ink-soft'}`}>{t.bn}</button>
           ))}
         </div>
         <div className="mt-3 grid grid-cols-3 gap-2 sm:grid-cols-4 lg:grid-cols-5" role="radiogroup">

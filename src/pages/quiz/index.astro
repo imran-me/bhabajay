@@ -12,6 +12,7 @@ const episodeQuizzes = liveEpisodes.map((e) => ({ e, q: quizzes.find((q) => q.sl
 const seriesQuizzes = quizzes.filter((q) => q.kind === 'initiator');
 const pastWeeklies = weeklies.slice().sort((a, b) => b.opensAt!.localeCompare(a.opensAt!));
 const pool = quizzes.find((q) => q.kind === 'pool')!;
+const seasons = quizzes.filter((q) => q.kind === 'season');
 const modes = [
   { name: 'শনিবারের কুইজ', how: '৫ প্রশ্ন, শনিবার রাত ৮টা; উত্তর আর ব্যাখ্যা পরদিন সকালে', why: 'সাপ্তাহিক অভ্যাস', href: '/quiz/weekly', doodle: 'sparkle' },
   { name: 'পর্বের কুইজ', how: 'প্রতিটি কার্টুন পর্বের পর ৩ প্রশ্ন', why: 'দেখাকে শেখায় বদলে দেয়', href: '#episode', doodle: 'mosquito' },
@@ -63,6 +64,22 @@ const modes = [
     </div>
   </section>
 
+  {seasons.map((q) => (
+    <section class="wrap mt-12" aria-label={q.title}>
+      <a href={`/quiz/${q.slug}`} class="card card-hover press grid items-center gap-4 overflow-hidden p-4 sm:grid-cols-[auto_1fr]">
+        <div class="flex gap-2">
+          {q.questions.slice(0, 3).map((x) => x.image && <img src={x.image} alt="" width="96" height="120" loading="lazy" class="w-20 rounded-xl sm:w-24" />)}
+        </div>
+        <div>
+          <p class="eyebrow">ফেসবুকে যা খেলেছে সবাই</p>
+          <h2 class="mt-1 text-2xl font-bold">{q.title}</h2>
+          <p class="mt-1 text-ink-soft">{q.blurb}</p>
+          <p class="mt-2 font-bold text-link">{bn(q.questions.length)} প্রশ্ন · খেলো →</p>
+        </div>
+      </a>
+    </section>
+  ))}
+
   <section id="initiator" class="wrap mt-12 scroll-mt-24" aria-labelledby="in-h">
     <h2 id="in-h" class="section-title mb-4">ইনিশিয়েটরদের কুইজ</h2>
     <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
@@ -89,7 +106,7 @@ const modes = [
     <div>
       <div class="mb-4 flex items-end gap-3">
         <h2 class="section-title">লিডারবোর্ড</h2>
-        <a href="/quiz/leaderboard" class="ml-auto font-bold text-link">পুরোটা দেখো →</a>
+        <a href="/quiz/leaderboard" class="ml-auto inline-flex min-h-11 items-center font-bold text-link">পুরোটা দেখো →</a>
       </div>
       <Leaderboard client:visible limit={8} />
     </div>

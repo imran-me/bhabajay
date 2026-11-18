@@ -299,6 +299,12 @@ export default function QuizPlayer({ quiz, count, shuffle = false, lockedUntilEp
       </div>
 
       <div className="p-5 sm:p-6">
+        {q.image && (
+          <figure className="mx-auto mb-4 max-w-xs">
+            <img src={q.image} alt={q.imageAlt ?? ''} width={960} height={1200} loading="lazy" decoding="async" className="w-full rounded-2xl" />
+            {q.credit && <figcaption className="mt-1 text-center text-xs text-ink-soft">ছবি: {q.credit}</figcaption>}
+          </figure>
+        )}
         <h2 className="text-[1.35rem] font-bold leading-snug sm:text-2xl" id={`q-${q.id}`}>{q.q}</h2>
         <div className="mt-5 grid gap-2.5" role="group" aria-labelledby={`q-${q.id}`}>
           {q.options.map((o, k) => {

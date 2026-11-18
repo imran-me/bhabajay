@@ -35,7 +35,7 @@ export default function Leaderboard({ initial = 'people', limit = 20 }: { initia
       <div role="tablist" className="flex gap-1 overflow-x-auto border-b border-line px-3 pt-3" aria-label="লিডারবোর্ড">
         {TABS.map((t) => (
           <button key={t.id} type="button" role="tab" aria-selected={scope === t.id} onClick={() => setScope(t.id)}
-            className={`relative shrink-0 px-3 pb-3 pt-1 font-bold ${scope === t.id ? 'text-coral-dark after:absolute after:inset-x-2 after:bottom-0 after:h-[3px] after:rounded-full after:bg-coral dark:text-coral' : 'text-ink-soft'}`}>
+            className={`relative min-h-11 shrink-0 px-3 pb-3 pt-1 font-bold ${scope === t.id ? 'text-coral-dark after:absolute after:inset-x-2 after:bottom-0 after:h-[3px] after:rounded-full after:bg-coral dark:text-coral' : 'text-ink-soft'}`}>
             {t.bn}
           </button>
         ))}
