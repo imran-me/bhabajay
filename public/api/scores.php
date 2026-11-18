@@ -14,10 +14,13 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
   $score = (int)($in['score'] ?? -1);
   $points = (int)($in['points'] ?? -1);
   if ($slug === '' || $total < 1 || $total > 50 || $score < 0 || $score > $total || $points < 0 || $points > $total * 20) bj_fail('invalid');
-  $nick = bj_str($in['nickname'] ?? '', 40) ?: 'অতিথি';
-  $db->prepare('INSERT INTO quiz_attempts (quiz_slug, nickname, school_id, district, score, total, points, duration_ms, ip_hash) VALUES (?,?,?,?,?,?,?,?,?)')
+  $me = bj_user();
+  $prof = $me && $me['profile'] ? (json_decode($me['profile'], true) ?: []) : [];
+  $nick = ($prof['nickname'] ?? '') ?: (bj_str($in['nickname'] ?? '', 40) ?: 'অতিথি');
+  if ($me) { $in['schoolId'] = $prof['schoolId'] ?? null; $in['district'] = $prof['district'] ?? null; }
+  $db->prepare('INSERT INTO quiz_attempts (quiz_slug, nickname, school_id, district, score, total, points, duration_ms, ip_hash, user_id) VALUES (?,?,?,?,?,?,?,?,?,?)')
     ->execute([str_starts_with($slug, 'weekly') ? 'weekly' : $slug, $nick, bj_str($in['schoolId'] ?? '', 64) ?: null, bj_str($in['district'] ?? '', 64) ?: null,
-      $score, $total, $points, max(0, min(3600000, (int)($in['durationMs'] ?? 0))), bj_ip_hash()]);
+      $score, $total, $points, max(0, min(3600000, (int)($in['durationMs'] ?? 0))), bj_ip_hash(), $me ? (int)$me['id'] : null]);
   bj_out(['ok' => true], 201);
 }
 

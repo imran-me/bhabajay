@@ -4,6 +4,7 @@ import MythCard from '../../components/cards/MythCard.astro';
 import Icon from '../../components/ui/Icon.astro';
 import Bhabu from '../../components/brand/Bhabu.astro';
 import InboxForm from '../../components/islands/InboxForm';
+import LiveMyths from '../../components/islands/LiveMyths';
 import { myths, fridayMyth } from '../../lib/content';
 import { bn } from '../../lib/bn';
 
@@ -48,7 +49,14 @@ const jsonLd = {
     </div>
   </section>
 
-  <section class="wrap mt-8" aria-live="polite">
+  <section class="wrap mt-8" aria-labelledby="season-title">
+    <h2 id="season-title" class="mb-1 text-2xl font-bold">সিজন ১: ছবি-কার্ডে যাচাই</h2>
+    <p class="mb-4 text-ink-soft">প্রতি শনি আর সোমবার একটা করে প্রচলিত দাবি। আগে নিজে আন্দাজ করুন, তারপর কার্ড খুলে রায় দেখুন।</p>
+    <LiveMyths client:visible />
+  </section>
+
+  <section class="wrap mt-10" aria-live="polite">
+    <h2 class="mb-3 text-2xl font-bold">মিথ লাইব্রেরি</h2>
     <p class="mb-3 text-sm font-semibold text-ink-soft" data-myth-count>{bn(myths.length)}টি দাবি</p>
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3" data-myth-grid>
       {myths.map((m) => <div data-slug={m.slug}><MythCard myth={m} /></div>)}

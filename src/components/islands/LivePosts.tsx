@@ -13,16 +13,11 @@ interface LivePost {
   readMinutes: number; publishedAt: string;
 }
 
-const BN = '০১২৩৪৫৬৭৮৯';
-const bn = (n: number | string) => String(n).replace(/\d/g, (d) => BN[+d]);
-const MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
-const bnDate = (iso: string) => {
-  const [y, m, d] = iso.split('-').map(Number);
-  return `${bn(d)} ${MONTHS[m - 1]} ${bn(y)}`;
-};
+import { bn, bnDate } from './bnfmt';
+import { TeaserCard, UpcomingStrip, useUpcoming } from './Teaser';
 
-export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty, heading }: {
-  series?: string; limit?: number; seriesTitles?: Record<string, string>; empty?: string; heading?: string;
+export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty, heading, teaserTitle }: {
+  series?: string; limit?: number; seriesTitles?: Record<string, string>; empty?: string; heading?: string; teaserTitle?: string;
 }) {
   const [items, setItems] = useState<LivePost[] | null>(null);
   const [total, setTotal] = useState(0);
@@ -30,6 +25,7 @@ export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState<LivePost | null>(null);
   const dlg = useRef<HTMLDialogElement>(null);
+  const upcoming = useUpcoming(series, items !== null && items.length === 0);
 
   const load = async (offset: number) => {
     setBusy(true);
@@ -82,6 +78,8 @@ export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty
     );
   }
   if (!items.length) {
+    if (upcoming) return <TeaserCard u={upcoming} title={teaserTitle} />;
+    if (!series && !failed) return <UpcomingStrip titles={seriesTitles} heading={heading ? 'শীঘ্রই আসছে' : undefined} />;
     return empty ? <p className="rounded-[22px] border border-dashed border-line bg-surface p-6 text-center text-ink-soft">{failed ? 'এই মুহূর্তে পোস্টগুলো আনা যাচ্ছে না। একটু পরে আবার দেখুন।' : empty}</p> : null;
   }
 
@@ -144,7 +142,7 @@ export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty
               <p className="mt-5 text-sm text-ink-soft">
                 সূত্র:{' '}
                 {open.sources.map((s, i) => (
-                  <span key={s.url}>{i > 0 && ' · '}<a href={s.url} target="_blank" rel="noopener nofollow" className="font-semibold text-link underline-offset-2 hover:underline">{s.label}</a></span>
+                  <span key={s.label + i}>{i > 0 && ' · '}{s.url ? <a href={s.url} target="_blank" rel="noopener nofollow" className="font-semibold text-link underline-offset-2 hover:underline">{s.label}</a> : <b>{s.label}</b>}</span>
                 ))}
               </p>
             )}
