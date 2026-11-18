@@ -16,7 +16,7 @@ const ext = SITE.deltaUrl ? { target: '_blank', rel: 'noopener' } : {};
           <p class="mt-4 font-display text-xl text-sun">প্রশ্ন যার, সিরিজ তার।</p>
 
           <a href={deltaHref} {...ext} class="mt-6 inline-flex items-center gap-3 rounded-2xl bg-white/5 p-3 pr-4 ring-1 ring-white/15 transition hover:bg-white/10">
-            <span class="grid h-10 w-10 place-items-center rounded-xl bg-coral font-display text-lg">Δ</span>
+            <span class="grid h-11 w-11 place-items-center rounded-xl bg-coral font-display text-lg">Δ</span>
             <span class="leading-tight">
               <span class="block text-xs text-white/70"><T bn="সহযোগী" en="Partner" /></span>
               <span class="font-bold"><T bn="ডেল্টা ইনিশিয়েটিভস" en="Delta Initiatives" /></span>
@@ -32,8 +32,8 @@ const ext = SITE.deltaUrl ? { target: '_blank', rel: 'noopener' } : {};
               <h2 class="mb-3 text-sm font-bold text-sun">
                 {group === 'explore' ? <T bn="ঘুরে দেখো" en="Explore" /> : group === 'community' ? <T bn="কমিউনিটি" en="Community" /> : <T bn="আমাদের কথা" en="About" />}
               </h2>
-              <ul class="grid gap-1.5">
-                {links.map((l) => <li><a href={l.href} class="text-white/85 hover:text-white hover:underline"><T bn={l.bn} en={l.en} /></a></li>)}
+              <ul class="grid">
+                {links.map((l) => <li><a href={l.href} class="inline-flex min-h-11 items-center text-white/85 hover:text-white hover:underline"><T bn={l.bn} en={l.en} /></a></li>)}
               </ul>
             </div>
           ))}
@@ -42,12 +42,12 @@ const ext = SITE.deltaUrl ? { target: '_blank', rel: 'noopener' } : {};
 
       <div class="mt-10 flex flex-col gap-4 border-t border-white/10 pt-6 text-sm text-white/70 sm:flex-row sm:items-center">
         <div class="flex items-center gap-2">
-          {SITE.facebookUrl && <a href={SITE.facebookUrl} target="_blank" rel="noopener" class="grid h-10 w-10 place-items-center rounded-xl bg-white hover:scale-105" aria-label="Facebook"><Icon name="facebook" class="h-6 w-6" /></a>}
-          {SITE.youtubeUrl && <a href={SITE.youtubeUrl} target="_blank" rel="noopener" class="grid h-10 w-10 place-items-center rounded-xl bg-white hover:scale-105" aria-label="YouTube"><Icon name="youtube" class="h-6 w-6" /></a>}
-          <a href={`mailto:${SITE.contactEmail}`} class="grid h-10 w-10 place-items-center rounded-xl bg-white/10 hover:bg-white/20" aria-label="ইমেইল"><Icon name="mail" /></a>
+          {SITE.facebookUrl && <a href={SITE.facebookUrl} target="_blank" rel="noopener" class="grid h-11 w-11 place-items-center rounded-xl bg-white hover:scale-105" aria-label="Facebook"><Icon name="facebook" class="h-6 w-6" /></a>}
+          {SITE.youtubeUrl && <a href={SITE.youtubeUrl} target="_blank" rel="noopener" class="grid h-11 w-11 place-items-center rounded-xl bg-white hover:scale-105" aria-label="YouTube"><Icon name="youtube" class="h-6 w-6" /></a>}
+          <a href={`mailto:${SITE.contactEmail}`} class="grid h-11 w-11 place-items-center rounded-xl bg-white/10 hover:bg-white/20" aria-label="ইমেইল"><Icon name="mail" /></a>
         </div>
         <p class="sm:ml-4">© ২০২৬ ভাবা যায়! · বাংলাদেশে তৈরি, কৌতূহল দিয়ে।</p>
-        <p class="sm:ml-auto"><a href="/privacy" class="hover:underline"><T bn="কুকি নেই, ট্র্যাকিং নেই" en="No cookies, no tracking" /></a></p>
+        <p class="sm:ml-auto"><a href="/privacy" class="inline-flex min-h-11 items-center hover:underline"><T bn="কুকি নেই, ট্র্যাকিং নেই" en="No cookies, no tracking" /></a></p>
       </div>
     </div>
   </div>

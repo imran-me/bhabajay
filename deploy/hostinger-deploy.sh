@@ -46,6 +46,20 @@ db_sync() {
 }
 [ -f "$HOME/bhabajay-deploy/.db-sum" ] || db_sync
 
+# Media inbox: zips uploaded to $HOME/bhabajay-deploy/media-inbox/ are unpacked into
+# public_html/media/ (images/video live on the server, never in git), then moved to media-inbox/done/.
+INBOX="$HOME/bhabajay-deploy/media-inbox"
+mkdir -p "$INBOX/done" "$WEB/media"
+for z in "$INBOX"/*.zip; do
+  [ -f "$z" ] || continue
+  # only media file types are extracted (no php/html/htaccess can arrive this way)
+  if unzip -o -q -C "$z" '*.webp' '*.jpg' '*.jpeg' '*.png' '*.svg' '*.mp4' '*.webm' '*.vtt' -x '__MACOSX/*' -d "$WEB/media" >> "$LOG" 2>&1; then
+    mv "$z" "$INBOX/done/" && echo "$(date '+%F %T') media unpacked $(basename "$z")" >> "$LOG"
+  else
+    echo "$(date '+%F %T') media unzip FAILED $(basename "$z")" >> "$LOG"
+  fi
+done
+
 remote=$(git ls-remote "$REPO" "refs/heads/$BRANCH" | cut -f1)
 [ -n "$remote" ] || exit 0
 [ -d "$GIT_DIR" ] || git init -q --bare "$GIT_DIR"

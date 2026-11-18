@@ -116,8 +116,8 @@ export async function renderCard(spec: CardSpec): Promise<Blob> {
   canvas.height = S;
   const g = canvas.getContext('2d')!;
   await Promise.all([
-    document.fonts.load('700 64px "Hind Siliguri"', 'অআক'),
-    document.fonts.load('500 40px "Hind Siliguri"', 'অআক'),
+    document.fonts.load('700 64px "Anek Bangla Variable"', 'অআক'),
+    document.fonts.load('500 40px "Anek Bangla Variable"', 'অআক'),
     document.fonts.load('800 60px "Baloo Da 2"', 'ভাবা'),
     document.fonts.load('800 80px "Anek Condensed"', 'মিথ'),
   ]).catch(() => undefined);
@@ -152,7 +152,7 @@ export async function renderCard(spec: CardSpec): Promise<Blob> {
     g.save();
     g.translate(150, 200);
     g.rotate(-0.1);
-    g.font = '800 84px "Anek Condensed", "Hind Siliguri"';
+    g.font = '800 84px "Anek Condensed", "Anek Bangla Variable"';
     const w = g.measureText(v.label).width + 60;
     g.lineWidth = 9;
     g.strokeStyle = v.color;
@@ -165,20 +165,20 @@ export async function renderCard(spec: CardSpec): Promise<Blob> {
     g.restore();
     y = 380;
   } else if (spec.eyebrow) {
-    g.font = '700 40px "Hind Siliguri"';
+    g.font = '700 40px "Anek Bangla Variable"';
     g.fillStyle = dark ? C.sun : '#D94A3B';
     g.fillText(spec.eyebrow, 130, 240);
     y = 330;
   }
 
   if (spec.big) {
-    g.font = '800 170px "Baloo Da 2", "Hind Siliguri"';
+    g.font = '800 170px "Baloo Da 2", "Anek Bangla Variable"';
     g.fillStyle = C.sun;
     g.fillText(spec.big, 124, y + 110);
     y += 200;
   }
 
-  g.font = `700 ${spec.title.length > 60 ? 58 : 68}px "Hind Siliguri"`;
+  g.font = `700 ${spec.title.length > 60 ? 58 : 68}px "Anek Bangla Variable"`;
   g.fillStyle = ink;
   const lines = wrap(g, spec.title, S - 280).slice(0, 4);
   for (const l of lines) {
@@ -187,7 +187,7 @@ export async function renderCard(spec: CardSpec): Promise<Blob> {
   }
 
   if (spec.line) {
-    g.font = '500 38px "Hind Siliguri"';
+    g.font = '500 38px "Anek Bangla Variable"';
     g.fillStyle = dark ? '#CFE9E6' : '#436E73';
     for (const l of wrap(g, spec.line, S - 300).slice(0, 3)) {
       g.fillText(l, 130, y + 12);
@@ -195,13 +195,13 @@ export async function renderCard(spec: CardSpec): Promise<Blob> {
     }
   }
   if (spec.source) {
-    g.font = '700 34px "Hind Siliguri"';
+    g.font = '700 34px "Anek Bangla Variable"';
     g.fillStyle = dark ? C.sun : C.teal;
     g.fillText(`সূত্র: ${spec.source}`, 130, Math.min(y + 50, 760));
   }
 
   // logo bottom-left (never touched by doodles)
-  g.font = '800 64px "Baloo Da 2", "Hind Siliguri"';
+  g.font = '800 64px "Baloo Da 2", "Anek Bangla Variable"';
   g.fillStyle = dark ? '#fff' : C.teal;
   g.fillText('ভাবা', 90, 950);
   const w1 = g.measureText('ভাবা ').width;

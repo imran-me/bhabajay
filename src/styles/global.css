@@ -9,10 +9,7 @@
 
 /* Self-hosted fonts. Fontsource ships unicode-range subsets, so a
    Bangla page downloads only the Bengali files it needs. */
-@import "@fontsource/hind-siliguri/400.css";
-@import "@fontsource/hind-siliguri/500.css";
-@import "@fontsource/hind-siliguri/600.css";
-@import "@fontsource/hind-siliguri/700.css";
+@import "@fontsource-variable/anek-bangla/wght.css";
 @import "@fontsource/baloo-da-2/700.css";
 @import "@fontsource/baloo-da-2/800.css";
 @import "@fontsource-variable/inter/wght.css";
@@ -120,9 +117,9 @@
   --color-sky: #4FB3E0;
   --color-leaf: #3BA56B;
 
-  --font-sans: "Hind Siliguri", "Inter Variable", system-ui, sans-serif;
-  --font-display: "Baloo Da 2", "Hind Siliguri", system-ui, sans-serif;
-  --font-stamp: "Anek Condensed", "Hind Siliguri", system-ui, sans-serif;
+  --font-sans: "Anek Bangla Variable", "Inter Variable", system-ui, sans-serif;
+  --font-display: "Baloo Da 2", "Anek Bangla Variable", system-ui, sans-serif;
+  --font-stamp: "Anek Condensed", "Anek Bangla Variable", system-ui, sans-serif;
   --font-en: "Inter Variable", system-ui, sans-serif;
 
   --radius-card: 22px;
@@ -404,7 +401,9 @@
   .flip-inner { position: relative; transform-style: preserve-3d; transition: transform .7s var(--ease-spring); height: 100%; }
   .flip.is-flipped .flip-inner { transform: rotateY(180deg); }
   .flip-face { backface-visibility: hidden; -webkit-backface-visibility: hidden; }
-  .flip-back { position: absolute; inset: 0; transform: rotateY(180deg); }
+  .flip-back { position: absolute; inset: 0; transform: rotateY(180deg); pointer-events: none; }
+  .flip.is-flipped .flip-back { pointer-events: auto; }
+  .flip.is-flipped .flip-front { pointer-events: none; }
 
   /* Tier frames */
   .tier-curious { --tier: #8FD3C8; }

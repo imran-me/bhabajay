@@ -1,0 +1,169 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Doodle from '../../components/brand/Doodle.astro';
+import Icon from '../../components/ui/Icon.astro';
+import Avatar from '../../components/ui/Avatar.astro';
+import PostCard from '../../components/cards/PostCard.astro';
+import InboxForm from '../../components/islands/InboxForm';
+import { getPerson, getMentor, postsOf, quizzes, seriesStats } from '../../lib/content';
+import { bn, bnDate, TIER_LABEL } from '../../lib/bn';
+import type { Series } from '../../data/types';
+
+const { s } = Astro.props as { s: Series };
+const owner = getPerson(s.ownerId)!;
+const mentor = getMentor(s.mentorId);
+const ps = postsOf(s.slug);
+const st = seriesStats(s.slug);
+const quiz = quizzes.find((q) => q.kind === 'initiator' && q.seriesSlug === s.slug);
+const team = s.team.map((id) => getPerson(id)!).filter(Boolean);
+const light = s.color.ink === 'light';
+const allSources = [...new Map(ps.flatMap((p) => p.sources).map((x) => [x.url, x])).values()];
+const isCore = owner.id === 'core';
+const ownerName = isCore ? 'ভাবা যায়! কোর টিম' : owner.ageBand === 'adult' && owner.realName ? owner.realName : owner.nickname;
+const tabs = [
+  { id: 'all', bn: 'সব', n: ps.length },
+  { id: 'card', bn: 'কার্ড', n: st.cards },
+  { id: 'video', bn: 'ভিডিও', n: st.videos },
+  { id: 'blog', bn: 'ব্লগ', n: st.blogs },
+  { id: 'quiz', bn: 'কুইজ', n: quiz ? 1 : 0 },
+  { id: 'team', bn: 'টিম', n: team.length },
+];
+const jsonLd = {
+  '@type': 'CreativeWorkSeries',
+  name: s.title,
+  description: s.description,
+  inLanguage: 'bn',
+  author: isCore ? { '@type': 'Organization', name: 'ভাবা যায়!' } : { '@type': 'Person', name: owner.ageBand === 'adult' ? ownerName : owner.nickname },
+  startDate: s.launchedAt,
+};
+---
+<BaseLayout title={`${s.title} — ${s.tagline}`} description={s.description} jsonLd={jsonLd} image={`/og/series/${s.slug}.png`}>
+  <!-- cover band in the series' own colour -->
+  <section class="relative overflow-hidden" style={`background: linear-gradient(120deg, ${s.color.from}, ${s.color.to})`}>
+    <div class="absolute inset-0 opacity-25" style="background-image:url(/patterns/teal.svg);background-size:240px;mix-blend-mode:soft-light" aria-hidden="true"></div>
+    <div class:list={['wrap relative py-8 sm:py-12', light ? 'text-white' : 'text-deep']}>
+      <a href="/series" class:list={['-my-2 inline-flex min-h-11 items-center gap-1 text-sm font-semibold', light ? 'text-white/85' : 'text-deep/75']}><Icon name="arrow-left" class="h-4 w-4" />সব সিরিজ</a>
+      <p class:list={['mt-3 inline-block rounded-full px-3 py-1 text-sm font-bold', light ? 'bg-white/20' : 'bg-deep/10']}>সিরিজ · {s.subject}</p>
+      <h1 class="mt-3 max-w-[75%] font-bold text-[2.3rem] leading-tight sm:text-6xl">{s.title}</h1>
+      <p class:list={['mt-2 max-w-[70%] text-lg', light ? 'text-white/90' : 'text-deep/80']}>{s.tagline} · {bn(st.posts)} পোস্ট{st.videos ? ` · ${bn(st.videos)} ভিডিও` : ''}</p>
+      <Doodle name={s.doodle} class="absolute right-4 top-1/2 h-28 w-28 -translate-y-1/2 rotate-[8deg] sm:right-10 sm:h-44 sm:w-44" />
+    </div>
+  </section>
+
+  <!-- owner strip: the Initiator is visible on every series -->
+  <section class="border-b border-line bg-surface">
+    <div class="wrap flex flex-wrap items-center gap-4 py-4">
+      <a href={isCore ? '/about' : `/u/${owner.username}`} class="flex min-w-0 items-center gap-3">
+        <Avatar avatar={owner.avatar} tier={isCore ? 'none' : owner.tier} class="h-14 w-14" />
+        <span class="min-w-0">
+          <span class="flex flex-wrap items-center gap-2">
+            <span class="text-xl font-bold">{ownerName}</span>
+            {!isCore && <span class:list={['tag', owner.tier === 'legend' ? 'tag-sun' : owner.tier === 'initiator' ? 'tag-sun' : '']}>⭐ {TIER_LABEL[owner.tier].bn}</span>}
+          </span>
+          <span class="block text-sm text-ink-soft">টিম: {bn(team.length)} জন{mentor ? ` · মেন্টর: ${mentor.name}` : ''} · শুরু {bnDate(s.launchedAt)}</span>
+        </span>
+      </a>
+      <div class="ml-auto flex gap-2">
+        <button type="button" class="btn btn-secondary aria-pressed:!bg-deep" data-follow={s.slug} aria-pressed="false" data-on-label="ফলো করছ ✓" data-off-label="+ ফলো">
+          <span data-label>+ ফলো</span>
+        </button>
+        <button type="button" class="btn btn-ghost" data-share data-share-url={`/series/${s.slug}`} data-share-title={s.title} data-share-text={`${s.title} — ${s.tagline}`}>
+          <Icon name="share" class="h-4 w-4" />শেয়ার
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap mt-6">
+    <div role="tablist" aria-label="সিরিজের বিভাগ" class="flex gap-1 overflow-x-auto border-b border-line">
+      {tabs.filter((t) => t.id === 'all' || t.n > 0).map((t, i) => (
+        <button type="button" role="tab" aria-selected={i === 0 ? 'true' : 'false'} data-tab={t.id}
+          class="relative shrink-0 px-3 pb-3 pt-1 text-lg font-bold text-ink-soft aria-selected:text-coral-dark dark:aria-selected:text-coral aria-selected:after:absolute aria-selected:after:inset-x-2 aria-selected:after:bottom-0 aria-selected:after:h-[3px] aria-selected:after:rounded-full aria-selected:after:bg-coral">
+          {t.bn}
+        </button>
+      ))}
+    </div>
+
+    <p class="mt-4 max-w-3xl text-ink-soft" data-panel="all">{s.description}</p>
+
+    <div class="mt-5 grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4" data-grid>
+      {ps.map((p) => <div data-format={p.format}><PostCard post={p} /></div>)}
+    </div>
+
+    {quiz && (
+      <div data-panel="quiz" hidden class="mt-5">
+        <a href={`/quiz/${quiz.slug}`} class="card card-hover press flex items-center gap-4 bg-sun-soft p-5">
+          <span class="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-sun text-2xl">🎲</span>
+          <span class="min-w-0">
+            <span class="block text-xl font-bold">{quiz.title}</span>
+            <span class="block text-ink-soft">{quiz.blurb} · {bn(quiz.questions.length)} প্রশ্ন</span>
+          </span>
+          <span class="btn btn-pill ml-auto hidden sm:inline-flex">খেলো!</span>
+        </a>
+      </div>
+    )}
+
+    <div data-panel="team" hidden class="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {team.map((m) => (
+        <a href={m.id === 'core' ? '/about' : `/u/${m.username}`} class="card card-hover flex items-center gap-3 p-4">
+          <Avatar avatar={m.avatar} tier={m.id === 'core' ? 'none' : m.tier} class="h-12 w-12" />
+          <span><span class="block font-bold">{m.nickname}</span><span class="text-sm text-ink-soft">{m.id === s.ownerId ? 'সিরিজের মালিক' : TIER_LABEL[m.tier].bn}</span></span>
+        </a>
+      ))}
+      {mentor && (
+        <div class="card flex items-center gap-3 p-4">
+          <span class="grid h-12 w-12 place-items-center rounded-full bg-deep font-display text-xl text-sun">{mentor.name.replace(/^(ড\.|ডা\.)\s*/, '').slice(0, 1)}</span>
+          <span><span class="block font-bold">{mentor.name}</span><span class="text-sm text-ink-soft">মেন্টর · {mentor.field}</span></span>
+        </div>
+      )}
+    </div>
+  </section>
+
+  <!-- footer of every series: join, credits, sources -->
+  <section class="wrap mt-12 grid gap-5 lg:grid-cols-[1.2fr_1fr]">
+    <div class="card bg-tint p-6">
+      <h2 class="text-2xl font-bold">এই সিরিজে হাত লাগাতে চাও?</h2>
+      <p class="mt-1 text-ink-soft">লিখতে, আঁকতে, অনুবাদ করতে বা তথ্য যাচাই করতে পারো? দলে যোগ দিলে তুমি <b>অভিযাত্রী</b> — প্রতিটা কাজে তোমার নামে ক্রেডিট।</p>
+      <div class="mt-4">
+        <InboxForm
+          client:visible
+          kind="contact"
+          hidden={{ type: 'join-team', series: s.slug }}
+          submitLabel="দলে যোগ দিতে চাই"
+          successTitle="পৌঁছে গেছে!"
+          successBody={`${ownerName} আর মেন্টর তোমার বার্তা দেখবেন। সাধারণত ৭ দিনের মধ্যে উত্তর আসে।`}
+          fields={[
+            { name: 'nickname', label: 'তোমার ডাকনাম', required: true, maxLength: 40 },
+            { name: 'skills', label: 'কী পারো / কী শিখতে চাও?', type: 'textarea', required: true, maxLength: 500, placeholder: 'যেমন: ছবি আঁকি, ইংরেজি থেকে অনুবাদ করতে পারি…' },
+            { name: 'email', label: 'যোগাযোগের ইমেইল', type: 'email', required: true },
+          ]}
+        />
+      </div>
+    </div>
+    <div class="card p-6">
+      <h2 class="text-xl font-bold">ক্রেডিট</h2>
+      <ul class="mt-2 grid gap-1 text-ink-soft">{s.credits.map((c) => <li>{c}</li>)}</ul>
+      <h2 class="mt-5 text-xl font-bold">সূত্র</h2>
+      <ul class="mt-2 flex flex-wrap gap-2">
+        {allSources.map((x) => <li><a href={x.url} target="_blank" rel="noopener" class="tag hover:underline">{x.label}<Icon name="external" class="h-3.5 w-3.5" /></a></li>)}
+      </ul>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const tabs = document.querySelectorAll<HTMLButtonElement>('[data-tab]');
+  const grid = document.querySelector<HTMLElement>('[data-grid]');
+  tabs.forEach((tab) =>
+    tab.addEventListener('click', () => {
+      const id = tab.dataset.tab!;
+      tabs.forEach((t) => t.setAttribute('aria-selected', String(t === tab)));
+      const formatTab = ['all', 'card', 'video', 'blog'].includes(id);
+      if (grid) {
+        grid.hidden = !formatTab;
+        grid.querySelectorAll<HTMLElement>('[data-format]').forEach((el) => (el.hidden = id !== 'all' && el.dataset.format !== id));
+      }
+      document.querySelectorAll<HTMLElement>('[data-panel]').forEach((p) => (p.hidden = p.dataset.panel !== id && !(p.dataset.panel === 'all' && formatTab)));
+    }),
+  );
+</script>

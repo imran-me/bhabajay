@@ -7,8 +7,7 @@ import Footer from '../components/layout/Footer.astro';
 import Icon from '../components/ui/Icon.astro';
 import { DEMO_MODE } from '../config/site';
 import { facts } from '../lib/content';
-import hindBn400 from '@fontsource/hind-siliguri/files/hind-siliguri-bengali-400-normal.woff2?url';
-import hindBn700 from '@fontsource/hind-siliguri/files/hind-siliguri-bengali-700-normal.woff2?url';
+import anekBn from '@fontsource-variable/anek-bangla/files/anek-bangla-bengali-wght-normal.woff2?url';
 import balooBn800 from '@fontsource/baloo-da-2/files/baloo-da-2-bengali-800-normal.woff2?url';
 
 interface Props {
@@ -39,8 +38,7 @@ const factsLite = facts.map((f) => f.text);
     <link rel="apple-touch-icon" href="/icon-192.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <link rel="sitemap" href="/sitemap-index.xml" />
-    <link rel="preload" href={hindBn400} as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href={hindBn700} as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href={anekBn} as="font" type="font/woff2" crossorigin />
     <link rel="preload" href={balooBn800} as="font" type="font/woff2" crossorigin />
     <Seo {...seo} />
     <script is:inline>
@@ -62,7 +60,7 @@ const factsLite = facts.map((f) => f.text);
         <div class="wrap flex items-center gap-2 py-1.5 text-[.8rem] leading-snug">
           <span class="rounded-md bg-sun px-1.5 py-px font-bold text-deep">ডেমো</span>
           <span class="min-w-0 flex-1 truncate">ডেটাবেস যুক্ত হয়নি — আইডি, স্কোর আর পিচ শুধু এই ব্রাউজারে থাকছে।</span>
-          <a href="/about#demo" class="shrink-0 font-semibold text-sun underline-offset-2 hover:underline">বিস্তারিত</a>
+          <a href="/about#demo" class="-my-3 inline-flex min-h-11 shrink-0 items-center px-1 font-semibold text-sun underline-offset-2 hover:underline">বিস্তারিত</a>
         </div>
       </div>
     )}
