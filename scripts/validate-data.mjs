@@ -106,7 +106,7 @@ uniq('quizzes.json', quizzes, 'slug');
 const allQ = [];
 quizzes.forEach((z) => {
   const w = `quiz:${z.slug}`;
-  need(['weekly', 'episode', 'initiator', 'pool', 'secret'].includes(z.kind), `${w}.kind`);
+  need(['weekly', 'episode', 'initiator', 'pool', 'secret', 'season'].includes(z.kind), `${w}.kind`);
   need(isStr(z.title) && isStr(z.blurb), `${w}.title/blurb`);
   need(Number.isInteger(z.secondsPerQuestion) && z.secondsPerQuestion >= 5, `${w}.secondsPerQuestion`);
   if (z.kind === 'weekly') {

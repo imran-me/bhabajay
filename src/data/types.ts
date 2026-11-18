@@ -64,9 +64,14 @@ export interface QuizQuestion {
   /** Shown after answering — what ভাবু explains. One or two sentences. */
   fact: string;
   topic?: TopicId;
+  /** optional question card (WebP under /public) */
+  image?: string;
+  imageAlt?: string;
+  /** photo credit line */
+  credit?: string;
 }
 
-export type QuizKind = 'weekly' | 'episode' | 'initiator' | 'pool' | 'secret';
+export type QuizKind = 'weekly' | 'episode' | 'initiator' | 'pool' | 'secret' | 'season';
 
 export interface Quiz {
   slug: string;
