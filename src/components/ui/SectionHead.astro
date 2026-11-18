@@ -9,7 +9,7 @@ const { title, eyebrow, href, linkText = 'সব দেখো', class: cls, id, 
     <h2 id={id} class:list={['section-title', light && 'text-white']}>{title}</h2>
   </div>
   {href && (
-    <a href={href} class:list={['ml-auto inline-flex shrink-0 items-center gap-1 rounded-xl px-2 py-1 font-bold hover:bg-tint', light ? 'text-sun hover:bg-white/10' : 'text-link']}>
+    <a href={href} class:list={['ml-auto inline-flex min-h-11 shrink-0 items-center gap-1 rounded-xl px-2 font-bold hover:bg-tint', light ? 'text-sun hover:bg-white/10' : 'text-link']}>
       {linkText}<Icon name="arrow-right" class="h-4 w-4" />
     </a>
   )}
