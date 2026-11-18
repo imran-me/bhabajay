@@ -1,1 +1,4 @@
+01-series.sql
+02-posts.sql
+03-myths.sql
 quiz.sql
