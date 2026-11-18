@@ -17,6 +17,7 @@ exec 9>"$LOCK"; flock -n 9 || exit 0
 # Database: apply database/schema.sql + the seeds listed in database/seed/manifest.txt
 # (fetched from main; all statements are idempotent). Credentials: $HOME/bhabajay-deploy/db.env.
 DBENV="$HOME/bhabajay-deploy/db.env"
+[ -f "$DBENV" ] && chmod 600 "$DBENV"
 RAW="https://raw.githubusercontent.com/imran-me/bhabajay/main/database"
 db_sync() {
   [ -f "$DBENV" ] || return 0
@@ -54,7 +55,9 @@ mkdir -p "$INBOX/done" "$WEB/media"
 for z in "$INBOX"/*.zip; do
   [ -f "$z" ] || continue
   # only media file types are extracted (no php/html/htaccess can arrive this way)
-  if unzip -o -q -C "$z" '*.webp' '*.jpg' '*.jpeg' '*.png' '*.svg' '*.mp4' '*.webm' '*.vtt' -x '__MACOSX/*' -d "$WEB/media" >> "$LOG" 2>&1; then
+  # exit 11 = "some patterns matched nothing" (e.g. no .jpg in this zip): still a success
+  rc=0; unzip -o -q -C "$z" '*.webp' '*.jpg' '*.jpeg' '*.png' '*.svg' '*.mp4' '*.webm' '*.vtt' -d "$WEB/media" > /dev/null 2>&1 || rc=$?
+  if [ "$rc" = 0 ] || [ "$rc" = 11 ]; then
     mv "$z" "$INBOX/done/" && echo "$(date '+%F %T') media unpacked $(basename "$z")" >> "$LOG"
   else
     echo "$(date '+%F %T') media unzip FAILED $(basename "$z")" >> "$LOG"
