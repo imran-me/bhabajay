@@ -3,6 +3,7 @@
  * GET /api/posts.php?series=<slug>[&limit=24&offset=0]  -> list (published up to today, Dhaka time)
  * GET /api/posts.php?series=<slug>&slug=<post>           -> one post
  * GET /api/posts.php?limit=12                            -> latest across series
+ * GET /api/posts.php?featured=1&limit=12                 -> first card of each series
  */
 declare(strict_types=1);
 require __DIR__ . '/_content.php';
@@ -21,6 +22,12 @@ bj_run(function () {
         $rows = bj_decode(bj_query("SELECT $cols FROM bj_posts WHERE series_slug = ? AND slug = ? AND published_at <= ?", [$series, $slug, $today]), $json);
         if (!$rows) bj_json(['error' => 'not found'], 60, 404);
         bj_json($rows[0], 600);
+    }
+    if (!$series && isset($_GET['featured'])) {
+        // one post per series (its first card), so the home grid shows the whole range
+        $rows = bj_query("SELECT $cols FROM (SELECT p.*, ROW_NUMBER() OVER (PARTITION BY series_slug ORDER BY published_at ASC, id ASC) AS rn
+                          FROM bj_posts p WHERE published_at <= ? AND JSON_LENGTH(images) > 0) x WHERE rn = 1 ORDER BY published_at ASC LIMIT $limit", [$today]);
+        bj_json(['total' => count($rows), 'items' => bj_decode($rows, $json)], 600);
     }
     if ($series) {
         $rows = bj_query("SELECT $cols FROM bj_posts WHERE series_slug = ? AND published_at <= ? ORDER BY published_at DESC, id DESC LIMIT $limit OFFSET $offset", [$series, $today]);

@@ -16,8 +16,8 @@ interface LivePost {
 import { bn, shownDate } from './bnfmt';
 import { TeaserCard, UpcomingStrip, useUpcoming } from './Teaser';
 
-export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty, heading, teaserTitle }: {
-  series?: string; limit?: number; seriesTitles?: Record<string, string>; empty?: string; heading?: string; teaserTitle?: string;
+export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty, heading, teaserTitle, featured = false }: {
+  series?: string; limit?: number; seriesTitles?: Record<string, string>; empty?: string; heading?: string; teaserTitle?: string; featured?: boolean;
 }) {
   const [items, setItems] = useState<LivePost[] | null>(null);
   const [total, setTotal] = useState(0);
@@ -32,6 +32,7 @@ export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty
     try {
       const q = new URLSearchParams({ limit: String(limit), offset: String(offset) });
       if (series) q.set('series', series);
+      if (featured) q.set('featured', '1');
       const r = await fetch(`/api/posts.php?${q}`, { headers: { Accept: 'application/json' } });
       if (!r.ok) throw new Error(String(r.status));
       const data = await r.json();
