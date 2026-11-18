@@ -44,7 +44,8 @@ db_sync() {
   fi
   rm -rf "$tmp"
 }
-[ -f "$HOME/bhabajay-deploy/.db-sum" ] || db_sync
+# first run, and every 5 minutes (GitHub raw files are cached ~5 min after a merge)
+if [ ! -f "$HOME/bhabajay-deploy/.db-sum" ] || [ $((10#$(date +%M) % 5)) -eq 0 ]; then db_sync; fi
 
 # Media inbox: zips uploaded to $HOME/bhabajay-deploy/media-inbox/ are unpacked into
 # public_html/media/ (images/video live on the server, never in git), then moved to media-inbox/done/.
