@@ -13,6 +13,13 @@ LOCK="$HOME/bhabajay-deploy/.lock"
 
 [ -d "$WEB" ] || { echo "$(date) web root missing: $WEB" >> "$LOG"; exit 1; }
 exec 9>"$LOCK"; flock -n 9 || exit 0
+umask 022
+# repair: web files must be readable by the web server (an older version left some at 0600)
+if [ ! -f "$HOME/bhabajay-deploy/.perms-fixed-1" ]; then
+  find "$WEB" -type d ! -perm -755 -exec chmod 755 {} + 2>/dev/null
+  find "$WEB" -type f ! -perm -644 -exec chmod 644 {} + 2>/dev/null
+  touch "$HOME/bhabajay-deploy/.perms-fixed-1"; echo "$(date '+%F %T') permissions repaired" >> "$LOG"
+fi
 
 # Database: apply database/schema.sql + the seeds listed in database/seed/manifest.txt
 # (fetched from main; all statements are idempotent). Credentials: $HOME/bhabajay-deploy/db.env.
@@ -33,8 +40,8 @@ db_sync() {
   done
   sum=$(cat "$tmp"/*.sql | sha1sum | cut -c1-40)
   if [ "$sum" != "$(cat "$HOME/bhabajay-deploy/.db-sum" 2>/dev/null)" ]; then
-    cnf="$tmp/my.cnf"; umask 077
-    printf '[client]\nuser=%s\npassword="%s"\nhost=localhost\ndefault-character-set=utf8mb4\n' "$user" "$pass" > "$cnf"
+    cnf="$tmp/my.cnf"
+    ( umask 077; printf '[client]\nuser=%s\npassword="%s"\nhost=localhost\ndefault-character-set=utf8mb4\n' "$user" "$pass" > "$cnf" )
     local ok=1 s
     for s in $(ls "$tmp"/*.sql | sort -V); do mysql --defaults-extra-file="$cnf" "$db" < "$s" >> "$LOG" 2>&1 || { ok=0; break; }; done
     if [ "$ok" = 1 ]; then
