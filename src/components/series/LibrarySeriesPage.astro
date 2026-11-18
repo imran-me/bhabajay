@@ -38,6 +38,6 @@ const jsonLd = {
 
   <section class="wrap mt-8" aria-labelledby="posts-title">
     <h2 id="posts-title" class="mb-4 text-2xl font-bold">পোস্টগুলো</h2>
-    <LivePosts client:visible series={s.slug} empty={`প্রথম পোস্ট আসছে ${bnDate(s.launchedAt)}। ফেসবুকে ভাবা যায়! ফলো করে রাখুন, প্রকাশ হলেই এখানেও দেখা যাবে।`} />
+    <LivePosts client:visible series={s.slug} teaserTitle={`${s.title}: ${s.tagline}`} empty={`প্রথম পোস্ট আসছে ${bnDate(s.launchedAt)}। ফেসবুকে ভাবা যায়! ফলো করে রাখুন, প্রকাশ হলেই এখানেও দেখা যাবে।`} />
   </section>
 </BaseLayout>

@@ -13,16 +13,11 @@ interface LivePost {
   readMinutes: number; publishedAt: string;
 }
 
-const BN = '০১২৩৪৫৬৭৮৯';
-const bn = (n: number | string) => String(n).replace(/\d/g, (d) => BN[+d]);
-const MONTHS = ['জানুয়ারি', 'ফেব্রুয়ারি', 'মার্চ', 'এপ্রিল', 'মে', 'জুন', 'জুলাই', 'আগস্ট', 'সেপ্টেম্বর', 'অক্টোবর', 'নভেম্বর', 'ডিসেম্বর'];
-const bnDate = (iso: string) => {
-  const [y, m, d] = iso.split('-').map(Number);
-  return `${bn(d)} ${MONTHS[m - 1]} ${bn(y)}`;
-};
+import { bn, bnDate } from './bnfmt';
+import { TeaserCard, UpcomingStrip, useUpcoming } from './Teaser';
 
-export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty, heading }: {
-  series?: string; limit?: number; seriesTitles?: Record<string, string>; empty?: string; heading?: string;
+export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty, heading, teaserTitle }: {
+  series?: string; limit?: number; seriesTitles?: Record<string, string>; empty?: string; heading?: string; teaserTitle?: string;
 }) {
   const [items, setItems] = useState<LivePost[] | null>(null);
   const [total, setTotal] = useState(0);
@@ -30,6 +25,7 @@ export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty
   const [busy, setBusy] = useState(false);
   const [open, setOpen] = useState<LivePost | null>(null);
   const dlg = useRef<HTMLDialogElement>(null);
+  const upcoming = useUpcoming(series, items !== null && items.length === 0);
 
   const load = async (offset: number) => {
     setBusy(true);
@@ -82,6 +78,8 @@ export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty
     );
   }
   if (!items.length) {
+    if (upcoming) return <TeaserCard u={upcoming} title={teaserTitle} />;
+    if (!series && !failed) return <UpcomingStrip titles={seriesTitles} heading={heading ? 'শীঘ্রই আসছে' : undefined} />;
     return empty ? <p className="rounded-[22px] border border-dashed border-line bg-surface p-6 text-center text-ink-soft">{failed ? 'এই মুহূর্তে পোস্টগুলো আনা যাচ্ছে না। একটু পরে আবার দেখুন।' : empty}</p> : null;
   }
 
