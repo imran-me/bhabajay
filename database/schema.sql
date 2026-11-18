@@ -146,3 +146,30 @@ CREATE TABLE IF NOT EXISTS bj_myths (
   published_at  DATE         NOT NULL,
   KEY ix_date (published_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ───────── Bhaba Jay ID (server accounts) ─────────
+-- role 'core' = admin. The first admin comes from a one-time flag file on the server
+-- ($HOME/bhabajay-deploy/admin.env with ADMIN_EMAIL=...), see public/api/_lib.php.
+CREATE TABLE IF NOT EXISTS users (
+  id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  email       VARCHAR(200) NOT NULL,
+  pass_hash   VARCHAR(255) NOT NULL,
+  role        VARCHAR(16)  NOT NULL DEFAULT 'member',
+  username    VARCHAR(20)  NULL,
+  profile     JSON         NULL,
+  created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  last_login  TIMESTAMP    NULL,
+  UNIQUE KEY ux_email (email),
+  UNIQUE KEY ux_username (username)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- link community rows to accounts (idempotent column adds, MySQL 8 + MariaDB)
+SET @t := 'quiz_attempts';
+SET @s := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = @t AND column_name = 'user_id') = 0, 'ALTER TABLE quiz_attempts ADD COLUMN user_id BIGINT UNSIGNED NULL, ADD KEY ix_user (user_id)', 'SELECT 1');
+PREPARE st FROM @s; EXECUTE st; DEALLOCATE PREPARE st;
+SET @t := 'comments';
+SET @s := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = @t AND column_name = 'user_id') = 0, 'ALTER TABLE comments ADD COLUMN user_id BIGINT UNSIGNED NULL, ADD KEY ix_user (user_id)', 'SELECT 1');
+PREPARE st FROM @s; EXECUTE st; DEALLOCATE PREPARE st;
+SET @t := 'pitches';
+SET @s := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = @t AND column_name = 'user_id') = 0, 'ALTER TABLE pitches ADD COLUMN user_id BIGINT UNSIGNED NULL, ADD COLUMN hidden TINYINT(1) NOT NULL DEFAULT 0, ADD KEY ix_user (user_id)', 'SELECT 1');
+PREPARE st FROM @s; EXECUTE st; DEALLOCATE PREPARE st;

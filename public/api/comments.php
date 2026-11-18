@@ -18,12 +18,15 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
   bj_rate_limit('comment', 10, 600);
   [$type, $id] = bj_target($in);
   $body = bj_str($in['body'] ?? '', 1000);
-  $nick = bj_str($in['nickname'] ?? '', 40);
+  $me = bj_user();
+  $prof = $me && $me['profile'] ? (json_decode($me['profile'], true) ?: []) : [];
+  $nick = ($prof['nickname'] ?? '') ?: bj_str($in['nickname'] ?? '', 40);
+  if ($me && isset($prof['avatar'])) $in['avatar'] = $prof['avatar'];
   if (mb_strlen($body) < 2 || $nick === '') bj_fail('invalid');
   $avatar = isset($in['avatar']) && is_array($in['avatar']) ? json_encode($in['avatar'], JSON_UNESCAPED_UNICODE) : null;
   if ($avatar !== null && strlen($avatar) > 2000) $avatar = null;
-  $db->prepare('INSERT INTO comments (target_type, target_id, nickname, avatar, body, ip_hash) VALUES (?,?,?,?,?,?)')
-    ->execute([$type, $id, $nick, $avatar, $body, bj_ip_hash()]);
+  $db->prepare('INSERT INTO comments (target_type, target_id, nickname, avatar, body, ip_hash, user_id) VALUES (?,?,?,?,?,?,?)')
+    ->execute([$type, $id, $nick, $avatar, $body, bj_ip_hash(), $me ? (int)$me['id'] : null]);
   bj_out(['id' => (string)$db->lastInsertId(), 'target' => ['type' => $type, 'id' => $id], 'nickname' => $nick,
     'avatar' => $avatar ? json_decode($avatar, true) : null, 'body' => $body, 'status' => 'pending', 'createdAt' => gmdate('c'), 'mine' => true], 201);
 }
