@@ -8,7 +8,7 @@ require __DIR__ . '/_content.php';
 
 bj_run(function () {
     $slug = bj_param('slug');
-    $today = (new DateTime('now', new DateTimeZone('Asia/Dhaka')))->format('Y-m-d');
+    $today = bj_cutoff();
     $sql = 'SELECT s.slug, s.title, s.tagline, s.subject, s.topic, s.doodle, s.color, s.description, s.cover,
                    DATE_FORMAT(s.launched_at, "%Y-%m-%d") AS launchedAt,
                    (SELECT COUNT(*) FROM bj_posts p WHERE p.series_slug = s.slug AND p.published_at <= ?) AS posts,

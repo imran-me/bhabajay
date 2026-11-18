@@ -12,7 +12,7 @@ bj_run(function () {
     $slug = bj_param('slug');
     $limit = max(1, min(60, (int)($_GET['limit'] ?? 24)));
     $offset = max(0, min(5000, (int)($_GET['offset'] ?? 0)));
-    $today = (new DateTime('now', new DateTimeZone('Asia/Dhaka')))->format('Y-m-d');
+    $today = bj_cutoff();
     $cols = 'slug, series_slug AS seriesSlug, kind AS format, title, hook, body, sources, images, image_credits AS imageCredits,
              topic, doodle, bg, read_minutes AS readMinutes, DATE_FORMAT(published_at, "%Y-%m-%d") AS publishedAt';
     $json = ['body', 'sources', 'images', 'imageCredits'];
