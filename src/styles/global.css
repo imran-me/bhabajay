@@ -151,6 +151,12 @@
     text-rendering: optimizeLegibility;
     scroll-behavior: smooth;
     background: var(--c-ground);
+    /* focused fields / scrolled-to anchors stay clear of the sticky header and bottom tab bar */
+    scroll-padding-top: 5rem;
+    scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+  }
+  @media (min-width: 1024px) {
+    html { scroll-padding-bottom: 1rem; }
   }
   body {
     background: var(--c-ground);
@@ -225,7 +231,7 @@
   }
   .btn:active:not(:disabled):not([aria-disabled="true"]) { transform: translateY(4px); box-shadow: 0 0 0 var(--step); }
   .btn:disabled, .btn[aria-disabled="true"] { opacity: .4; cursor: not-allowed; }
-  .btn-sm { min-height: 40px; padding: .35rem 1rem; font-size: .95rem; border-radius: 13px; }
+  .btn-sm { min-height: 44px; padding: .35rem 1rem; font-size: .95rem; border-radius: 13px; }
   .btn-lg { min-height: 56px; padding: .7rem 1.7rem; font-size: 1.15rem; }
 
   .btn-primary { --step: var(--color-coral-dark); background: var(--color-coral); color: #fff; }

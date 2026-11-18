@@ -27,7 +27,7 @@ const jsonLd = {
 ---
 <BaseLayout title={q.title} description={`${q.blurb} — ${bn(pool ? 10 : q.questions.length)} প্রশ্নের বাংলা কুইজ।`} noindex={q.kind === 'secret'} jsonLd={q.kind === 'secret' ? undefined : jsonLd}>
   <div class="wrap max-w-3xl pt-5 sm:pt-8">
-    <a href="/quiz" class="inline-flex items-center gap-1 font-bold text-link"><Icon name="arrow-left" class="h-4 w-4" />কুইজ জোন</a>
+    <a href="/quiz" class="inline-flex min-h-11 items-center gap-1 font-bold text-link"><Icon name="arrow-left" class="h-4 w-4" />কুইজ জোন</a>
     <h1 class="mt-2 text-[2rem] font-bold leading-tight sm:text-4xl">{q.title}</h1>
     {s && owner && (
       <p class="mt-1 text-ink-soft">বানিয়েছে <a href={`/u/${owner.username}`} class="font-bold text-link">{owner.nickname}</a> · সিরিজ: <a href={`/series/${s.slug}`} class="font-bold text-link">{s.title}</a></p>

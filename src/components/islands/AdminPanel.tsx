@@ -69,7 +69,7 @@ export default function AdminPanel({ mentors }: { mentors: string[] }) {
 
       <div role="tablist" className="flex gap-1 rounded-2xl bg-tint p-1">
         {([['pitches', 'পিচ'], ['comments', 'মন্তব্য'], ['inbox', 'ইনবক্স']] as const).map(([id, l]) => (
-          <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className={`flex-1 rounded-xl py-2 font-bold ${tab === id ? 'bg-surface shadow-sm' : 'text-ink-soft'}`}>{l}</button>
+          <button key={id} type="button" role="tab" aria-selected={tab === id} onClick={() => setTab(id)} className={`min-h-11 flex-1 rounded-xl py-2 font-bold ${tab === id ? 'bg-surface shadow-sm' : 'text-ink-soft'}`}>{l}</button>
         ))}
       </div>
 
