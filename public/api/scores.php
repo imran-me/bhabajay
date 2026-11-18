@@ -1,0 +1,45 @@
+<?php
+// POST /api/scores.php  {quizSlug, score, total, points, durationMs, nickname, schoolId?, district?}
+// GET  /api/scores.php?count=<quizSlug>        → {count}
+// GET  /api/scores.php?board=people|schools|districts[&quiz=slug] → {rows:[{rank,name,sub,score,plays}]}
+declare(strict_types=1);
+require __DIR__ . '/_lib.php';
+$db = bj_db();
+
+if (($_SERVER['REQUEST_METHOD'] ?? 'GET') === 'POST') {
+  $in = bj_post_json();
+  bj_rate_limit('score', 60, 3600);
+  $slug = bj_slug($in['quizSlug'] ?? '');
+  $total = (int)($in['total'] ?? 0);
+  $score = (int)($in['score'] ?? -1);
+  $points = (int)($in['points'] ?? -1);
+  if ($slug === '' || $total < 1 || $total > 50 || $score < 0 || $score > $total || $points < 0 || $points > $total * 20) bj_fail('invalid');
+  $nick = bj_str($in['nickname'] ?? '', 40) ?: 'অতিথি';
+  $db->prepare('INSERT INTO quiz_attempts (quiz_slug, nickname, school_id, district, score, total, points, duration_ms, ip_hash) VALUES (?,?,?,?,?,?,?,?,?)')
+    ->execute([str_starts_with($slug, 'weekly') ? 'weekly' : $slug, $nick, bj_str($in['schoolId'] ?? '', 64) ?: null, bj_str($in['district'] ?? '', 64) ?: null,
+      $score, $total, $points, max(0, min(3600000, (int)($in['durationMs'] ?? 0))), bj_ip_hash()]);
+  bj_out(['ok' => true], 201);
+}
+
+if (isset($_GET['count'])) {
+  $slug = bj_slug($_GET['count']);
+  if ($slug === '') bj_fail('invalid');
+  $st = $db->prepare('SELECT COUNT(*) FROM quiz_attempts WHERE quiz_slug = ?');
+  $st->execute([str_starts_with($slug, 'weekly') ? 'weekly' : $slug]);
+  bj_out(['count' => (int)$st->fetchColumn()]);
+}
+
+$board = $_GET['board'] ?? 'people';
+$col = ['people' => 'nickname', 'schools' => 'school_id', 'districts' => 'district'][$board] ?? null;
+if (!$col) bj_fail('invalid');
+$quiz = bj_slug($_GET['quiz'] ?? '');
+$sql = "SELECT $col AS name, MAX(district) AS sub, SUM(points) AS score, COUNT(*) AS plays FROM quiz_attempts WHERE $col IS NOT NULL"
+  . ($quiz ? ' AND quiz_slug = ?' : '') . " GROUP BY $col ORDER BY score DESC LIMIT 100";
+$st = $db->prepare($sql);
+$st->execute($quiz ? [str_starts_with($quiz, 'weekly') ? 'weekly' : $quiz] : []);
+$rows = [];
+foreach ($st->fetchAll() as $i => $r) {
+  $rows[] = ['rank' => $i + 1, 'name' => $r['name'], 'sub' => $board === 'districts' ? null : $r['sub'], 'score' => (int)$r['score'], 'plays' => (int)$r['plays']];
+}
+header('Cache-Control: public, max-age=60');
+bj_out(['rows' => $rows]);
