@@ -2,3 +2,4 @@
 02-posts.sql
 03-myths.sql
 quiz.sql
+90-cleanup-tests.sql
