@@ -309,8 +309,10 @@ function Prog({ label, v, max }: { label: string; v: number; max: number }) {
 function Toggle({ label, on, onChange }: { label: string; on: boolean; onChange: (v: boolean) => void }) {
   return (
     <label className="flex cursor-pointer items-center gap-3">
-      <button type="button" role="switch" aria-checked={on} onClick={() => onChange(!on)} className={`relative h-7 w-12 shrink-0 rounded-full transition before:absolute before:-inset-y-2 before:-inset-x-1 before:content-[''] ${on ? 'bg-teal' : 'bg-line'}`}>
-        <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all ${on ? 'left-6' : 'left-1'}`} />
+      <button type="button" role="switch" aria-checked={on} onClick={() => onChange(!on)} className="grid min-h-11 w-12 shrink-0 place-items-center">
+        <span className={`relative block h-7 w-12 rounded-full transition ${on ? 'bg-teal' : 'bg-line'}`}>
+          <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all ${on ? 'left-6' : 'left-1'}`} />
+        </span>
       </button>
       <span>{label}</span>
     </label>
