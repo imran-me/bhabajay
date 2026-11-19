@@ -543,3 +543,5 @@
 @media (prefers-reduced-motion: reduce) {
   .bj-key-turn, .bj-reveal, .bj-stamp, .bj-float-points { animation: none; }
 }
+
+@keyframes podium { from { transform: scaleY(0); } to { transform: scaleY(1); } }

@@ -1,0 +1,12 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PointsBoard from '../components/islands/PointsBoard';
+---
+<BaseLayout title="লিডারবোর্ড — ভাবা যায়!" description="এই সপ্তাহের আর সব সময়ের সেরা ভাবুকেরা: কুইজ আর আনলক করা কার্ডের ভাবনা পয়েন্টে।">
+  <div class="wrap max-w-3xl pt-6 sm:pt-10">
+    <p class="eyebrow">কুইজ + চাবি + বোনাস</p>
+    <h1 class="font-display text-[2.2rem] leading-tight sm:text-5xl">লিডারবোর্ড</h1>
+    <p class="mt-1 text-ink-soft">ঠিক উত্তর আর খোলা কার্ডে পয়েন্ট জমে। বয়স কখনো দেখানো হয় না; জেলা দেখায় শুধু যাঁরা চেয়েছেন।</p>
+    <div class="mt-6"><PointsBoard client:load /></div>
+  </div>
+</BaseLayout>
