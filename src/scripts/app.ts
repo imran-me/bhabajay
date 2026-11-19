@@ -365,3 +365,49 @@ if (!waved) dailyFact();
 
 // Under Supabase, refresh the session mirror (magic-link / OAuth return)
 void getBackend().then((b) => { if (b.mode !== 'demo') void b.getSession(); });
+
+/* ───────────── Reveal on scroll + hero parallax (CSS does the motion; off for reduced motion) ───────────── */
+(() => {
+  if (prefersReducedMotion() || !('IntersectionObserver' in window)) return;
+  const SEL = 'main h2, main .section-title, main .eyebrow, main .card, main [role=list] > li, main .swipe > *';
+  const io = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      const el = e.target as HTMLElement;
+      el.classList.add('rv-in');
+      io.unobserve(el);
+      // hand the element back to its own hover/press transitions once revealed
+      setTimeout(() => el.classList.remove('rv', 'rv-in'), 1100);
+    });
+  }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
+  const seen = new WeakSet<Element>();
+  const scan = () => {
+    const vh = innerHeight;
+    document.querySelectorAll<HTMLElement>(SEL).forEach((el) => {
+      if (seen.has(el) || el.closest('.bj-hero, dialog, [data-bottom-tabs], [data-topbar], .flip')) return;
+      seen.add(el);
+      // already on screen at load: leave it alone (no flash, no layout shift)
+      if (el.getBoundingClientRect().top < vh * 0.92) return;
+      const sib = el.parentElement ? [...el.parentElement.children].indexOf(el) : 0;
+      el.style.setProperty('--rv-delay', `${Math.min(sib % 8, 7) * 55}ms`);
+      el.classList.add('rv');
+      io.observe(el);
+    });
+  };
+  scan();
+  let t = 0;
+  new MutationObserver(() => { clearTimeout(t); t = window.setTimeout(scan, 120); })
+    .observe(document.querySelector('main') ?? document.body, { childList: true, subtree: true });
+
+  const layers = [...document.querySelectorAll<HTMLElement>('[data-parallax]')];
+  if (layers.length) {
+    let ticking = false;
+    const run = () => {
+      ticking = false;
+      const y = scrollY;
+      if (y > innerHeight) return;
+      layers.forEach((l) => { l.style.transform = `translate3d(0, ${(y * Number(l.dataset.parallax || 0)).toFixed(1)}px, 0)`; });
+    };
+    addEventListener('scroll', () => { if (!ticking) { ticking = true; requestAnimationFrame(run); } }, { passive: true });
+  }
+})();
