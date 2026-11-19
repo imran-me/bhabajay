@@ -25,6 +25,7 @@ export const DEMO_MODE = !(env.PUBLIC_SUPABASE_URL && env.PUBLIC_SUPABASE_ANON_K
 /** Primary navigation (desktop top bar) */
 export const NAV = [
   { href: '/series', bn: 'সিরিজ', en: 'Series' },
+  { href: '/videos', bn: 'ভিডিও', en: 'Videos' },
   { href: '/bhabur-duniya', bn: 'ভাবুর দুনিয়া', en: 'Cartoon' },
   { href: '/myth', bn: 'মিথ না সত্য?', en: 'Myth or fact?' },
   { href: '/quiz', bn: 'কুইজ', en: 'Quiz' },
@@ -43,6 +44,7 @@ export const TABS = [
 export const FOOTER_LINKS = {
   explore: [
     { href: '/series', bn: 'সব সিরিজ', en: 'All series' },
+    { href: '/videos', bn: 'ভিডিও দেখো', en: 'Videos' },
     { href: '/bhabur-duniya', bn: 'ভাবুর দুনিয়া', en: 'Cartoon' },
     { href: '/myth', bn: 'মিথ না সত্য?', en: 'Myth library' },
     { href: '/quiz', bn: 'কুইজ জোন', en: 'Quiz zone' },

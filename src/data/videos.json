@@ -1,0 +1,11 @@
+[
+  { "slug": "ep01-mosha-part1", "title": "পর্ব ১: মশা কেন শুধু আমাকেই কামড়ায়? (প্রথম ভাগ)", "category": "cartoon", "src": "/media/video/ep01-mosha-part1.mp4", "poster": "/media/video/ep01-mosha-part1.webp", "seconds": 120 },
+  { "slug": "ep01-mosha-part2", "title": "পর্ব ১: মশা কেন শুধু আমাকেই কামড়ায়? (দ্বিতীয় ভাগ)", "category": "cartoon", "src": "/media/video/ep01-mosha-part2.mp4", "poster": "/media/video/ep01-mosha-part2.webp", "seconds": 116 },
+  { "slug": "ep02-shushuk", "title": "পর্ব ২: শুশুক কি মাছ?", "category": "cartoon", "src": "/media/video/ep02-shushuk.mp4", "poster": "/media/video/ep02-shushuk.webp", "seconds": 109 },
+  { "slug": "ep03-chand", "title": "পর্ব ৩: চাঁদ কেন আমাদের সাথে হাঁটে?", "category": "cartoon", "src": "/media/video/ep03-chand.mp4", "poster": "/media/video/ep03-chand.webp", "seconds": 91 },
+  { "slug": "reel-aedes-eggs", "title": "এডিস মশার ডিম শুকনো পাত্রেও বাঁচে", "category": "reel", "src": "/media/video/reel-aedes-eggs.mp4", "poster": "/media/video/reel-aedes-eggs.webp", "seconds": 28 },
+  { "slug": "reel-shushuk-echolocation", "title": "শুশুক চোখে নয়, শব্দে দেখে", "category": "reel", "src": "/media/video/reel-shushuk-echolocation.mp4", "poster": "/media/video/reel-shushuk-echolocation.webp", "seconds": 29 },
+  { "slug": "reel-moon-drifting-away", "title": "চাঁদ প্রতি বছর একটু করে দূরে সরছে", "category": "reel", "src": "/media/video/reel-moon-drifting-away.mp4", "poster": "/media/video/reel-moon-drifting-away.webp", "seconds": 29 },
+  { "slug": "chhora-01-mosquito", "title": "ভাবুর ছড়া: মশা", "category": "rhyme", "src": "/media/video/chhora-01-mosquito.mp4", "poster": "/media/video/chhora-01-mosquito.webp", "seconds": 37 },
+  { "slug": "chhora-15-firefly", "title": "ভাবুর ছড়া: জোনাকি", "category": "rhyme", "src": "/media/video/chhora-15-firefly.mp4", "poster": "/media/video/chhora-15-firefly.webp", "seconds": 38 }
+]

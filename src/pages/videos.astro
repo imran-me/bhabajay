@@ -1,0 +1,27 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import VideoGallery, { type Video } from '../components/islands/VideoGallery';
+import videosJson from '../data/videos.json';
+import { bn } from '../lib/bn';
+
+const videos = videosJson as Video[];
+const jsonLd = {
+  '@type': 'ItemList',
+  name: 'ভাবা যায়! ভিডিও',
+  itemListElement: videos.map((v, i) => ({
+    '@type': 'VideoObject', position: i + 1, name: v.title, description: v.title, inLanguage: 'bn',
+    thumbnailUrl: `https://bhabajay.com${v.poster}`, contentUrl: `https://bhabajay.com${v.src}`,
+    duration: `PT${Math.floor(v.seconds / 60)}M${v.seconds % 60}S`, uploadDate: '2026-11-19',
+  })),
+};
+---
+<BaseLayout title="ভিডিও দেখো" description="ভাবুর দুনিয়ার কার্টুন পর্ব, ৩০ সেকেন্ডের ফ্যাক্ট রিল আর ভাবুর ছড়া: ভাবা যায়!-এর সব ভিডিও এক জায়গায়।" jsonLd={jsonLd}>
+  <section class="wrap pt-6 sm:pt-10">
+    <p class="eyebrow">{bn(videos.length)}টি ভিডিও · সাউন্ড অন করে দেখুন</p>
+    <h1 class="mt-1 font-display text-[2.2rem] leading-tight sm:text-5xl">ভিডিও দেখো</h1>
+    <p class="mt-2 max-w-2xl text-lg text-ink-soft">ভাবু আর তার বন্ধুদের কার্টুন, ছোট্ট ফ্যাক্ট রিল আর ছড়া। একটায় চাপ দিন, তারপর সোয়াইপ করে পরেরটায় যান।</p>
+    <div class="mt-6">
+      <VideoGallery client:load videos={videos} />
+    </div>
+  </section>
+</BaseLayout>
