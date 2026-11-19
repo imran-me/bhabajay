@@ -11,9 +11,9 @@ import { getState, subscribe, update, toast, type AgeBand } from '../../lib/stor
 import { DEFAULT_AVATAR, FACE_OPTIONS, GROUND_OPTIONS } from '../../lib/bhabu';
 import { sound, confetti } from '../../lib/fx';
 import type { AvatarConfig } from '../../data/types';
-import { Avatar, Bhabu, Field, Icon, Loader, isEmail } from './ui';
+import { Avatar, Bhabu, Field, Icon, InterestPicker, Loader, isEmail } from './ui';
 
-interface Props { schools: { id: string; name: string; district: string }[]; districts: string[] }
+interface Props { schools: { id: string; name: string; district: string }[]; districts: string[]; seriesList?: { slug: string; title: string }[] }
 type Step = 'start' | 'google-demo' | 'magic-sent' | 'profile' | 'guest' | 'done';
 
 const AGE: { id: AgeBand; bn: string }[] = [
@@ -22,7 +22,7 @@ const AGE: { id: AgeBand; bn: string }[] = [
   { id: '18+', bn: '১৮+' },
 ];
 
-export default function IdPanel({ schools, districts }: Props) {
+export default function IdPanel({ schools, districts, seriesList = [] }: Props) {
   const [b, setB] = useState<Backend | null>(null);
   const [st, setSt] = useState(getState);
   const [step, setStep] = useState<Step>('start');
@@ -211,7 +211,7 @@ export default function IdPanel({ schools, districts }: Props) {
 
   /* ───────── profile / onboarding ───────── */
   if (step === 'profile') {
-    return <ProfileStep b={b} initialAge={age === '13-17' || age === '18+' ? age : null} schools={schools} districts={districts} onDone={() => setStep('done')} />;
+    return <ProfileStep b={b} initialAge={age === '13-17' || age === '18+' ? age : null} schools={schools} districts={districts} seriesList={seriesList} onDone={() => setStep('done')} />;
   }
 
   if (step === 'done') {
@@ -306,7 +306,9 @@ export default function IdPanel({ schools, districts }: Props) {
 }
 
 /* ───────────────────── onboarding form ───────────────────── */
-function ProfileStep({ b, initialAge, schools, districts, onDone }: { b: Backend; initialAge: '13-17' | '18+' | null; schools: Props['schools']; districts: string[]; onDone: () => void }) {
+function ProfileStep({ b, initialAge, schools, districts, seriesList, onDone }: { b: Backend; initialAge: '13-17' | '18+' | null; schools: Props['schools']; districts: string[]; seriesList: { slug: string; title: string }[]; onDone: () => void }) {
+  const [interests, setInterests] = useState<string[]>([]);
+  const [bio, setBio] = useState('');
   const st = getState();
   const [ageBand, setAgeBand] = useState<'13-17' | '18+'>(initialAge ?? '18+');
   const [nickname, setNickname] = useState('');
@@ -349,6 +351,7 @@ function ProfileStep({ b, initialAge, schools, districts, onDone }: { b: Backend
         nickname: nickname.trim(), username, ageBand, parentEmail: teen ? parentEmail.trim() : undefined,
         isPublic: teen ? false : isPublic, showRealName: teen ? false : showRealName, realName: teen ? undefined : realName.trim() || undefined,
         district: district || undefined, schoolId: schoolId || undefined, avatar,
+        interests, bio: bio.trim() || undefined,
       });
       sound.badge();
       confetti();
@@ -423,6 +426,11 @@ function ProfileStep({ b, initialAge, schools, districts, onDone }: { b: Backend
           )}
         </div>
       )}
+
+      <Field label="এক লাইনে তুমি (ঐচ্ছিক)" hint="যেমন: রান্নাঘরেই ল্যাব!" htmlFor="p-bio">
+        <input id="p-bio" className="field" value={bio} maxLength={60} onChange={(e) => setBio(e.target.value)} />
+      </Field>
+      {seriesList.length > 0 && <InterestPicker options={seriesList} value={interests} onChange={setInterests} />}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="জেলা (ঐচ্ছিক)" hint={teen ? 'অভিভাবক নিশ্চিত করলে লিডারবোর্ডে যোগ হবে' : undefined} htmlFor="p-dist">

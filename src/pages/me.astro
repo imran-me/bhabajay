@@ -20,7 +20,7 @@ for (const q of quizzes) {
 ---
 <BaseLayout title="আমার ভাবা যায়" description="তোমার স্কোর, স্ট্রিক, ব্যাজ, অবতার আর পিচ — এক পেজে।" noindex>
   <div class="wrap pt-5 sm:pt-8">
-    <MeDashboard client:only="react" catalog={catalog} quizTopics={quizTopics} schools={schools} districts={DISTRICTS}>
+    <MeDashboard client:only="react" catalog={catalog} quizTopics={quizTopics} schools={schools} districts={DISTRICTS} seriesList={series.map((x) => ({ slug: x.slug, title: x.title }))}>
       <div slot="fallback" class="grid h-64 place-items-center text-ink-soft">তোমার পেজ সাজাচ্ছি…</div>
     </MeDashboard>
   </div>
