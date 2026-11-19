@@ -1,0 +1,11 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import Icon from '../../../components/ui/Icon.astro';
+import RemoteQuiz from '../../../components/islands/RemoteQuiz';
+---
+<BaseLayout title="কুইজ — ভাবা যায়!" description="ভাবা যায়!-এর নতুন বাংলা কুইজ। ঠিক উত্তরে +১০, চেষ্টায় +২।">
+  <div class="wrap max-w-3xl pt-5 sm:pt-8">
+    <a href="/quiz" class="inline-flex min-h-11 items-center gap-1 font-bold text-link"><Icon name="arrow-left" class="h-4 w-4" />কুইজ জোন</a>
+    <RemoteQuiz client:load />
+  </div>
+</BaseLayout>
