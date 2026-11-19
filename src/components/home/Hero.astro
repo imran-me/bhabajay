@@ -15,7 +15,7 @@ const words = ['প্রতিদিনের', 'চেনা', 'জিনি�
       <img src="/media/video/hero-tall.webp" alt="" class="h-full w-full object-cover" fetchpriority="high" decoding="async" onerror="this.style.display='none'" />
     </picture>
     <video data-hero-video muted loop playsinline preload="none" class="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-700"></video>
-    <span class="absolute inset-0 bg-[linear-gradient(180deg,rgb(6_39_44/.35)_0%,rgb(6_39_44/.15)_35%,rgb(6_60_67/.85)_78%,rgb(6_39_44/.95)_100%)] lg:bg-[linear-gradient(90deg,rgb(6_39_44/.92)_0%,rgb(6_60_67/.7)_45%,rgb(6_39_44/.1)_100%)]"></span>
+    <span class="absolute inset-0 bg-[linear-gradient(180deg,rgb(6_39_44/.4)_0%,rgb(6_39_44/.25)_30%,rgb(6_60_67/.88)_62%,rgb(6_39_44/.95)_100%)] lg:bg-[linear-gradient(90deg,rgb(6_39_44/.94)_0%,rgb(6_60_67/.78)_50%,rgb(6_39_44/.2)_100%)]"></span>
   </div>
 
   <div class="wrap relative grid w-full grid-cols-[1fr_auto] items-end gap-3 pb-14 pt-24 sm:pb-16 lg:items-center lg:py-20">
@@ -35,7 +35,7 @@ const words = ['প্রতিদিনের', 'চেনা', 'জিনি�
         <a href="/videos" class="bj-pop btn min-h-12 border-2 border-white/60 bg-white/10 px-5 text-[1.05rem] text-white backdrop-blur-sm hover:bg-white/20" style="--d:1150ms">▶ ভিডিও</a>
       </div>
     </div>
-    <div class="relative self-end" data-parallax="-0.1"><div class="bj-bounce" style="--d:700ms">
+    <div class="bj-mascot relative self-end transition-opacity duration-500" data-parallax="-0.1"><div class="bj-bounce" style="--d:700ms">
       <img src="/media/brand/bhabu-happy-reverse.webp" width="279" height="640" alt="ভাবু, ভাবা যায়!-এর মাসকট"
         class="bj-hero-bhabu relative z-10 h-[9.5rem] w-auto drop-shadow-[0_14px_20px_rgb(0_0_0/.35)] sm:h-[16rem] lg:h-[21rem]"
         decoding="async" onerror="this.hidden=true;this.nextElementSibling.hidden=false" />
@@ -64,7 +64,7 @@ const words = ['প্রতিদিনের', 'চেনা', 'জিনি�
       var p = v.play();
       if (p && p.catch) p.catch(function () {});
     };
-    v.addEventListener('playing', function () { v.style.opacity = '1'; });
+    v.addEventListener('playing', function () { v.style.opacity = '1'; v.closest('.bj-hero').classList.add('is-playing'); });
     v.addEventListener('error', function () { v.remove(); });
     pick();
     matchMedia('(orientation: landscape)').addEventListener('change', pick);
@@ -78,6 +78,8 @@ const words = ['প্রতিদিনের', 'চেনা', 'জিনি�
 </script>
 
 <style>
+  /* the loop already has ভাবু in it: the static one is only for the poster / reduced-motion view */
+  .bj-hero.is-playing .bj-mascot { opacity: 0; pointer-events: none; }
   .bj-hero-bhabu { animation: bj-float 5s ease-in-out 1.6s infinite; transform-origin: bottom center; }
   .bj-word { display: inline-block; animation: bj-word-in .7s cubic-bezier(.2, .9, .25, 1.2) both; animation-delay: var(--d, 0ms); }
   .bj-in { animation: bj-word-in .6s ease-out both; animation-delay: var(--d, 0ms); }
