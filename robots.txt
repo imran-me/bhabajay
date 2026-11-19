@@ -1,0 +1,9 @@
+User-agent: *
+Allow: /
+Disallow: /me
+Disallow: /admin
+Disallow: /id
+Disallow: /initiator/track
+Disallow: /search
+
+Sitemap: https://bhabajay.com/sitemap-index.xml

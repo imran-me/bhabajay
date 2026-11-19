@@ -1,0 +1,23 @@
+{
+  "name": "ভাবা যায়! — কৌতূহলী বাংলাদেশের ঘর",
+  "short_name": "ভাবা যায়!",
+  "description": "মজার বিজ্ঞান, মিথ না সত্য, কুইজ আর তোমার নিজের সিরিজ।",
+  "lang": "bn",
+  "dir": "ltr",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#FFFBF4",
+  "theme_color": "#0B6E79",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" },
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ],
+  "shortcuts": [
+    { "name": "শনিবারের কুইজ", "url": "/quiz/weekly" },
+    { "name": "মিথ না সত্য?", "url": "/myth" },
+    { "name": "আইডিয়া পাঠাও", "url": "/initiator/pitch" }
+  ]
+}

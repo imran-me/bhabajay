@@ -1,0 +1,1 @@
+const o="০১২৩৪৫৬৭৮৯",e=t=>String(t).replace(/\d/g,n=>o[+n]),c=["জানুয়ারি","ফেব্রুয়ারি","মার্চ","এপ্রিল","মে","জুন","জুলাই","আগস্ট","সেপ্টেম্বর","অক্টোবর","নভেম্বর","ডিসেম্বর"],r=t=>{const[n,s,a]=t.split("-").map(Number);return`${e(a)} ${c[s-1]} ${e(n)}`},b=t=>{const n=new Date(Date.now()+216e5).toISOString().slice(0,10);return t<=n?r(t):""};export{r as a,e as b,b as s};
