@@ -1,0 +1,13 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PublicProfile from '../../components/islands/PublicProfile';
+import { series, quizzes } from '../../lib/content';
+
+const seriesTitles = Object.fromEntries(series.map((s) => [s.slug, s.title]));
+const quizTitles = Object.fromEntries(quizzes.map((q) => [q.slug, q.title]));
+---
+<BaseLayout title="প্রোফাইল — ভাবা যায়!" description="ভাবা যায়! কমিউনিটির সদস্যের প্রোফাইল: ব্যাজ, কুইজ স্কোর, পিচ আর মন্তব্য।" noindex>
+  <div class="wrap max-w-2xl pt-6 sm:pt-10">
+    <PublicProfile client:load seriesTitles={seriesTitles} quizTitles={quizTitles} />
+  </div>
+</BaseLayout>
