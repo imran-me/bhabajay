@@ -16,6 +16,8 @@ export const rulesOf = (k: KeyState): Rules => k.rules ?? (typeof k.points === '
 export interface KeyState {
   series: string; limit: number; used: number; left: number; resetsAt: string; signedIn: boolean;
   unlocked?: string[]; free?: string[]; total?: number;
+  /** today's extra key from a 3/7/30-day streak (any series) */
+  bonusKey?: boolean; streak?: number;
   rules?: Rules;
   /** older servers sent the rules as `points` (collides with the earned points of an unlock) */
   points?: Rules | number;
@@ -47,13 +49,20 @@ export interface UnlockResult<T> { item?: T; points: number; correct?: boolean |
 
 export async function unlockItem<T>(series: string, item: string, guess?: 'myth' | 'true'): Promise<UnlockResult<T>> {
   try {
-    const { status, data } = await call<KeyState & { item?: T; points?: number; correct?: boolean | null; mystery?: boolean; error?: string; total?: number }>('unlock.php', { action: 'unlock', series, item, guess });
+    const { status, data } = await call<KeyState & { item?: T; points?: number; correct?: boolean | null; mystery?: boolean; error?: string; total?: number; newBadges?: string[]; bonusUsed?: boolean }>('unlock.php', { action: 'unlock', series, item, guess });
     if (status === 200 && data.item) {
       const pts = data.points ?? 0;
       if (pts > 0) addPoints(pts);
       const { streak } = touchActivity();
       if (streak >= 3) awardBadge('streak-3');
       if (streak >= 7) awardBadge('streak-7');
+      for (const b of data.newBadges ?? []) {
+        if (b.startsWith('series:')) {
+          toast('পুরো সিরিজ খুলে ফেলেছ! নতুন সিরিজ-ব্যাজ কার্ড প্রোফাইলে 🏅', { kind: 'badge', mood: 'wow', href: '/me#badges' });
+          window.dispatchEvent(new CustomEvent('bj:badge'));
+        } else awardBadge(b);
+      }
+      if (data.bonusUsed) toast('স্ট্রিকের বোনাস চাবি কাজে লাগল! 🔥🔑', { mood: 'wow' });
       return { item: data.item, points: pts, correct: data.correct, mystery: data.mystery, state: { ...data, points: undefined } };
     }
     return { points: 0, error: data.error ?? (status === 429 ? 'no_keys' : 'server'), state: data.limit ? data : undefined };
@@ -77,17 +86,34 @@ export async function shareCard(series: string, item: string, title: string, url
   }
 }
 
-/** 🔑🔑 for today, spent keys dimmed */
-export function KeyRing({ k, done, total }: { k: KeyState; done?: number; total?: number }) {
+/** progress ring: opened / total in this series */
+export function ProgressRing({ done, total }: { done: number; total: number }) {
+  const r = 15, c = 2 * Math.PI * r, f = total ? Math.min(1, done / total) : 0;
   return (
-    <div className="flex flex-wrap items-center gap-2 rounded-2xl bg-tint px-3 py-2 text-sm font-bold" aria-live="polite">
+    <span className="inline-flex items-center gap-1.5" aria-label={`${bn(done)}/${bn(total)} খোলা`}>
+      <svg viewBox="0 0 36 36" className="h-8 w-8 -rotate-90" aria-hidden="true">
+        <circle cx="18" cy="18" r={r} fill="none" strokeWidth="4" className="stroke-line" />
+        <circle cx="18" cy="18" r={r} fill="none" strokeWidth="4" strokeLinecap="round" className={f >= 1 ? 'stroke-sun' : 'stroke-teal'} strokeDasharray={`${c * f} ${c}`} />
+      </svg>
+      <span className="text-ink-soft">{bn(done)}/{bn(total)} খোলা</span>
+    </span>
+  );
+}
+
+/** 🔑🔑 for today, spent keys dimmed; a golden bonus key on streak days */
+export function KeyRing({ k, done, total }: { k: KeyState; done?: number; total?: number }) {
+  const base = Math.max(0, k.left - (k.bonusKey ? 1 : 0));
+  return (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl bg-tint px-3 py-2 text-sm font-bold" aria-live="polite">
       <span className="flex gap-1" aria-label={`আজ বাকি ${bn(k.left)}টা চাবি`}>
         {Array.from({ length: k.limit }, (_, i) => (
-          <span key={i} className={`text-xl ${i < k.left ? 'bj-key-glow' : 'opacity-30 grayscale'}`} aria-hidden="true">🔑</span>
+          <span key={i} className={`text-xl ${i < base ? 'bj-key-glow' : 'opacity-30 grayscale'}`} aria-hidden="true">🔑</span>
         ))}
+        {k.bonusKey && <span className="bj-key-glow text-xl" title="স্ট্রিকের বোনাস চাবি" aria-hidden="true">🌟</span>}
       </span>
-      <span>আজ বাকি: {bn(k.left)}/{bn(k.limit)}</span>
-      {total !== undefined && done !== undefined && total > 0 && <span className="ml-auto text-ink-soft">{bn(done)}/{bn(total)} খোলা</span>}
+      <span>আজ বাকি: {bn(k.left)}/{bn(k.limit + (k.bonusKey ? 1 : 0))}</span>
+      {(k.streak ?? 0) > 1 && <span title="টানা দিনের স্ট্রিক">🔥 {bn(k.streak!)}</span>}
+      {total !== undefined && done !== undefined && total > 0 && <span className="ml-auto"><ProgressRing done={done} total={total} /></span>}
       {k.signedIn && k.total !== undefined && <span className="tag !py-0">🧠 {bn(getState().points)}</span>}
     </div>
   );
