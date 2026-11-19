@@ -110,6 +110,7 @@ export interface ProfileInput {
   bio?: string;
   /** series slugs the person is curious about */
   interests?: string[];
+  showDistrict?: boolean;
   avatar: AvatarConfig;
 }
 

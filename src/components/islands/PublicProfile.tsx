@@ -10,6 +10,7 @@ import { PITCH_STEPS } from '../../lib/backend/types';
 import { DEFAULT_AVATAR } from '../../lib/bhabu';
 import { bn, bnMonthYear } from '../../lib/bn';
 import { Avatar, Bhabu, Loader } from './ui';
+import { ProgressRing } from './unlock';
 
 interface Profile {
   username: string;
@@ -27,6 +28,8 @@ interface Profile {
   quizzes?: { slug: string; best: number; total: number; plays: number; points: number }[];
   pitches?: { code: string; title: string; status: string }[];
   comments?: { target: { type: string; id: string }; body: string; createdAt: string }[];
+  progress?: Record<string, { opened: number; total: number }>;
+  seriesBadges?: { slug: string; title: string; cover?: string | null }[];
 }
 
 interface Props {
@@ -102,6 +105,34 @@ export default function PublicProfile({ seriesTitles, quizTitles }: Props) {
           <div className="mt-2 flex flex-wrap gap-2">
             {p.interests!.map((s) => <a key={s} href={`/series/${s}`} className="chip min-h-11">{seriesTitles[s] ?? s}</a>)}
           </div>
+        </section>
+      )}
+
+      {(p.seriesBadges?.length ?? 0) > 0 && (
+        <section className="card p-5">
+          <h2 className="text-lg font-bold">সিরিজ-ব্যাজ কার্ড</h2>
+          <ul className="mt-2 grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {p.seriesBadges!.map((b) => (
+              <li key={b.slug}><a href={b.slug === 'myth-na-sotti' ? '/myth' : `/series/${b.slug}`} className="block overflow-hidden rounded-2xl bg-deep text-white ring-2 ring-sun">
+                {b.cover ? <img src={b.cover} alt="" loading="lazy" className="aspect-[4/5] w-full object-cover" /> : <span className="grid aspect-[4/5] place-items-center text-5xl">🏅</span>}
+                <span className="block p-2 text-sm font-bold leading-snug">🏅 {b.title}</span>
+              </a></li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {Object.keys(p.progress ?? {}).length > 0 && (
+        <section className="card p-5">
+          <h2 className="text-lg font-bold">কোন সিরিজে কতদূর</h2>
+          <ul className="mt-2 grid gap-2 sm:grid-cols-2">
+            {Object.entries(p.progress!).map(([slug, x]) => (
+              <li key={slug} className="flex min-h-11 items-center gap-3 rounded-2xl bg-tint p-2 px-3">
+                <a href={slug === 'myth-na-sotti' ? '/myth' : `/series/${slug}`} className="min-w-0 flex-1 truncate font-semibold">{slug === 'myth-na-sotti' ? 'মিথ না সত্য?' : seriesTitles[slug] ?? slug}</a>
+                <ProgressRing done={x.opened} total={x.total} />
+              </li>
+            ))}
+          </ul>
         </section>
       )}
 

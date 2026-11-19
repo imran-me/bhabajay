@@ -323,6 +323,7 @@ function ProfileSettings({ u, schools, districts, seriesList, onSave }: { u: Non
   const [nickname, setNickname] = useState(u.nickname);
   const [bio, setBio] = useState(u.bio ?? '');
   const [isPublic, setIsPublic] = useState(u.isPublic);
+  const [showDistrict, setShowDistrict] = useState(!!u.showDistrict);
   const [showRealName, setShowRealName] = useState(u.showRealName);
   const [realName, setRealName] = useState(u.realName ?? '');
   const [district, setDistrict] = useState(u.district ?? '');
@@ -331,7 +332,7 @@ function ProfileSettings({ u, schools, districts, seriesList, onSave }: { u: Non
   const teen = u.ageBand === '13-17';
   const canPlace = !teen || u.parentConfirmed;
   return (
-    <form className="mt-4 grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); onSave({ nickname: nickname.trim() || u.nickname, bio: bio.trim(), isPublic, showRealName, realName: realName.trim() || undefined, district: district || undefined, schoolId: schoolId || undefined, interests }); }}>
+    <form className="mt-4 grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); onSave({ nickname: nickname.trim() || u.nickname, bio: bio.trim(), isPublic, showRealName, realName: realName.trim() || undefined, district: district || undefined, schoolId: schoolId || undefined, interests, showDistrict }); }}>
       <div><label className="label" htmlFor="s-nick">ডাকনাম</label><input id="s-nick" className="field" value={nickname} maxLength={30} onChange={(e) => setNickname(e.target.value)} /></div>
       <div><label className="label" htmlFor="s-bio">এক লাইনে তুমি</label><input id="s-bio" className="field" value={bio} maxLength={60} placeholder="যেমন: রান্নাঘরেই ল্যাব!" onChange={(e) => setBio(e.target.value)} /></div>
       <div><label className="label" htmlFor="s-dist">জেলা</label>
@@ -347,6 +348,7 @@ function ProfileSettings({ u, schools, districts, seriesList, onSave }: { u: Non
       ) : (
         <div className="grid gap-3 sm:col-span-2">
           <label className="flex items-center gap-3"><input type="checkbox" className="h-5 w-5 accent-teal" checked={isPublic} onChange={(e) => setIsPublic(e.target.checked)} />পাবলিক প্রোফাইল</label>
+          <label className="flex items-center gap-3"><input type="checkbox" className="h-5 w-5 accent-teal" checked={showDistrict} onChange={(e) => setShowDistrict(e.target.checked)} />লিডারবোর্ডে আমার জেলা দেখাও</label>
           <label className="flex items-center gap-3"><input type="checkbox" className="h-5 w-5 accent-teal" checked={showRealName} onChange={(e) => setShowRealName(e.target.checked)} />ওয়াল অফ ফেমে আসল নাম দেখাও</label>
           {showRealName && <input className="field" value={realName} placeholder="আসল নাম" onChange={(e) => setRealName(e.target.value)} />}
         </div>

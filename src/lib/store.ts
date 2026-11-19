@@ -28,6 +28,8 @@ export interface LocalUser {
   schoolId?: string;
   bio?: string;
   interests?: string[];
+  /** 18+: show district on the leaderboard */
+  showDistrict?: boolean;
   avatar: AvatarConfig;
   method: 'google' | 'magic';
   createdAt: string;
