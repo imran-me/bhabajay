@@ -18,6 +18,8 @@ import { bn, TOPIC_LABEL } from '../lib/bn';
 import { SITE } from '../config/site';
 import LivePosts from '../components/islands/LivePosts';
 import Hero from '../components/home/Hero.astro';
+import VideoGallery, { type Video } from '../components/islands/VideoGallery';
+import videosJson from '../data/videos.json';
 import { libraryTitles } from '../lib/library';
 
 const rows = seriesByActivity();
@@ -61,8 +63,14 @@ const jsonLd = [
   <Hero />
 
   <!-- ═════════════ real photo cards, one per series (from the API) ═════════════ -->
-  <section class="wrap pt-6 lg:pt-10" aria-label="ভাবা যায়!-এর ছবি-কার্ড">
+  <section id="home-cards" class="wrap scroll-mt-20 pt-6 lg:pt-10" aria-label="ভাবা যায়!-এর ছবি-কার্ড">
     <LivePosts client:load featured limit={8} seriesTitles={libraryTitles} heading="আজ কী ভাববেন?" />
+  </section>
+
+  <!-- ═════════════ videos ═════════════ -->
+  <section class="wrap mt-10" aria-labelledby="home-videos">
+    <SectionHead id="home-videos" title="ভিডিও দেখো" eyebrow="কার্টুন · ফ্যাক্ট রিল · ছড়া" href="/videos" linkText="সব ভিডিও" />
+    <VideoGallery client:visible videos={videosJson as Video[]} limit={4} filters={false} />
   </section>
 
   <!-- ═════════════ MOBILE: the daily ritual (Plan p.6) ═════════════ -->
