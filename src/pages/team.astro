@@ -1,0 +1,65 @@
+---
+/**
+ * Core team. Real people only: names are added here when the core team confirms them.
+ * Roles follow the Core Team Plan (Nov 2026). No photos until people send their own.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Doodle from '../components/brand/Doodle.astro';
+import type { DoodleName } from '../data/types';
+
+interface Member { name: string | null; role: string; job: string; detail?: string; doodle: DoodleName }
+const team: Member[] = [
+  {
+    name: 'মো. ইমরান হোসেন', role: 'প্রতিষ্ঠাতা ও প্ল্যাটফর্ম লিড',
+    job: 'ভাবনা, অগ্রাধিকার, পার্টনার আর ডেল্টা ইনিশিয়েটিভসের সঙ্গে যোগসূত্র।',
+    detail: 'হেড অফ এআই, স্ট্র্যাটেজি অ্যান্ড রিসার্চ, এপাল গ্রুপ', doodle: 'bulb',
+  },
+  {
+    name: 'নাফিসা তাবাসসুম নুসরাত', role: 'ওয়েব ডেভেলপার',
+    job: 'ওয়েবসাইট, প্রোফাইল, পিচ পাঠানোর পথ আর মাপজোখ।', doodle: 'atom',
+  },
+  { name: null, role: 'কমিউনিটি ও মেন্টর', job: 'নতুনদের স্বাগত জানানো, মেন্টর মেলানো, নিয়মিত খোঁজখবর।', doodle: 'heart' },
+  { name: null, role: 'তথ্য যাচাই ও সম্পাদনা', job: 'প্রতিটা দাবির অন্তত দুটো সূত্র, সিরিজ রিভিউ, জার্নাল।', doodle: 'eye' },
+  { name: null, role: 'ডিজাইন ও ভিডিও', job: 'ব্র্যান্ড কিট, টেমপ্লেট আর প্রোডাকশনে সাহায্য।', doodle: 'sparkle' },
+  { name: null, role: 'পার্টনারশিপ ও রিচ মাইন্ডস', job: 'শিক্ষক, গবেষক, মেন্টর, সমর্থক আর ফোরামের সঙ্গে যোগাযোগ।', doodle: 'telescope' },
+];
+const initials = (n: string) => n.replace(/^মো\.\s*/, '').split(/\s+/).slice(0, 2).map((w) => w[0]).join('');
+---
+<BaseLayout title="আমাদের টিম" description="ভাবা যায়!-এর পেছনের মানুষেরা: কে কী কাজ করেন, আর কোন জায়গাগুলোতে নতুন মানুষ যোগ হচ্ছেন।">
+  <section class="wrap pt-6 sm:pt-10">
+    <p class="eyebrow">ভাবা যায়!-এর পেছনে</p>
+    <h1 class="mt-1 font-display text-[2.2rem] leading-tight sm:text-5xl">আমাদের টিম</h1>
+    <p class="mt-2 max-w-2xl text-lg text-ink-soft">ছোট একটা দল, বড় একটা প্রশ্ন নিয়ে: কৌতূহলী মানুষকে কীভাবে নির্মাতা আর গবেষক বানানো যায়। যাঁদের নাম এখনো যোগ হয়নি, সেই দায়িত্বগুলো এখন কোর টিম মিলে সামলাচ্ছে।</p>
+
+    <ul class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3" role="list">
+      {team.map((m) => (
+        <li class:list={['card flex h-full flex-col p-5', !m.name && 'border-dashed !shadow-none']}>
+          <div class="flex items-center gap-4">
+            {m.name ? (
+              <span class="grid h-16 w-16 shrink-0 place-items-center rounded-full bg-teal font-display text-2xl text-white" aria-hidden="true">{initials(m.name)}</span>
+            ) : (
+              <span class="grid h-16 w-16 shrink-0 place-items-center rounded-full border-2 border-dashed border-line bg-tint" aria-hidden="true"><Doodle name={m.doodle} class="h-9 w-9" /></span>
+            )}
+            <div class="min-w-0">
+              <h2 class:list={['text-xl font-bold leading-snug', !m.name && 'text-ink-soft']}>{m.name ?? 'নাম যোগ হবে'}</h2>
+              <p class="font-semibold text-coral-dark">{m.role}</p>
+            </div>
+          </div>
+          {m.detail && <p class="mt-3 text-sm text-ink-soft">{m.detail}</p>}
+          <p class="mt-3 leading-relaxed">{m.job}</p>
+        </li>
+      ))}
+    </ul>
+
+    <div class="mt-10 grid gap-4 rounded-[26px] bg-tint p-6 sm:grid-cols-[1fr_auto] sm:items-center sm:p-8">
+      <div>
+        <h2 class="text-2xl font-bold">দলে যোগ দিতে চান?</h2>
+        <p class="mt-1 max-w-xl text-ink-soft">শিক্ষক, গবেষক, ডিজাইনার বা শুধুই কৌতূহলী, সবার জায়গা আছে। প্রথমে একটা সিরিজের আইডিয়া পাঠান অথবা মেন্টর হিসেবে যুক্ত হন।</p>
+      </div>
+      <div class="flex flex-wrap gap-3">
+        <a href="/initiator" class="btn btn-primary">ইনিশিয়েটর হও</a>
+        <a href="/mentors" class="btn btn-ghost">মেন্টর হও</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
