@@ -16,7 +16,7 @@ SRC = Path(sys.argv[1])
 REPO = Path(__file__).resolve().parent.parent
 IMG = Path(sys.argv[2]) if len(sys.argv) > 2 else REPO.parent / 'bhabajay-media'
 SEED = REPO / 'database' / 'seed'
-MAX_CARDS = 2
+MAX_CARDS = 6
 WIDTH = 960
 
 TEAL = {'from': '#0E7C7B', 'to': '#17A2A0', 'ink': 'light'}
@@ -26,6 +26,22 @@ DEEP = {'from': '#0B4F57', 'to': '#0E7C7B', 'ink': 'light'}
 
 # project number: slug, title, tagline, subject, topic, doodle, colour, bg, description
 SERIES = {
+    1: ('bilupto-prani', 'প্রাণী চিনি', 'বাংলার বিপন্ন প্রাণী থেকে পৃথিবীর অদ্ভুত প্রাণী', 'প্রাণী + সংরক্ষণ', 'biology', 'paw', TEAL, 'teal',
+        'শুরুটা বাংলাদেশের বিপন্ন প্রাণীদের দিয়ে: বাঘ, হাতি, উল্লুক, শুশুক, শকুন। তারা কী খায়, কোথায় থাকে, কেন কমছে। তারপর পৃথিবীর সবচেয়ে অদ্ভুত প্রাণীরা, ম্যান্টিস চিংড়ি থেকে অক্টোপাস। প্রতিটা পোস্টে আসল ছবি আর তথ্য।'),
+    3: ('bhabur-railgari', 'ভাবুর রেলগাড়ি', '৬৪ জেলার যাত্রা, এক স্টেশন এক জেলা', 'জেলা + ইতিহাস', 'history', 'sparkle', CORAL, 'coral',
+        'ভাবুর রেলগাড়ি থামে একেকটা জেলায়: সেখানকার বিখ্যাত খাবার, নদী, মানুষ আর অবাক করা তথ্য। প্রতিটা স্টেশনে একটা ধাঁধাও থাকে।'),
+    4: ('bhabur-passport', 'ভাবুর পাসপোর্ট', 'প্রতিবেশী দেশগুলোর অবাক তথ্য', 'দেশ + ভূগোল', 'history', 'planet', MINT, 'mint',
+        'ভারত, নেপাল, ভুটান, চীন, মিয়ানমার, থাইল্যান্ড, শ্রীলঙ্কা, মালদ্বীপ। ভাবুর পাসপোর্টে সিল পড়ে, আর প্রতিটা দেশের সাথে আমাদের যোগসূত্র বেরিয়ে আসে।'),
+    5: ('bhaba-jay-meter', 'ভাবা যায়! মিটার', 'অবাক-মাত্রা ১ থেকে ৫', 'মজার তথ্য', 'physics', 'bulb', CORAL, 'coral',
+        'অক্টোপাসের তিন হৃৎপিণ্ড থেকে মহাকাশের নীরবতা। ১২টি তথ্য, প্রতিটার একটা অবাক-মাত্রা: শুরু সহজে, শেষে মাথা ঘুরে যায়।'),
+    6: ('rohosso-file', 'রহস্য ফাইল', 'বিখ্যাত দাবি, গোয়েন্দার মতো যাচাই', 'রহস্য + যাচাই', 'physics', 'eye', DEEP, 'deep',
+        'বারমুডা ট্রায়াঙ্গল, চাঁদ থেকে মহাপ্রাচীর, এভারেস্টের ডেথ জোন। প্রতিটা ফাইলে একটা বিখ্যাত দাবি, প্রমাণ আর শেষে রায়: সত্যি না মিথ্যা।'),
+    7: ('golpe-golpe-abishkar', 'গল্পে গল্পে আবিষ্কার', 'বাংলার মাটির বিজ্ঞানীদের সত্যি গল্প', 'বিজ্ঞানী + ইতিহাস', 'history', 'book', TEAL, 'teal',
+        'জগদীশচন্দ্র বসু, সত্যেন্দ্রনাথ বসু, ফজলুর রহমান খান। বাংলার মাটির সঙ্গে যুক্ত তিন মানুষের আবিষ্কারের গল্প, ছবির পাতায় পাতায়।'),
+    8: ('bhabur-golper-jhuri', 'ভাবুর গল্পের ঝুড়ি', 'ছবির গল্প, সত্যিকারের প্রাণী', 'ছবির গল্প', 'nature', 'fish', MINT, 'mint',
+        'গল্পটা বানানো, কিন্তু চরিত্রগুলো বাংলাদেশের সত্যিকারের প্রাণী, আর তাদের ক্ষমতাগুলোও সত্যি। পরিবারের সবাই মিলে পড়ার মতো ছবির গল্প।'),
+    11: ('anime-vs-biggan', 'অ্যানিমে vs বিজ্ঞান', 'অ্যানিমের দৃশ্য, বাস্তবের বিজ্ঞানে যাচাই', 'অ্যানিমে + পদার্থবিজ্ঞান', 'physics', 'bolt', DEEP, 'deep',
+         'নারুতো রান কি সত্যিই দ্রুত, টাইটান কি দাঁড়াতে পারত, পিকাচু কি বৈদ্যুতিক বানের সাথে পারত? জনপ্রিয় অ্যানিমের দৃশ্য বিজ্ঞানের মাপকাঠিতে।'),
     14: ('goyenda-bhabu', 'গোয়েন্দা ভাবু', 'ছবিতে সূত্র, উত্তর পরের দিন', 'রহস্য + বিজ্ঞান', 'physics', 'eye', DEEP, 'deep',
          'প্রতিটা কেসে একটা অদ্ভুত ঘটনা, কয়েকটা সূত্র আর একটা প্রশ্ন। আগে নিজে মাথা খাটান, পরের দিন ভাবু খুলে বলে আসল কারণটা কী, আর তার পেছনের বিজ্ঞান।'),
     16: ('mon-bhalo-bhabu', 'মন ভালো ভাবু', 'মন খারাপের দিনেও কাজে লাগে এমন বিজ্ঞান', 'মন + অনুভূতি', 'health', 'heart', CORAL, 'coral',
@@ -194,6 +210,78 @@ def convert(src, dst):
         return im.width, im.height
 
 
+# Early projects (Oct 2026) keep their captions in one .docx: heading, a table with
+# "ছবির ফাইল: <file or folder>", then the caption paragraphs. Date = first post day.
+DOCX_START = {1: '2026-10-15', 3: '2026-10-17', 4: '2026-10-17', 5: '2026-10-17', 6: '2026-10-17',
+              7: '2026-10-17', 8: '2026-10-17', 11: '2026-10-21'}
+FOLDER_CARDS = 10
+
+
+def docx_posts(num, pdir):
+    import datetime
+    import docx
+    from docx.oxml.ns import qn
+    files = list(pdir.glob('*.docx'))
+    if not files:
+        return []
+    meta = SERIES[num]
+    sslug = meta[0]
+    body = docx.Document(str(files[0])).element.body
+    blocks = []  # [file_ref, [paragraphs]]
+    cur = None
+    for el in body.iterchildren():
+        text = ''.join(x.text or '' for x in el.iter(qn('w:t')))
+        if el.tag == qn('w:tbl'):
+            m = re.search(r'ছবির ফাইল:\s*(.+)$', text)
+            if m:
+                if cur:
+                    blocks.append(cur)
+                cur = [m.group(1).strip(), []]
+            continue
+        if cur is not None and el.tag == qn('w:p'):
+            cur[1].append(text)
+    if cur:
+        blocks.append(cur)
+    out = []
+    day = datetime.date.fromisoformat(DOCX_START[num])
+    for i, (ref, paras) in enumerate(blocks):
+        # caption starts after "ক্যাপশন — কপি করে..."; the last non-empty line is the next post's heading
+        k = next((j for j, p in enumerate(paras) if p.startswith('ক্যাপশন')), -1)
+        paras = paras[k + 1:]
+        while paras and not paras[-1].strip():
+            paras.pop()
+        if i < len(blocks) - 1 and paras:
+            paras.pop()
+        cap = '\n'.join(p if p.strip() else '' for p in paras)
+        cap = re.sub(r'\n{3,}', '\n\n', cap).strip()
+        if not cap:
+            continue
+        ref_clean = re.sub(r'\s*\(.*\)\s*$', '', ref).strip()
+        target = pdir / ref_clean
+        if target.is_dir():
+            imgs = sorted(p for p in target.iterdir() if p.suffix.lower() in ('.png', '.jpg', '.jpeg'))[:FOLDER_CARDS]
+        else:
+            imgs = [p for p in pdir.rglob(ref_clean) if '_superseded' not in str(p)][:1]
+        title, hook, rest, labels = parse_caption(cap)
+        date = (day + datetime.timedelta(days=i)).isoformat()
+        pslug = f'{date[2:4]}{date[5:7]}{date[8:10]}-' + (slugify(ref_clean.rsplit('.', 1)[0]) or f'p{i:02d}')
+        images = []
+        for j, img in enumerate(imgs):
+            dst = IMG / sslug / f'{pslug}-{j + 1}.webp'
+            w, h = convert(img, dst)
+            images.append({'src': f'/media/{sslug}/{dst.name}', 'width': w, 'height': h, 'alt': f'{title}, ছবি {j + 1}'})
+        credit = [m.group(0) for m in re.finditer(r'ছবি:\s*[^\n]+', cap)][:2]
+        words = sum(len(x.split()) for x in [hook] + rest)
+        out.append({
+            'slug': pslug, 'seriesSlug': sslug, 'format': 'card', 'title': title, 'hook': hook,
+            'body': [r for r in rest if not r.startswith('ছবি:')] or [hook],
+            'sources': [{'label': x, 'url': ''} for x in labels], 'publishedAt': date, 'topic': meta[4],
+            'readMinutes': max(1, round(words / 180)), 'art': {'doodle': meta[5], 'bg': meta[7]},
+            'shares': 0, 'likes': 0, 'images': images, 'imageCredits': credit,
+        })
+    return out
+
+
 def main():
     series_out, posts_out, myths_out = [], [], []
     projects = {int(re.match(r'Project (\d+)', d.name).group(1)): d for d in SRC.glob('Project *') if d.is_dir()}
@@ -236,6 +324,8 @@ def main():
                 'shares': 0, 'likes': 0, 'images': images,
                 'imageCredits': credits_for(t.parent / 'Sources.md', date, stem),
             })
+        if num in DOCX_START:
+            posts_out += docx_posts(num, pdir)
         if num != 22:
             meta = SERIES[num]
             ps = [p for p in posts_out if p['seriesSlug'] == meta[0]]
