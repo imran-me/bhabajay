@@ -95,7 +95,8 @@ export const phpBackend: Backend = {
   async saveProfile(input) {
     if (!csrf) await refreshMe();
     if (!getState().flags.authEmail && !getState().user?.id.startsWith('u')) return demoBackend.saveProfile(input);
-    const me = await api<Me>('auth.php', { action: 'profile', profile: input });
+    const st = getState();
+    const me = await api<Me>('auth.php', { action: 'profile', profile: { ...input, badges: Object.keys(st.badges), points: st.points } });
     applyMe(me);
     return getState().user!;
   },
@@ -160,6 +161,10 @@ export const phpBackend: Backend = {
     await demoBackend.recordAttempt(a); // local history + badges stay on this device
     const u = getState().user;
     api('scores.php', { ...a, nickname: u?.nickname, schoolId: u?.schoolId, district: u?.district }).catch(() => {});
+    if (u?.id.startsWith('u')) {
+      const st = getState();
+      api('auth.php', { action: 'stats', badges: Object.keys(st.badges), points: st.points }).catch(() => {});
+    }
   },
   async playCount(slug) {
     try {

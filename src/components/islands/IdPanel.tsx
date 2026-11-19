@@ -139,6 +139,7 @@ export default function IdPanel({ schools, districts }: Props) {
       const code = (x as { code?: string }).code;
       setErr(
         code === 'credentials' ? 'ইমেইল বা পাসওয়ার্ড মিলছে না। নতুন হলে “নতুন আইডি” বেছে নাও।'
+        : code === 'disabled' ? 'এই আইডি এখন বন্ধ আছে। কিছু জানতে hello@bhabajay.com-এ লেখো।'
         : code === 'exists' ? 'এই ইমেইলে আগেই আইডি আছে — “লগ ইন” বেছে নাও।'
         : code === 'rate' ? 'অনেকবার চেষ্টা হয়েছে। ১৫ মিনিট পরে আবার চেষ্টা করো।'
         : 'উফ! এখন ঢোকা গেল না। একটু পরে আবার চেষ্টা করো।',

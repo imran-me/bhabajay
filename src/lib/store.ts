@@ -27,6 +27,7 @@ export interface LocalUser {
   district?: string;
   schoolId?: string;
   bio?: string;
+  interests?: string[];
   avatar: AvatarConfig;
   method: 'google' | 'magic';
   createdAt: string;

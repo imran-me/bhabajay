@@ -173,3 +173,24 @@ PREPARE st FROM @s; EXECUTE st; DEALLOCATE PREPARE st;
 SET @t := 'pitches';
 SET @s := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = @t AND column_name = 'user_id') = 0, 'ALTER TABLE pitches ADD COLUMN user_id BIGINT UNSIGNED NULL, ADD COLUMN hidden TINYINT(1) NOT NULL DEFAULT 0, ADD KEY ix_user (user_id)', 'SELECT 1');
 PREPARE st FROM @s; EXECUTE st; DEALLOCATE PREPARE st;
+
+-- ───────── Admin panel: account disable, audit log, quiz publish, post visibility ─────────
+SET @s := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'users' AND column_name = 'disabled') = 0, 'ALTER TABLE users ADD COLUMN disabled TINYINT(1) NOT NULL DEFAULT 0', 'SELECT 1');
+PREPARE st FROM @s; EXECUTE st; DEALLOCATE PREPARE st;
+SET @s := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'quizzes' AND column_name = 'published') = 0, 'ALTER TABLE quizzes ADD COLUMN published TINYINT(1) NOT NULL DEFAULT 1', 'SELECT 1');
+PREPARE st FROM @s; EXECUTE st; DEALLOCATE PREPARE st;
+SET @s := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'bj_posts' AND column_name = 'hidden') = 0, 'ALTER TABLE bj_posts ADD COLUMN hidden TINYINT(1) NOT NULL DEFAULT 0', 'SELECT 1');
+PREPARE st FROM @s; EXECUTE st; DEALLOCATE PREPARE st;
+SET @s := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'inbox' AND column_name = 'read_at') = 0, 'ALTER TABLE inbox ADD COLUMN read_at TIMESTAMP NULL', 'SELECT 1');
+PREPARE st FROM @s; EXECUTE st; DEALLOCATE PREPARE st;
+
+CREATE TABLE IF NOT EXISTS audit_log (
+  id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  admin_id    BIGINT UNSIGNED NOT NULL,
+  admin_email VARCHAR(200) NOT NULL,
+  action      VARCHAR(40)  NOT NULL,
+  target      VARCHAR(120) NOT NULL,
+  detail      JSON         NULL,
+  created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY ix_created (created_at)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
