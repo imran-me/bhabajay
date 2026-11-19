@@ -5,6 +5,7 @@
  * A card opens a reader dialog; the URL hash (#p=<slug>) makes it shareable.
  */
 import { useEffect, useRef, useState } from 'react';
+import CardCarousel from './CardCarousel';
 
 interface Img { src: string; width: number; height: number; alt: string }
 interface LivePost {
@@ -93,12 +94,19 @@ export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty
           return (
             <li key={p.seriesSlug + p.slug} className="card card-hover press overflow-hidden">
               <button type="button" onClick={() => show(p)} className="block w-full text-left focus-visible:outline-none">
+                <span className="relative block">
                 {img ? (
                   <img src={img.src} width={img.width} height={img.height} alt={img.alt} loading="lazy" decoding="async"
                     className="aspect-[4/5] w-full bg-tint object-cover" />
                 ) : (
-                  <div className="grid aspect-[4/5] place-items-center bg-tint p-4 text-center text-lg font-bold text-ink">{p.title}</div>
+                  <span className="grid aspect-[4/5] place-items-center bg-tint p-4 text-center text-lg font-bold text-ink">{p.title}</span>
                 )}
+                  {(p.images?.length ?? 0) > 1 && (
+                    <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-deep/80 px-2.5 py-1 text-xs font-bold text-white backdrop-blur" aria-label={`${bn(p.images.length)}টি কার্ড, সোয়াইপ করুন`}>
+                      <span aria-hidden="true">⇆</span>{bn(p.images.length)}টি কার্ড
+                    </span>
+                  )}
+                </span>
                 <span className="block px-3 pb-3 pt-2.5">
                   <span className="line-clamp-2 min-h-[2.75em] font-bold leading-snug">{p.title}</span>
                   <span className="mt-1 block truncate text-[.82rem] text-ink-soft">
@@ -128,12 +136,7 @@ export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty
             </div>
             <p className="mt-1 text-sm text-ink-soft">{shownDate(open.publishedAt) && `${shownDate(open.publishedAt)} · `}{bn(open.readMinutes)} মিনিটে পড়া</p>
             {open.images?.length > 0 && (
-              <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-                {open.images.map((im) => (
-                  <img key={im.src} src={im.src} width={im.width} height={im.height} alt={im.alt} loading="lazy"
-                    className="w-[85%] shrink-0 snap-center rounded-[18px] bg-tint sm:w-[calc(50%-.375rem)]" />
-                ))}
-              </div>
+              <div className="mt-4 sm:px-16"><CardCarousel key={open.slug} images={open.images} label={open.title} /></div>
             )}
             <p className="mt-5 text-lg font-semibold leading-relaxed">{open.hook}</p>
             {open.body.filter((b) => b !== open.hook).map((b, i) => (

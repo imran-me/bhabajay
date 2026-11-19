@@ -3,7 +3,8 @@
  * Before the first myth is out it shows the "শীঘ্রই আসছে" teaser. #m=<slug> opens a myth directly.
  */
 import { useEffect, useRef, useState } from 'react';
-import { shownDate } from './bnfmt';
+import CardCarousel from './CardCarousel';
+import { bn, shownDate } from './bnfmt';
 import { TeaserCard, useUpcoming } from './Teaser';
 
 interface Img { src: string; width: number; height: number; alt: string }
@@ -72,6 +73,11 @@ export default function LiveMyths() {
                   {img ? <img src={img.src} width={img.width} height={img.height} alt={img.alt} loading="lazy" decoding="async" className="aspect-[4/5] w-full bg-tint object-cover" />
                     : <span className="grid aspect-[4/5] place-items-center bg-tint p-4 text-center text-lg font-bold">“{m.claim}”</span>}
                   <span className={`absolute left-2 top-2 rounded-full px-2.5 py-0.5 text-xs font-bold ${v.cls}`}>{v.bn}</span>
+                  {(m.images?.length ?? 0) > 1 && (
+                    <span className="absolute bottom-2 right-2 inline-flex items-center gap-1 rounded-full bg-deep/80 px-2.5 py-1 text-xs font-bold text-white backdrop-blur" aria-label={`${bn(m.images.length)}টি কার্ড, সোয়াইপ করুন`}>
+                      <span aria-hidden="true">⇆</span>{bn(m.images.length)}টি কার্ড
+                    </span>
+                  )}
                 </span>
                 <span className="block px-3 pb-3 pt-2.5">
                   <span className="line-clamp-2 min-h-[2.75em] font-bold leading-snug">“{m.claim}”</span>
@@ -96,12 +102,7 @@ export default function LiveMyths() {
             </div>
             <p className="mt-3 text-lg font-semibold leading-relaxed">{open.short}</p>
             {open.images?.length > 0 && (
-              <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 sm:mx-0 sm:px-0">
-                {open.images.map((im) => (
-                  <img key={im.src} src={im.src} width={im.width} height={im.height} alt={im.alt} loading="lazy"
-                    className="w-[85%] shrink-0 snap-center rounded-[18px] bg-tint sm:w-[calc(50%-.375rem)]" />
-                ))}
-              </div>
+              <div className="mt-4 sm:px-16"><CardCarousel key={open.slug} images={open.images} label={open.claim} /></div>
             )}
             {open.body.slice(1).map((b, i) => <p key={i} className="mt-3 whitespace-pre-line leading-relaxed">{b}</p>)}
             {open.sources?.length > 0 && (
