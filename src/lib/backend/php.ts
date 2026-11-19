@@ -16,7 +16,7 @@ export class ApiError extends Error {
   }
 }
 
-async function api<T>(path: string, body?: unknown): Promise<T> {
+export async function api<T>(path: string, body?: unknown): Promise<T> {
   if (body !== undefined && !csrf && path !== 'auth.php') {
     try { csrf = (await api<Me>('auth.php')).csrf; } catch { /* anonymous POST still works */ }
   }
