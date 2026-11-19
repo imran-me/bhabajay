@@ -25,21 +25,10 @@ const latest = posts.slice(0, 8);
       {topics.map((t) => <button type="button" class="chip" aria-pressed="false" data-topic-filter={t}>{TOPIC_LABEL[t]}</button>)}
     </div>
 
-    <div class="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {all.map((s) => (
-        <div data-series-item data-topic={s.topic}><SeriesCover s={s} size="grid" /></div>
-      ))}
-      <a href="/initiator/pitch" class="press group relative flex min-h-[13rem] flex-col justify-end overflow-hidden rounded-[22px] border-2 border-dashed border-coral bg-coral-soft p-5">
-        <span class="absolute right-3 top-2 w-14" aria-hidden="true"><Bhabu face="wink" body="teal" dot="coral" class="w-14" /></span>
-        <span class="text-2xl font-bold">তোমার সিরিজ এখানে?</span>
-        <span class="mt-1 text-ink-soft">একটা প্রশ্ন + ৫ মিনিটের ফর্ম। ৭ দিনের মধ্যে উত্তর।</span>
-        <span class="btn btn-primary btn-sm mt-4 self-start">আইডিয়া পাঠাও</span>
-      </a>
-    </div>
   </section>
 
   {library.length > 0 && (
-    <section class="wrap mt-14" aria-labelledby="core-title">
+    <section class="wrap mt-8" aria-labelledby="core-title">
       <SectionHead id="core-title" title="ভাবা যায়! কোর টিমের সিরিজ" eyebrow={`${bn(library.length)}টি সিরিজ · প্রতি সপ্তাহে নতুন পোস্ট`} />
       <ul class="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4" role="list">
         {library.map((s) => (
@@ -58,10 +47,34 @@ const latest = posts.slice(0, 8);
     </section>
   )}
 
-  <section class="wrap mt-14" aria-labelledby="latest-title">
-    <SectionHead id="latest-title" title="সবশেষ পোস্ট" eyebrow={`মোট ${bn(posts.length)}টি পোস্ট`} />
+
+  <section class="wrap mt-14" aria-labelledby="pitch-title">
+    <h2 id="pitch-title" class="sr-only">নিজের সিরিজ</h2>
+    <div class="max-w-xl">
+      <a href="/initiator/pitch" class="press group relative flex min-h-[11rem] flex-col justify-end overflow-hidden rounded-[22px] border-2 border-dashed border-coral bg-coral-soft p-5">
+        <span class="absolute right-3 top-2 w-14" aria-hidden="true"><Bhabu face="wink" body="teal" dot="coral" class="w-14" /></span>
+        <span class="text-2xl font-bold">তোমার সিরিজ এখানে?</span>
+        <span class="mt-1 text-ink-soft">একটা প্রশ্ন + ৫ মিনিটের ফর্ম। ৭ দিনের মধ্যে উত্তর।</span>
+        <span class="btn btn-primary btn-sm mt-4 self-start">আইডিয়া পাঠাও</span>
+      </a>
+    </div>
+  </section>
+
+  <section class="wrap mt-14" aria-labelledby="sample-title">
+    <SectionHead id="sample-title" title="নমুনা" eyebrow="ইনিশিয়েটর সিরিজ দেখতে কেমন হবে, তার নমুনা" />
+    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+      {all.map((s) => (
+        <div data-series-item data-topic={s.topic}><SeriesCover s={s} size="grid" /></div>
+      ))}
+    </div>
+
+    <div class="mt-10">
+  <div aria-labelledby="latest-title">
+    <SectionHead id="latest-title" title="নমুনা পোস্ট" eyebrow={`মোট ${bn(posts.length)}টি পোস্ট`} />
     <div class="grid grid-cols-2 gap-3 sm:gap-4 md:grid-cols-3 lg:grid-cols-4">
       {latest.map((p) => <PostCard post={p} showSeries={getSeries(p.seriesSlug)?.title} />)}
+    </div>
+  </div>
     </div>
   </section>
 </BaseLayout>
