@@ -4,7 +4,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import CardCarousel from './CardCarousel';
-import { bn, shownDate } from './bnfmt';
+import { bn, shownDate, thumbProps } from './bnfmt';
 import { TeaserCard, useUpcoming } from './Teaser';
 import { KeyRing, OutOfKeys, UnlockPanel, celebrate, fetchKeys, shareCard, unlockItem, type KeyState } from './unlock';
 
@@ -101,7 +101,7 @@ export default function LiveMyths() {
             <li key={m.slug} className="card card-hover press overflow-hidden">
               <button type="button" className="block w-full text-left" onClick={() => show(m)}>
                 <span className="relative block">
-                  {img ? <img src={img.src} width={img.width} height={img.height} alt={img.alt} loading="lazy" decoding="async" className="aspect-[4/5] w-full bg-tint object-cover" />
+                  {img ? <img src={img.src} {...thumbProps(img.src)} width={img.width} height={img.height} alt={img.alt} loading="lazy" decoding="async" className="aspect-[4/5] w-full bg-tint object-cover" />
                     : <span className={`grid aspect-[4/5] place-items-center p-4 text-center text-lg font-bold ${m.locked ? 'pattern-teal text-white' : 'bg-tint'}`}>“{m.claim}”</span>}
                   {v ? <span className={`absolute left-2 top-2 rounded-full px-2.5 py-0.5 text-xs font-bold ${v.cls}`}>{v.bn}</span>
                     : <span className="absolute left-2 top-2 rounded-full bg-deep/85 px-2.5 py-0.5 text-xs font-bold text-white">🔒 মিথ? / সত্য?</span>}

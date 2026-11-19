@@ -407,17 +407,23 @@ async function importServerNotices() {
     });
   }, { rootMargin: '0px 0px -8% 0px', threshold: 0.08 });
   const seen = new WeakSet<Element>();
-  const scan = () => {
-    const vh = innerHeight;
-    document.querySelectorAll<HTMLElement>(SEL).forEach((el) => {
-      if (seen.has(el) || el.closest('.bj-hero, dialog, [data-bottom-tabs], [data-topbar], .flip')) return;
-      seen.add(el);
-      // already on screen at load: leave it alone (no flash, no layout shift)
-      if (el.getBoundingClientRect().top < vh * 0.92) return;
-      const sib = el.parentElement ? [...el.parentElement.children].indexOf(el) : 0;
+  // First look: an observer reports which new elements start below the fold (no forced layout).
+  const first = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      first.unobserve(e.target);
+      if (e.isIntersecting) return; // already on screen: leave it alone (no flash, no shift)
+      const el = e.target as HTMLElement;
+      const sib = el.parentElement ? Array.prototype.indexOf.call(el.parentElement.children, el) : 0;
       el.style.setProperty('--rv-delay', `${Math.min(sib % 8, 7) * 55}ms`);
       el.classList.add('rv');
       io.observe(el);
+    });
+  });
+  const scan = () => {
+    document.querySelectorAll<HTMLElement>(SEL).forEach((el) => {
+      if (seen.has(el) || el.closest('.bj-hero, dialog, [data-bottom-tabs], [data-topbar], .flip')) return;
+      seen.add(el);
+      first.observe(el);
     });
   };
   scan();

@@ -66,11 +66,17 @@ const words = ['প্রতিদিনের', 'চেনা', 'জিনি�
     };
     v.addEventListener('playing', function () { v.style.opacity = '1'; v.closest('.bj-hero').classList.add('is-playing'); });
     v.addEventListener('error', function () { v.remove(); });
-    pick();
-    matchMedia('(orientation: landscape)').addEventListener('change', pick);
+    // start the loop only after the page has loaded and gone idle, so it never competes with first paint
+    var start = function () {
+      pick();
+      matchMedia('(orientation: landscape)').addEventListener('change', pick);
+    };
+    var later = function () { setTimeout(function () { (window.requestIdleCallback || setTimeout)(start, { timeout: 2500 }); }, 1500); };
+    if (document.readyState === 'complete') later(); else addEventListener('load', later, { once: true });
     // pause when the hero is off screen (battery)
     if ('IntersectionObserver' in window) {
       new IntersectionObserver(function (e) {
+        if (!v.getAttribute('src')) return;
         if (e[0].isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function () {}); } else v.pause();
       }).observe(v);
     }

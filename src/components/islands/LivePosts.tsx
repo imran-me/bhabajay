@@ -16,7 +16,7 @@ interface LivePost {
   locked?: boolean;
 }
 
-import { bn, shownDate } from './bnfmt';
+import { bn, shownDate, thumbProps } from './bnfmt';
 import { TeaserCard, UpcomingStrip, useUpcoming } from './Teaser';
 import { KeyRing, OutOfKeys, UnlockPanel, celebrate, fetchKeys, shareCard, unlockItem, type KeyState } from './unlock';
 
@@ -153,7 +153,7 @@ export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty
               <button type="button" onClick={() => show(p)} className="block w-full text-left focus-visible:outline-none">
                 <span className="relative block">
                 {img ? (
-                  <img src={img.src} width={img.width} height={img.height} alt={img.alt} loading="lazy" decoding="async"
+                  <img src={img.src} {...thumbProps(img.src)} width={img.width} height={img.height} alt={img.alt} loading="lazy" decoding="async"
                     className={`aspect-[4/5] w-full bg-tint object-cover${lockedCls}`} />
                 ) : (
                   <span className="grid aspect-[4/5] place-items-center bg-tint p-4 text-center text-lg font-bold text-ink">{p.title}</span>
