@@ -33,9 +33,11 @@ function bj_json($data, int $maxAge = 300, int $status = 200): void
     http_response_code($status);
     header('Content-Type: application/json; charset=utf-8');
     header('X-Content-Type-Options: nosniff');
-    header($status === 200
+    // personalised responses (daily unlocks) must never be cached by proxies
+    header($status === 200 && empty($GLOBALS['bj_private'])
         ? "Cache-Control: public, max-age=$maxAge, stale-while-revalidate=86400"
-        : 'Cache-Control: no-store');
+        : ($status === 200 ? 'Cache-Control: private, no-store' : 'Cache-Control: no-store'));
+    if (!empty($GLOBALS['bj_private'])) header('Vary: Cookie');
     echo json_encode($data, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
     exit;
 }

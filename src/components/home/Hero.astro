@@ -1,54 +1,94 @@
 ---
 /**
- * Home hero: brand, one-line promise, brand-kit ভাবু, two CTAs.
- * Background = the three brand patterns drifting slowly (CSS only, stops for reduced motion).
- * Mobile: capped at ~70svh so the first photo cards stay close.
- * ভাবু art is the brand-kit PNG (as WebP) served from /media/brand/; if it is missing the
- * code-drawn ভাবু shows instead.
+ * Home hero: real ভাবা যায়! video loop behind the brand, promise, CTAs and ভাবু.
+ * Portrait screens get the 540x960 loop, landscape the 1280x720 one. The poster
+ * (a <picture>) is always there; the video fades in only once it plays, and is
+ * skipped for reduced motion or Save-Data. Videos live in /media/video/ (not in git).
  */
 import Bhabu from '../brand/Bhabu.astro';
+const words = ['প্রতিদিনের', 'চেনা', 'জিনিসের', 'ভেতরে', 'লুকানো', 'অবাক', 'বিজ্ঞান,', 'সূত্রসহ,', 'সহজ', 'বাংলায়।'];
 ---
-<section class="bj-hero relative isolate overflow-hidden bg-teal text-white" aria-labelledby="home-hero-title">
-  <div class="bj-hero-bg" aria-hidden="true">
-    <span class="bj-hero-layer bj-l1"></span>
-    <span class="bj-hero-layer bj-l2"></span>
-    <span class="bj-hero-glow"></span>
+<section class="bj-hero relative isolate flex min-h-[64svh] items-end overflow-hidden bg-deep text-white sm:min-h-[70svh] lg:min-h-[78vh]" aria-labelledby="home-hero-title">
+  <div class="absolute inset-0 -z-10" aria-hidden="true">
+    <picture>
+      <source media="(orientation: landscape)" srcset="/media/video/hero-wide.webp" />
+      <img src="/media/video/hero-tall.webp" alt="" class="h-full w-full object-cover" fetchpriority="high" decoding="async" onerror="this.style.display='none'" />
+    </picture>
+    <video data-hero-video muted loop playsinline preload="none" class="absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-700"></video>
+    <span class="absolute inset-0 bg-[linear-gradient(180deg,rgb(6_39_44/.35)_0%,rgb(6_39_44/.15)_35%,rgb(6_60_67/.85)_78%,rgb(6_39_44/.95)_100%)] lg:bg-[linear-gradient(90deg,rgb(6_39_44/.92)_0%,rgb(6_60_67/.7)_45%,rgb(6_39_44/.1)_100%)]"></span>
   </div>
-  <div class="wrap relative grid max-h-[70svh] grid-cols-[1fr_auto] items-center gap-3 py-7 sm:py-12 lg:max-h-none lg:gap-10 lg:py-14">
+
+  <div class="wrap relative grid w-full grid-cols-[1fr_auto] items-end gap-3 pb-14 pt-24 sm:pb-16 lg:items-center lg:py-20">
     <div class="min-w-0" data-parallax="0.06">
-      <p class="inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-sm font-bold ring-1 ring-white/25">
+      <p class="bj-in inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-sm font-bold ring-1 ring-white/25 backdrop-blur-sm" style="--d:0ms">
         <span class="h-2 w-2 rounded-full bg-sun" aria-hidden="true"></span>কৌতূহলী বাংলাদেশের ঘর
       </p>
-      <h1 id="home-hero-title" class="mt-3 font-display text-[2.9rem] leading-[1.05] sm:text-7xl">
-        ভাবা <span class="text-sun">যায়!</span>
+      <h1 id="home-hero-title" class="mt-3 font-display text-[3rem] leading-[1.05] drop-shadow-[0_3px_12px_rgb(0_0_0/.35)] sm:text-7xl lg:text-8xl">
+        <span class="bj-word" style="--d:120ms">ভাবা</span> <span class="bj-word text-sun" style="--d:260ms">যায়!</span>
       </h1>
-      <p class="mt-3 max-w-xl text-[1.12rem] leading-snug text-white/90 sm:text-2xl">
-        প্রতিদিনের চেনা জিনিসের ভেতরে লুকানো অবাক বিজ্ঞান, সূত্রসহ, সহজ বাংলায়।
+      <p class="mt-3 max-w-xl text-[1.12rem] leading-snug text-white/95 drop-shadow-[0_2px_8px_rgb(0_0_0/.4)] sm:text-2xl">
+        {words.map((w, i) => <><span class="bj-word" style={`--d:${420 + i * 45}ms`}>{w}</span>{' '}</>)}
       </p>
       <div class="mt-6 flex flex-wrap gap-3">
-        <a href="/series" class="btn btn-primary min-h-12 px-5 text-[1.05rem]">সিরিজ দেখো</a>
-        <a href="/quiz" class="btn min-h-12 bg-white px-5 text-[1.05rem] text-deep hover:bg-sun">কুইজ খেলো</a>
+        <a href="/series" class="bj-pop btn btn-primary min-h-12 px-5 text-[1.05rem]" style="--d:950ms">সিরিজ দেখো</a>
+        <a href="/quiz" class="bj-pop btn min-h-12 bg-white px-5 text-[1.05rem] text-deep hover:bg-sun" style="--d:1050ms">কুইজ খেলো</a>
+        <a href="/videos" class="bj-pop btn min-h-12 border-2 border-white/60 bg-white/10 px-5 text-[1.05rem] text-white backdrop-blur-sm hover:bg-white/20" style="--d:1150ms">▶ ভিডিও</a>
       </div>
     </div>
-    <div class="relative self-center" data-parallax="-0.1">
-      <img src="/media/brand/bhabu-happy-reverse.webp" width="279" height="640" alt="ভাবু, ভাবা যায়!-এর মাসকট, হাসিমুখে হাত নাড়ছে"
-        class="bj-hero-bhabu relative z-10 h-[13rem] w-auto sm:h-[18rem] lg:h-[21rem] drop-shadow-[0_14px_20px_rgb(0_0_0/.25)]"
-        fetchpriority="high" decoding="async"
-        onerror="this.hidden=true;this.nextElementSibling.hidden=false" />
-      <span hidden class="block w-24 sm:w-36"><Bhabu face="happy" body="coral" dot="sun" class="w-full" /></span>
-    </div>
+    <div class="relative self-end" data-parallax="-0.1"><div class="bj-bounce" style="--d:700ms">
+      <img src="/media/brand/bhabu-happy-reverse.webp" width="279" height="640" alt="ভাবু, ভাবা যায়!-এর মাসকট"
+        class="bj-hero-bhabu relative z-10 h-[9.5rem] w-auto drop-shadow-[0_14px_20px_rgb(0_0_0/.35)] sm:h-[16rem] lg:h-[21rem]"
+        decoding="async" onerror="this.hidden=true;this.nextElementSibling.hidden=false" />
+      <span hidden class="block w-20 sm:w-32"><Bhabu face="happy" body="coral" dot="sun" class="w-full" /></span>
+    </div></div>
   </div>
+
+  <a href="#home-cards" class="bj-cue absolute bottom-2 left-1/2 grid h-11 w-11 -translate-x-1/2 place-items-center rounded-full text-white/90 hover:text-sun" aria-label="নিচে নামুন">
+    <svg viewBox="0 0 24 24" class="h-7 w-7" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+  </a>
 </section>
 
+<script is:inline>
+  (function () {
+    var v = document.querySelector('[data-hero-video]');
+    if (!v) return;
+    var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var save = navigator.connection && navigator.connection.saveData;
+    if (reduce || save) return;
+    var pick = function () {
+      var wide = matchMedia('(orientation: landscape)').matches;
+      var src = wide ? '/media/video/hero-wide.mp4' : '/media/video/hero-tall.mp4';
+      if (v.getAttribute('src') === src) return;
+      v.style.opacity = '0';
+      v.src = src;
+      var p = v.play();
+      if (p && p.catch) p.catch(function () {});
+    };
+    v.addEventListener('playing', function () { v.style.opacity = '1'; });
+    v.addEventListener('error', function () { v.remove(); });
+    pick();
+    matchMedia('(orientation: landscape)').addEventListener('change', pick);
+    // pause when the hero is off screen (battery)
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(function (e) {
+        if (e[0].isIntersecting) { var p = v.play(); if (p && p.catch) p.catch(function () {}); } else v.pause();
+      }).observe(v);
+    }
+  })();
+</script>
+
 <style>
-  .bj-hero-bg { position: absolute; inset: 0; z-index: -1; }
-  .bj-hero-layer { position: absolute; inset: -20%; background-repeat: repeat; will-change: transform; }
-  .bj-l1 { background-image: url('/patterns/teal.svg'); background-size: 260px; opacity: .55; animation: bj-drift 60s linear infinite; }
-  .bj-l2 { background-image: url('/patterns/mint.svg'); background-size: 420px; opacity: .12; mix-blend-mode: screen; animation: bj-drift 90s linear infinite reverse; }
-  .bj-hero-glow { position: absolute; inset: 0; background: radial-gradient(60% 70% at 85% 30%, rgb(255 107 91 / .35), transparent 70%), radial-gradient(50% 60% at 0% 100%, rgb(126 224 194 / .25), transparent 70%); }
-  .bj-hero-bhabu { animation: bj-float 5s ease-in-out infinite; transform-origin: bottom center; }
-  @keyframes bj-drift { to { transform: translate3d(260px, 130px, 0); } }
+  .bj-hero-bhabu { animation: bj-float 5s ease-in-out 1.6s infinite; transform-origin: bottom center; }
+  .bj-word { display: inline-block; animation: bj-word-in .7s cubic-bezier(.2, .9, .25, 1.2) both; animation-delay: var(--d, 0ms); }
+  .bj-in { animation: bj-word-in .6s ease-out both; animation-delay: var(--d, 0ms); }
+  .bj-pop { animation: bj-pop-in .55s cubic-bezier(.3, 1.6, .5, 1) both; animation-delay: var(--d, 0ms); }
+  .bj-bounce { animation: bj-drop-in .9s cubic-bezier(.3, 1.5, .5, 1) both; animation-delay: var(--d, 0ms); }
+  .bj-cue { animation: bj-cue 1.8s ease-in-out 2s infinite; }
+  @keyframes bj-word-in { from { opacity: 0; transform: translateY(.6em); } to { opacity: 1; transform: none; } }
+  @keyframes bj-pop-in { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: none; } }
+  @keyframes bj-drop-in { 0% { opacity: 0; transform: translateY(-40px) scale(.9); } 60% { opacity: 1; transform: translateY(6px); } 100% { transform: none; } }
+  @keyframes bj-cue { 0%, 100% { transform: translate(-50%, 0); } 50% { transform: translate(-50%, 7px); } }
   @media (prefers-reduced-motion: reduce) {
-    .bj-hero-layer, .bj-hero-bhabu { animation: none; }
+    .bj-word, .bj-in, .bj-pop, .bj-bounce, .bj-cue, .bj-hero-bhabu { animation: none; }
   }
 </style>

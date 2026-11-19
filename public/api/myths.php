@@ -5,6 +5,7 @@
  */
 declare(strict_types=1);
 require __DIR__ . '/_content.php';
+require __DIR__ . '/_unlock.php';
 
 bj_run(function () {
     $slug = bj_param('slug');
@@ -14,7 +15,7 @@ bj_run(function () {
     if ($slug) {
         $rows = bj_decode(bj_query("SELECT $cols FROM bj_myths WHERE slug = ? AND published_at <= ?", [$slug, $today]), $json);
         if (!$rows) bj_json(['error' => 'not found'], 60, 404);
-        bj_json($rows[0], 600);
+        bj_json(bj_apply_locks($rows, 'myth')[0], 600);
     }
-    bj_json(bj_decode(bj_query("SELECT $cols FROM bj_myths WHERE published_at <= ? ORDER BY published_at DESC LIMIT 100", [$today]), $json), 300);
+    bj_json(bj_apply_locks(bj_decode(bj_query("SELECT $cols FROM bj_myths WHERE published_at <= ? ORDER BY published_at DESC LIMIT 100", [$today]), $json), 'myth'), 300);
 });

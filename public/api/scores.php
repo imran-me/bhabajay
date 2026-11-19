@@ -38,8 +38,25 @@ if (!$col) bj_fail('invalid');
 $quiz = bj_slug($_GET['quiz'] ?? '');
 $sql = "SELECT $col AS name, MAX(district) AS sub, SUM(points) AS score, COUNT(*) AS plays FROM quiz_attempts WHERE $col IS NOT NULL"
   . ($quiz ? ' AND quiz_slug = ?' : '') . " GROUP BY $col ORDER BY score DESC LIMIT 100";
-$st = $db->prepare($sql);
-$st->execute($quiz ? [str_starts_with($quiz, 'weekly') ? 'weekly' : $quiz] : []);
+if ($board === 'people' && !$quiz) {
+  // overall people board also counts points from daily unlocks and bonuses
+  $sql = "SELECT name, MAX(sub) AS sub, SUM(score) AS score, SUM(plays) AS plays FROM (
+      SELECT nickname AS name, district AS sub, points AS score, 1 AS plays FROM quiz_attempts
+      UNION ALL SELECT JSON_UNQUOTE(JSON_EXTRACT(u.profile, '$.nickname')), NULL, c.points, 0 FROM content_unlocks c JOIN users u ON u.id = c.user_id WHERE c.points > 0
+      UNION ALL SELECT JSON_UNQUOTE(JSON_EXTRACT(u.profile, '$.nickname')), NULL, b.points, 0 FROM bonus_points b JOIN users u ON u.id = b.user_id
+    ) t WHERE name IS NOT NULL GROUP BY name ORDER BY score DESC LIMIT 100";
+}
+$args = $quiz ? [str_starts_with($quiz, 'weekly') ? 'weekly' : $quiz] : [];
+try {
+  $st = $db->prepare($sql);
+  $st->execute($args);
+} catch (PDOException $e) {
+  if (!in_array((string)$e->getCode(), ['42S02', '42S22'], true)) throw $e;
+  // unlock tables not created yet: quiz points only
+  $st = $db->prepare("SELECT $col AS name, MAX(district) AS sub, SUM(points) AS score, COUNT(*) AS plays FROM quiz_attempts WHERE $col IS NOT NULL"
+    . ($quiz ? ' AND quiz_slug = ?' : '') . " GROUP BY $col ORDER BY score DESC LIMIT 100");
+  $st->execute($args);
+}
 $rows = [];
 foreach ($st->fetchAll() as $i => $r) {
   $rows[] = ['rank' => $i + 1, 'name' => $r['name'], 'sub' => $board === 'districts' ? null : $r['sub'], 'score' => (int)$r['score'], 'plays' => (int)$r['plays']];

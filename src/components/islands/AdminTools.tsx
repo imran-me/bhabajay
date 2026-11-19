@@ -14,7 +14,7 @@ type Api = <T>(path: string, body?: unknown) => Promise<T>;
 type Tab = 'comments' | 'pitches' | 'inbox' | 'users' | 'quizzes' | 'posts' | 'audit';
 const TABS: [Tab, string][] = [['comments', 'মন্তব্য'], ['pitches', 'পিচ'], ['inbox', 'ইনবক্স'], ['users', 'ইউজার'], ['quizzes', 'কুইজ'], ['posts', 'পোস্ট'], ['audit', 'লগ']];
 
-interface Stats { users: number; comments: number; commentsPending: number; pitches: number; pitchesWaiting: number; attempts: number; inbox: number; inboxUnread: number }
+interface Stats { users: number; comments: number; commentsPending: number; pitches: number; pitchesWaiting: number; attempts: number; inbox: number; inboxUnread: number; unlocks?: number | null; unlocksToday?: number | null }
 
 export default function AdminTools() {
   const [api, setApi] = useState<Api | null>(null);
@@ -51,19 +51,20 @@ export default function AdminTools() {
     }
   };
 
-  const tiles: [string, number | undefined, string?][] = [
+  const tiles: [string, number | null | undefined, string?][] = [
     ['ইউজার', stats?.users], ['মন্তব্য', stats?.comments, stats ? `${bn(stats.commentsPending)} অপেক্ষায়` : ''],
     ['পিচ', stats?.pitches, stats ? `${bn(stats.pitchesWaiting)} রিভিউতে` : ''], ['কুইজ খেলা', stats?.attempts],
     ['ইনবক্স', stats?.inbox, stats ? `${bn(stats.inboxUnread)} না-পড়া` : ''],
+    ['আনলক', stats?.unlocks, stats?.unlocksToday != null ? `আজ ${bn(stats.unlocksToday)}` : ''],
   ];
 
   return (
     <section className="mt-10 grid gap-4" aria-labelledby="tools-h">
       <h2 id="tools-h" className="section-title">ড্যাশবোর্ড ও টুলস</h2>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-5">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-6">
         {tiles.map(([l, n, sub]) => (
           <div key={l} className="card p-3 text-center">
-            <p className="font-display text-2xl text-link">{n === undefined ? '…' : bn(n)}</p>
+            <p className="font-display text-2xl text-link">{n == null ? '…' : bn(n)}</p>
             <p className="text-xs font-semibold">{l}</p>
             {sub && <p className="text-xs text-ink-soft">{sub}</p>}
           </div>

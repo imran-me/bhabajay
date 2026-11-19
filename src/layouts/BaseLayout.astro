@@ -56,13 +56,27 @@ const factsLite = facts.map((f) => f.text);
     <a href="#main" class="skip-link">মূল লেখায় যাও</a>
 
     {DEMO_MODE && (
-      <div data-demo-banner class="relative z-50 bg-deep text-white">
+      <div data-demo-banner hidden class="relative z-50 bg-deep text-white">
         <div class="wrap flex items-center gap-2 py-1.5 text-[.8rem] leading-snug">
           <span class="rounded-md bg-sun px-1.5 py-px font-bold text-deep">ডেমো</span>
           <span class="min-w-0 flex-1 truncate">ডেটাবেস যুক্ত হয়নি — আইডি, স্কোর আর পিচ শুধু এই ব্রাউজারে থাকছে।</span>
           <a href="/about#demo" class="-my-3 inline-flex min-h-11 shrink-0 items-center px-1 font-semibold text-sun underline-offset-2 hover:underline">বিস্তারিত</a>
         </div>
       </div>
+    )}
+    {DEMO_MODE && (
+      <script is:inline>
+        // The demo note shows only when the site's own API is really unreachable.
+        (function () {
+          var show = function () { var b = document.querySelector('[data-demo-banner]'); if (b) b.hidden = false; };
+          var ctl = 'AbortController' in window ? new AbortController() : null;
+          var t = setTimeout(function () { if (ctl) ctl.abort(); }, 6000);
+          fetch('/api/health.php', { cache: 'no-store', signal: ctl ? ctl.signal : undefined })
+            .then(function (r) { return r.ok ? r.json() : null; })
+            .then(function (d) { clearTimeout(t); if (!d || d.ok !== true) show(); })
+            .catch(function () { clearTimeout(t); show(); });
+        })();
+      </script>
     )}
 
     <TopBar />

@@ -18,7 +18,10 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
   $list = $_GET['list'] ?? '';
 
   if ($list === 'stats') {
-    $n = fn(string $sql) => (int)$db->query($sql)->fetchColumn();
+    $n = function (string $sql) use ($db): ?int {
+      try { return (int)$db->query($sql)->fetchColumn(); }
+      catch (PDOException $e) { if (in_array((string)$e->getCode(), ['42S02', '42S22'], true)) return null; throw $e; }
+    };
     bj_out([
       'users' => $n('SELECT COUNT(*) FROM users'),
       'comments' => $n('SELECT COUNT(*) FROM comments'),
@@ -28,6 +31,8 @@ if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
       'attempts' => $n('SELECT COUNT(*) FROM quiz_attempts'),
       'inbox' => $n('SELECT COUNT(*) FROM inbox'),
       'inboxUnread' => $n('SELECT COUNT(*) FROM inbox WHERE read_at IS NULL'),
+      'unlocks' => $n('SELECT COUNT(*) FROM content_unlocks'),
+      'unlocksToday' => $n("SELECT COUNT(*) FROM content_unlocks WHERE unlock_day = '" . (new DateTime('now', new DateTimeZone('Asia/Dhaka')))->format('Y-m-d') . "'"),
     ]);
   }
   if ($list === 'pitches') {
