@@ -35,7 +35,7 @@ export default function PointsBoard() {
   const medals = ['🥈', '🥇', '🥉'];
 
   return (
-    <div className="grid gap-5">
+    <div className="grid grid-cols-[minmax(0,1fr)] gap-5">
       <div className="flex flex-wrap items-center gap-2">
         <div className="grid grid-cols-2 gap-1 rounded-2xl bg-tint p-1" role="tablist" aria-label="সময়">
           {([['week', 'এই সপ্তাহ'], ['all', 'সব সময়']] as const).map(([id, l]) => (
@@ -44,9 +44,9 @@ export default function PointsBoard() {
           ))}
         </div>
         {data && data !== 'off' && (data.districts.length > 0 || district) && (
-          <label className="ml-auto flex items-center gap-2">
+          <label className="ml-auto flex min-w-0 items-center gap-2">
             <span className="sr-only">জেলা</span>
-            <select className="field min-h-11 !w-auto" value={district} onChange={(e) => setDistrict(e.target.value)}>
+            <select className="field min-h-11 !w-40 max-w-full" value={district} onChange={(e) => setDistrict(e.target.value)}>
               <option value="">সব জেলা</option>
               {[...new Set([...(district ? [district] : []), ...data.districts])].map((d) => <option key={d} value={d}>{d}</option>)}
             </select>
@@ -73,13 +73,13 @@ export default function PointsBoard() {
       {top.length > 0 && (
         <div className="grid grid-cols-3 items-end gap-2 sm:gap-4" aria-label="সেরা তিন">
           {podium.map((r, i) => (
-            <div key={i} className="flex flex-col items-center text-center">
+            <div key={i} className="flex min-w-0 flex-col items-center text-center">
               {r && (
                 <>
                   <div className={motion ? 'reveal-up' : ''} style={motion ? { animationDelay: `${[250, 500, 0][i]}ms` } : undefined}>
                     <Avatar avatar={r.avatar ?? DEFAULT_AVATAR} className={i === 1 ? 'h-20 w-20' : 'h-16 w-16'} />
                   </div>
-                  <p className="mt-1 line-clamp-1 w-full text-sm font-bold">{r.username ? <a href={`/u/?h=${r.username}`} className="text-link">{r.name}</a> : r.name}{r.me && ' (তুমি)'}</p>
+                  <p className="mt-1 w-full truncate text-sm font-bold">{r.username ? <a href={`/u/?h=${r.username}`} className="text-link">{r.name}</a> : r.name}{r.me && ' (তুমি)'}</p>
                   <p className="text-xs text-ink-soft">{bn(r.score)} পয়েন্ট</p>
                   <div className={`mt-1 grid w-full place-items-start justify-center rounded-t-2xl pt-2 text-2xl ${heights[i]} ${i === 1 ? 'bg-sun' : 'bg-tint'} ${motion ? 'origin-bottom animate-[podium_.6s_ease-out_both]' : ''}`}
                     style={motion ? { animationDelay: `${[200, 450, 0][i]}ms` } : undefined}>{medals[i]}</div>
