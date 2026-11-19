@@ -58,6 +58,7 @@ export const FOOTER_LINKS = {
   ],
   about: [
     { href: '/about', bn: 'আমাদের কথা', en: 'About us' },
+    { href: '/team', bn: 'আমাদের টিম', en: 'Our team' },
     { href: '/privacy', bn: 'গোপনীয়তা ও অভিভাবক', en: 'Privacy & parents' },
     { href: '/code-of-conduct', bn: 'আচরণবিধি', en: 'Code of conduct' },
     { href: '/contact', bn: 'যোগাযোগ', en: 'Contact' },

@@ -1,6 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import AdminPanel from '../components/islands/AdminPanel';
+import AdminTools from '../components/islands/AdminTools';
 import { mentors } from '../lib/content';
 ---
 <BaseLayout title="কোর টিম ডেস্ক" description="পিচ রিভিউ, মডারেশন আর ইনবক্স।" noindex hideFooter>
@@ -9,5 +10,6 @@ import { mentors } from '../lib/content';
     <h1 class="font-display text-[2.2rem] leading-tight sm:text-5xl">কোর টিম ডেস্ক</h1>
     <p class="mt-1 text-ink-soft">লক্ষ্য: প্রতিটা পিচের প্রথম উত্তর ৭ দিনের মধ্যে। বিষয়ের মিল · তথ্য · নিরাপত্তা।</p>
     <div class="mt-5"><AdminPanel client:only="react" mentors={mentors.map((m) => m.name)}><div slot="fallback" class="card grid h-60 place-items-center text-ink-soft">লোড হচ্ছে…</div></AdminPanel></div>
+    <AdminTools client:only="react" />
   </div>
 </BaseLayout>

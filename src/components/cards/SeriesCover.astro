@@ -22,7 +22,7 @@ const count = s.kind === 'cartoon' ? `${bn(liveEpisodes.length)} পর্ব` :
     {fresh && (
       <span class="absolute right-3 top-3 flex items-center gap-1.5 rounded-full bg-white px-2 py-0.5 text-xs font-bold text-coral-dark"><span class="new-dot !h-2 !w-2 !shadow-none"></span>নতুন</span>
     )}
-    <h3 class:list={['absolute bottom-3 left-4 right-20 text-[1.3rem] font-bold leading-tight', light ? 'text-white' : 'text-deep']}>
+    <h3 class:list={['absolute bottom-3 left-4 right-20 line-clamp-2 text-[1.3rem] font-bold leading-tight', light ? 'text-white' : 'text-deep']}>
       <a href={href} class="after:absolute after:inset-0 after:content-['']">{s.title}</a>
     </h3>
   </div>

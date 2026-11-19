@@ -67,6 +67,9 @@ TARGETS = r"""
     }
     if (mobile) {
       const inline = el.tagName === 'A' && el.closest('p, li > p, .prose') && s.display === 'inline';
+      // stretched links (::after covers the whole card) are as big as their card
+      const stretched = getComputedStyle(el, '::after').position === 'absolute';
+      if (stretched) continue;
       if (!inline && (q.width < 40 || q.height < 40)) res.small.push(name(el) + ` ${Math.round(q.width)}x${Math.round(q.height)}`);
     }
     if (res.covered.length > 10) break;

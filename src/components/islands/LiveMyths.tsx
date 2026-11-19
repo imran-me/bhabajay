@@ -74,7 +74,7 @@ export default function LiveMyths() {
                   <span className={`absolute left-2 top-2 rounded-full px-2.5 py-0.5 text-xs font-bold ${v.cls}`}>{v.bn}</span>
                 </span>
                 <span className="block px-3 pb-3 pt-2.5">
-                  <span className="line-clamp-2 block font-bold leading-snug">“{m.claim}”</span>
+                  <span className="line-clamp-2 min-h-[2.75em] font-bold leading-snug">“{m.claim}”</span>
                   <span className="mt-1 block text-[.82rem] text-ink-soft">{shownDate(m.publishedAt) || 'মিথ না সত্য?'}</span>
                 </span>
               </button>

@@ -21,4 +21,11 @@ import Doodle from '../components/brand/Doodle.astro';
       </div>
     </div>
   </section>
+  <script is:inline>
+    // member profiles are not prebuilt pages: /u/<handle> → the profile viewer
+    (function () {
+      var m = location.pathname.match(/^\/u\/([a-z0-9_]{3,20})\/?$/i);
+      if (m) location.replace('/u/?h=' + m[1].toLowerCase());
+    })();
+  </script>
 </BaseLayout>

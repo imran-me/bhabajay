@@ -7,10 +7,10 @@ require __DIR__ . '/_lib.php';
 $db = bj_db();
 $slug = bj_slug($_GET['slug'] ?? '');
 if ($slug === '') {
-  $rows = $db->query('SELECT slug, kind, title, blurb, opens_at AS opensAt, seconds_per_question AS secondsPerQuestion FROM quizzes ORDER BY created_at, slug')->fetchAll();
+  $rows = $db->query('SELECT slug, kind, title, blurb, opens_at AS opensAt, seconds_per_question AS secondsPerQuestion FROM quizzes WHERE published = 1 ORDER BY created_at, slug')->fetchAll();
   bj_out(['quizzes' => $rows]);
 }
-$st = $db->prepare('SELECT slug, kind, title, blurb, opens_at AS opensAt, seconds_per_question AS secondsPerQuestion FROM quizzes WHERE slug = ?');
+$st = $db->prepare('SELECT slug, kind, title, blurb, opens_at AS opensAt, seconds_per_question AS secondsPerQuestion FROM quizzes WHERE slug = ? AND published = 1');
 $st->execute([$slug]);
 $quiz = $st->fetch();
 if (!$quiz) bj_fail('not_found', 404);

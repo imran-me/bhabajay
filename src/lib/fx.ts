@@ -1,5 +1,6 @@
 /**
- * Delight effects: sound (off by default, synthesized — no audio files),
+ * Delight effects: sound (on by default, starts after the first tap/key because
+ * browsers block audio before a user gesture; synthesized, no audio files),
  * confetti in brand colours, and a reduced-motion guard.
  */
 import { getState } from './store';
@@ -21,9 +22,18 @@ function ac(): AudioContext | null {
   }
 }
 
+/** Browsers keep audio locked until a gesture: wake the context on the first tap/click/key. */
+if (typeof window !== 'undefined') {
+  const unlock = () => {
+    if (getState().prefs.sound) ac();
+    ['pointerdown', 'keydown', 'touchstart'].forEach((e) => window.removeEventListener(e, unlock, true));
+  };
+  ['pointerdown', 'keydown', 'touchstart'].forEach((e) => window.addEventListener(e, unlock, { capture: true, passive: true }));
+}
+
 function tone(freq: number, start: number, dur: number, type: OscillatorType = 'sine', vol = 0.12) {
   const c = ac();
-  if (!c) return;
+  if (!c || c.state !== 'running') return; // no queued blips before the first gesture
   const o = c.createOscillator();
   const g = c.createGain();
   o.type = type;

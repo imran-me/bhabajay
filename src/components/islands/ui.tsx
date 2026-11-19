@@ -78,3 +78,23 @@ export function Field({ label, hint, error, children, htmlFor }: { label: string
 }
 
 export const isEmail = (v: string) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v.trim());
+
+/** Series chips: which series the person is curious about (stored as slugs). */
+export function InterestPicker({ options, value, onChange, max = 8 }: { options: { slug: string; title: string }[]; value: string[]; onChange: (v: string[]) => void; max?: number }) {
+  return (
+    <fieldset>
+      <legend className="label">কোন বিষয়ে কৌতূহল? <span className="font-normal text-ink-soft">(যতগুলো খুশি, {max}টা পর্যন্ত)</span></legend>
+      <div className="flex flex-wrap gap-2">
+        {options.map((o) => {
+          const on = value.includes(o.slug);
+          return (
+            <button key={o.slug} type="button" aria-pressed={on} className={`chip min-h-11 ${on ? 'is-active' : ''}`}
+              onClick={() => onChange(on ? value.filter((x) => x !== o.slug) : value.length >= max ? value : [...value, o.slug])}>
+              {o.title}{on && ' ✓'}
+            </button>
+          );
+        })}
+      </div>
+    </fieldset>
+  );
+}

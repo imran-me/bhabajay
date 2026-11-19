@@ -5,6 +5,7 @@ import Bhabu from '../../components/brand/Bhabu.astro';
 import Doodle from '../../components/brand/Doodle.astro';
 import QuizCard from '../../components/home/QuizCard.astro';
 import Leaderboard from '../../components/islands/Leaderboard';
+import RemoteQuiz from '../../components/islands/RemoteQuiz';
 import { quizzes, liveEpisodes, getSeries, getPerson, weeklies } from '../../lib/content';
 import { bn } from '../../lib/bn';
 
@@ -79,6 +80,8 @@ const modes = [
       </a>
     </section>
   ))}
+
+  <RemoteQuiz client:visible mode="list" known={quizzes.map((q) => q.slug)} />
 
   <section id="initiator" class="wrap mt-12 scroll-mt-24" aria-labelledby="in-h">
     <h2 id="in-h" class="section-title mb-4">ইনিশিয়েটরদের কুইজ</h2>

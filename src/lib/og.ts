@@ -14,8 +14,8 @@ import { bhabuSvg } from './bhabu';
 
 type FontKey = 'bold' | 'medium' | 'display' | 'stamp';
 const FILES: Record<FontKey, string> = {
-  bold: 'HindSiliguri-Bold.ttf',
-  medium: 'HindSiliguri-Medium.ttf',
+  bold: 'AnekBangla-Bold.ttf',
+  medium: 'AnekBangla-Medium.ttf',
   display: 'BalooDa2-ExtraBold.ttf',
   stamp: 'AnekBangla-CondensedExtraBold.ttf',
 };

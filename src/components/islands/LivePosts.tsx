@@ -100,7 +100,7 @@ export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty
                   <div className="grid aspect-[4/5] place-items-center bg-tint p-4 text-center text-lg font-bold text-ink">{p.title}</div>
                 )}
                 <span className="block px-3 pb-3 pt-2.5">
-                  <span className="line-clamp-2 block font-bold leading-snug">{p.title}</span>
+                  <span className="line-clamp-2 min-h-[2.75em] font-bold leading-snug">{p.title}</span>
                   <span className="mt-1 block truncate text-[.82rem] text-ink-soft">
                     {[seriesTitles[p.seriesSlug], shownDate(p.publishedAt)].filter(Boolean).join(' · ') || `${bn(p.readMinutes)} মিনিটে পড়া`}
                   </span>

@@ -11,8 +11,8 @@ bj_run(function () {
     $today = bj_cutoff();
     $sql = 'SELECT s.slug, s.title, s.tagline, s.subject, s.topic, s.doodle, s.color, s.description, s.cover,
                    DATE_FORMAT(s.launched_at, "%Y-%m-%d") AS launchedAt,
-                   (SELECT COUNT(*) FROM bj_posts p WHERE p.series_slug = s.slug AND p.published_at <= ?) AS posts,
-                   (SELECT DATE_FORMAT(MAX(p.published_at), "%Y-%m-%d") FROM bj_posts p WHERE p.series_slug = s.slug AND p.published_at <= ?) AS latest
+                   (SELECT COUNT(*) FROM bj_posts p WHERE p.series_slug = s.slug AND p.published_at <= ? AND p.hidden = 0) AS posts,
+                   (SELECT DATE_FORMAT(MAX(p.published_at), "%Y-%m-%d") FROM bj_posts p WHERE p.series_slug = s.slug AND p.published_at <= ? AND p.hidden = 0) AS latest
             FROM bj_series s';
     if ($slug) {
         $rows = bj_decode(bj_query("$sql WHERE s.slug = ?", [$today, $today, $slug]), ['color']);

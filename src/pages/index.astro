@@ -17,6 +17,7 @@ import {
 import { bn, TOPIC_LABEL } from '../lib/bn';
 import { SITE } from '../config/site';
 import LivePosts from '../components/islands/LivePosts';
+import Hero from '../components/home/Hero.astro';
 import { libraryTitles } from '../lib/library';
 
 const rows = seriesByActivity();
@@ -57,14 +58,15 @@ const jsonLd = [
   keywords={['বাংলা বিজ্ঞান', 'মিথ না সত্য', 'বাংলা কুইজ', 'bhaba jay', 'ভাবা যায়']}
   jsonLd={jsonLd}
 >
+  <Hero />
+
   <!-- ═════════════ real photo cards, one per series (from the API) ═════════════ -->
-  <section class="wrap pt-4 lg:pt-8" aria-label="ভাবা যায়!-এর ছবি-কার্ড">
+  <section class="wrap pt-6 lg:pt-10" aria-label="ভাবা যায়!-এর ছবি-কার্ড">
     <LivePosts client:load featured limit={8} seriesTitles={libraryTitles} heading="আজ কী ভাববেন?" />
   </section>
 
   <!-- ═════════════ MOBILE: the daily ritual (Plan p.6) ═════════════ -->
   <div class="wrap grid grid-cols-1 gap-5 pt-4 lg:hidden">
-    <h1 class="sr-only">ভাবা যায়! — কৌতূহলী বাংলাদেশের ঘর</h1>
     <ThoughtCard />
 
     <section aria-labelledby="m-series">
@@ -102,7 +104,7 @@ const jsonLd = [
       <section class="pattern-teal relative overflow-hidden rounded-[32px] p-10 text-white shadow-[var(--shadow-lift)]" aria-labelledby="hero-title">
         <div class="relative z-10 max-w-[58%] rounded-3xl bg-teal/70 p-1 backdrop-blur-[1px]">
           <p class="font-display text-xl text-sun">প্রশ্ন যার, সিরিজ তার</p>
-          <h1 id="hero-title" class="mt-2 font-display text-[3.4rem] leading-[1.12]">কৌতূহল থেকে শুরু হোক তোমার সিরিজ</h1>
+          <h2 id="hero-title" class="mt-2 font-display text-[3.4rem] leading-[1.12]">কৌতূহল থেকে শুরু হোক তোমার সিরিজ</h2>
           <p class="mt-4 max-w-md text-lg text-white/90">একটা প্রশ্ন পাঠাও। মেন্টর, ব্র্যান্ড কিট আর দল পাও। নিজের নামে সিরিজ চালাও — ওয়াল অফ ফেমে জায়গা নাও।</p>
           <div class="mt-7 flex flex-wrap gap-3">
             <a href="/initiator/pitch" class="btn btn-primary btn-lg">আইডিয়া পাঠাও</a>

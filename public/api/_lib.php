@@ -87,7 +87,7 @@ function bj_user(): ?array {
   if (empty($_COOKIE['BJSESS']) && session_status() !== PHP_SESSION_ACTIVE) return $u = null;
   bj_session();
   if (empty($_SESSION['uid'])) return $u = null;
-  $st = bj_db()->prepare('SELECT id, email, role, username, profile, created_at FROM users WHERE id = ?');
+  $st = bj_db()->prepare('SELECT id, email, role, username, profile, created_at FROM users WHERE id = ? AND disabled = 0');
   $st->execute([(int)$_SESSION['uid']]);
   return $u = ($st->fetch() ?: null);
 }
@@ -140,4 +140,10 @@ function bj_maybe_promote(array $u): void {
   $db = bj_db();
   if ((int)$db->query("SELECT COUNT(*) FROM users WHERE role = 'core'")->fetchColumn() > 0) return;
   $db->prepare("UPDATE users SET role = 'core' WHERE id = ?")->execute([$u['id']]);
+}
+
+/** Record an admin action in audit_log. */
+function bj_audit(array $admin, string $action, string $target, ?array $detail = null): void {
+  bj_db()->prepare('INSERT INTO audit_log (admin_id, admin_email, action, target, detail) VALUES (?,?,?,?,?)')
+    ->execute([(int)$admin['id'], $admin['email'], $action, mb_substr($target, 0, 120), $detail ? json_encode($detail, JSON_UNESCAPED_UNICODE) : null]);
 }

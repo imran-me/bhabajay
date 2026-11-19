@@ -108,6 +108,8 @@ export interface ProfileInput {
   district?: string;
   schoolId?: string;
   bio?: string;
+  /** series slugs the person is curious about */
+  interests?: string[];
   avatar: AvatarConfig;
 }
 

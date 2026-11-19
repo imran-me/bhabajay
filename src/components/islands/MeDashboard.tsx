@@ -11,10 +11,11 @@ import { doodleSvg } from '../../lib/doodles';
 import { sound, confetti } from '../../lib/fx';
 import type { AvatarConfig } from '../../data/types';
 import AvatarStudio from './AvatarStudio';
-import { Avatar, Bhabu, Flame, Icon, Loader } from './ui';
+import { Avatar, Bhabu, Flame, Icon, InterestPicker, Loader } from './ui';
 
 interface Item { id: string; title: string; url: string }
 interface Props {
+  seriesList?: { slug: string; title: string }[];
   catalog: { post: Item[]; myth: Item[]; episode: Item[]; series: Item[] };
   quizTopics: Record<string, string>;
   schools: { id: string; name: string; district: string }[];
@@ -23,7 +24,7 @@ interface Props {
 
 const BG = { teal: 'bg-teal', coral: 'bg-coral', sun: 'bg-sun', deep: 'bg-deep', mint: 'bg-mint' } as const;
 
-export default function MeDashboard({ catalog, quizTopics, schools, districts }: Props) {
+export default function MeDashboard({ catalog, quizTopics, schools, districts, seriesList = [] }: Props) {
   const [st, setSt] = useState<State>(getState);
   const [b, setB] = useState<Backend | null>(null);
   const [pitches, setPitches] = useState<Pitch[] | null>(null);
@@ -257,7 +258,7 @@ export default function MeDashboard({ catalog, quizTopics, schools, districts }:
       {/* settings */}
       <section id="settings" className="card scroll-mt-24 p-5 sm:p-6" aria-labelledby="st-h">
         <h2 id="st-h" className="text-xl font-bold">সেটিংস ও গোপনীয়তা</h2>
-        {u ? <ProfileSettings u={u} schools={schools} districts={districts} onSave={saveSettings} /> : <p className="mt-2 text-ink-soft">প্রোফাইল সেটিংস আইডি বানালে পাবে।</p>}
+        {u ? <><ProfileSettings u={u} schools={schools} districts={districts} seriesList={seriesList} onSave={saveSettings} />{b?.mode === 'php' && <a href={`/u/?h=${u.username}`} className="btn btn-ghost btn-sm mt-3">আমার পাবলিক প্রোফাইল দেখো →</a>}</> : <p className="mt-2 text-ink-soft">প্রোফাইল সেটিংস আইডি বানালে পাবে।</p>}
 
         <div className="mt-6 grid gap-3 border-t border-line pt-5">
           <h3 className="font-bold">নোটিফিকেশন</h3>
@@ -308,15 +309,17 @@ function Prog({ label, v, max }: { label: string; v: number; max: number }) {
 function Toggle({ label, on, onChange }: { label: string; on: boolean; onChange: (v: boolean) => void }) {
   return (
     <label className="flex cursor-pointer items-center gap-3">
-      <button type="button" role="switch" aria-checked={on} onClick={() => onChange(!on)} className={`relative h-7 w-12 shrink-0 rounded-full transition before:absolute before:-inset-y-2 before:-inset-x-1 before:content-[''] ${on ? 'bg-teal' : 'bg-line'}`}>
-        <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all ${on ? 'left-6' : 'left-1'}`} />
+      <button type="button" role="switch" aria-checked={on} onClick={() => onChange(!on)} className="grid min-h-11 w-12 shrink-0 place-items-center">
+        <span className={`relative block h-7 w-12 rounded-full transition ${on ? 'bg-teal' : 'bg-line'}`}>
+          <span className={`absolute top-1 h-5 w-5 rounded-full bg-white shadow transition-all ${on ? 'left-6' : 'left-1'}`} />
+        </span>
       </button>
       <span>{label}</span>
     </label>
   );
 }
 
-function ProfileSettings({ u, schools, districts, onSave }: { u: NonNullable<State['user']>; schools: Props['schools']; districts: string[]; onSave: (p: Partial<NonNullable<State['user']>>) => void }) {
+function ProfileSettings({ u, schools, districts, seriesList, onSave }: { u: NonNullable<State['user']>; schools: Props['schools']; districts: string[]; seriesList: { slug: string; title: string }[]; onSave: (p: Partial<NonNullable<State['user']>>) => void }) {
   const [nickname, setNickname] = useState(u.nickname);
   const [bio, setBio] = useState(u.bio ?? '');
   const [isPublic, setIsPublic] = useState(u.isPublic);
@@ -324,10 +327,11 @@ function ProfileSettings({ u, schools, districts, onSave }: { u: NonNullable<Sta
   const [realName, setRealName] = useState(u.realName ?? '');
   const [district, setDistrict] = useState(u.district ?? '');
   const [schoolId, setSchoolId] = useState(u.schoolId ?? '');
+  const [interests, setInterests] = useState<string[]>(u.interests ?? []);
   const teen = u.ageBand === '13-17';
   const canPlace = !teen || u.parentConfirmed;
   return (
-    <form className="mt-4 grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); onSave({ nickname: nickname.trim() || u.nickname, bio: bio.trim(), isPublic, showRealName, realName: realName.trim() || undefined, district: district || undefined, schoolId: schoolId || undefined }); }}>
+    <form className="mt-4 grid gap-4 sm:grid-cols-2" onSubmit={(e) => { e.preventDefault(); onSave({ nickname: nickname.trim() || u.nickname, bio: bio.trim(), isPublic, showRealName, realName: realName.trim() || undefined, district: district || undefined, schoolId: schoolId || undefined, interests }); }}>
       <div><label className="label" htmlFor="s-nick">ডাকনাম</label><input id="s-nick" className="field" value={nickname} maxLength={30} onChange={(e) => setNickname(e.target.value)} /></div>
       <div><label className="label" htmlFor="s-bio">এক লাইনে তুমি</label><input id="s-bio" className="field" value={bio} maxLength={60} placeholder="যেমন: রান্নাঘরেই ল্যাব!" onChange={(e) => setBio(e.target.value)} /></div>
       <div><label className="label" htmlFor="s-dist">জেলা</label>
@@ -336,6 +340,7 @@ function ProfileSettings({ u, schools, districts, onSave }: { u: NonNullable<Sta
       <div><label className="label" htmlFor="s-school">স্কুল / ক্লাব</label>
         <select id="s-school" className="field" value={schoolId} disabled={!canPlace} onChange={(e) => setSchoolId(e.target.value)}><option value="">বলতে চাই না</option>{schools.map((s) => <option key={s.id} value={s.id}>{s.name}, {s.district}</option>)}</select>
       </div>
+      {seriesList.length > 0 && <div className="sm:col-span-2"><InterestPicker options={seriesList} value={interests} onChange={setInterests} /></div>}
       {!canPlace && <p className="hint sm:col-span-2">জেলা আর স্কুল যোগ করতে অভিভাবকের নিশ্চিতকরণ লাগবে।</p>}
       {teen ? (
         <p className="rounded-2xl bg-tint p-3 text-sm sm:col-span-2">১৩–১৭ বয়সে প্রোফাইল ব্যক্তিগত থাকে; পাবলিক নাম শুধু ডাকনাম + অবতার। ১৮ হলে পাবলিক করার অপশন খুলবে।</p>

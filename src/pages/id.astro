@@ -1,11 +1,12 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import IdPanel from '../components/islands/IdPanel';
-import { schools } from '../lib/content';
+import { schools, series } from '../lib/content';
 import { DISTRICTS } from '../data/districts';
+const seriesList = series.map((x) => ({ slug: x.slug, title: x.title }));
 ---
 <BaseLayout title="ভাবা যায় আইডি — ৩০ সেকেন্ডে সাইন আপ" description="ফ্রি ভাবা যায় আইডি: কুইজ স্কোর, স্ট্রিক, ব্যাজ আর নিজের ভাবু অবতার। পাসওয়ার্ড নেই, কিশোরদের জন্য নিরাপদ।" noindex>
   <div class="wrap max-w-lg pt-6 sm:pt-10">
-    <IdPanel client:load schools={schools} districts={DISTRICTS} />
+    <IdPanel client:load schools={schools} districts={DISTRICTS} seriesList={seriesList} />
   </div>
 </BaseLayout>

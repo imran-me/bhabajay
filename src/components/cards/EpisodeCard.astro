@@ -20,7 +20,7 @@ const href = `/bhabur-duniya/${ep.slug}`;
   </div>
   <div class="p-3.5 sm:p-4">
     <p class="text-sm font-bold text-coral-dark dark:text-coral">পর্ব {bn(ep.number)}{ep.comingSoon && ' · শীঘ্রই'}</p>
-    <h3 class="mt-0.5 text-lg font-bold leading-snug">
+    <h3 class="mt-0.5 line-clamp-2 text-lg font-bold leading-snug">
       {ep.comingSoon ? ep.title : <a href={href} class="after:absolute after:inset-0 after:content-['']">{ep.title}</a>}
     </h3>
     <p class="mt-1 text-sm text-ink-soft">
