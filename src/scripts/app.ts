@@ -48,7 +48,7 @@ $$('[data-menu-open]').forEach((b) => b.addEventListener('click', () => menu?.sh
 $$('[data-menu-close]').forEach((b) => b.addEventListener('click', () => menu?.close()));
 menu?.addEventListener('click', (e) => { if (e.target === menu) menu.close(); });
 
-/* ───────────── Sound toggle (off by default) ───────────── */
+/* ───────────── Sound toggle (on by default; a visitor's choice is remembered) ───────────── */
 function applySound() {
   const on = getState().prefs.sound;
   $$('[data-sound-toggle]').forEach((b) => {

@@ -99,7 +99,7 @@ export function emptyState(): State {
     shares: 0,
     pitches: [],
     notices: [],
-    prefs: { sound: false, theme: 'system', lang: 'bn', notifyEmail: true, notifyPush: false },
+    prefs: { sound: true, theme: 'system', lang: 'bn', notifyEmail: true, notifyPush: false },
     flags: {},
   };
 }
@@ -113,7 +113,10 @@ function safeRead(): State {
     const raw = localStorage.getItem(KEY);
     if (!raw) return emptyState();
     const parsed = JSON.parse(raw);
-    return { ...emptyState(), ...parsed, prefs: { ...emptyState().prefs, ...(parsed.prefs || {}) }, streak: { ...emptyState().streak, ...(parsed.streak || {}) } };
+    const st = { ...emptyState(), ...parsed, prefs: { ...emptyState().prefs, ...(parsed.prefs || {}) }, streak: { ...emptyState().streak, ...(parsed.streak || {}) } };
+    // sound is on by default; only a visitor's own choice (flags.soundChosen) keeps it off
+    if (st.flags?.soundChosen !== '1') st.prefs.sound = true;
+    return st;
   } catch {
     return emptyState();
   }
@@ -345,6 +348,7 @@ export function curiousProgress(s = getState()) {
 export function setPref<K extends keyof State['prefs']>(k: K, v: State['prefs'][K]) {
   update((s) => {
     s.prefs[k] = v;
+    if (k === 'sound') s.flags = { ...s.flags, soundChosen: '1' };
   });
 }
 
