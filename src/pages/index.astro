@@ -7,7 +7,7 @@ import Stamp from '../components/ui/Stamp.astro';
 import Avatar from '../components/ui/Avatar.astro';
 import SectionHead from '../components/ui/SectionHead.astro';
 import SeriesCover from '../components/cards/SeriesCover.astro';
-import EpisodeCard from '../components/cards/EpisodeCard.astro';
+import { realEpisodes, episodeVideos, episodeSeconds, bnDuration } from '../lib/realEpisodes';
 import MythCard from '../components/cards/MythCard.astro';
 import ThoughtCard from '../components/home/ThoughtCard.astro';
 import QuizCard from '../components/home/QuizCard.astro';
@@ -24,8 +24,8 @@ import { libraryTitles } from '../lib/library';
 
 const rows = seriesByActivity();
 const myth = fridayMyth();
-const newestEp = liveEpisodes.at(-1)!;
-const nextEp = episodes.find((e) => e.comingSoon);
+const newestEp = realEpisodes.at(-1)!;
+const newestPoster = episodeVideos(newestEp)[0]?.poster;
 const stars = ['nadia', 'rafi', 'tanvir'].map((id) => getPerson(id)!).filter(Boolean);
 const star = getPerson(MONTH_STAR)!;
 const launch = cardSeries.slice().sort((a, b) => b.launchedAt.localeCompare(a.launchedAt))[0];
@@ -134,14 +134,14 @@ const jsonLd = [
 
       <div class="grid content-start gap-6">
         <a href={`/bhabur-duniya/${newestEp.slug}`} class="card card-hover press group grid grid-cols-[44%_1fr] items-center gap-4 p-3">
-          <span class="placeholder-stripes relative grid aspect-[4/3] place-items-center overflow-hidden rounded-2xl">
-            <Doodle name={newestEp.doodle} class="absolute left-3 top-3 h-10 w-10" />
+          <span class="relative grid aspect-[4/3] place-items-center overflow-hidden rounded-2xl bg-deep">
+            {newestPoster && <img src={newestPoster} alt="" loading="lazy" decoding="async" class="absolute inset-0 h-full w-full object-cover" />}
             <span class="grid h-14 w-14 place-items-center rounded-full bg-teal text-white shadow-[0_4px_0_#063C43] transition-transform group-hover:scale-110"><Icon name="play" class="ml-1 h-7 w-7" /></span>
           </span>
           <span>
             <span class="tag tag-coral">নতুন পর্ব</span>
             <span class="mt-2 block text-xl font-bold leading-snug">ভাবুর দুনিয়া · পর্ব {bn(newestEp.number)}: {newestEp.title}</span>
-            <span class="mt-1 block text-sm text-ink-soft">{newestEp.duration} মিনিট · ৩ প্রশ্নের কুইজ</span>
+            <span class="mt-1 block text-sm text-ink-soft">{bnDuration(episodeSeconds(newestEp))} মিনিট · ৩ প্রশ্নের কুইজ</span>
           </span>
         </a>
 
@@ -210,9 +210,17 @@ const jsonLd = [
     <div class="wrap">
       <SectionHead id="cartoon-title" eyebrow="কার্টুন সিরিজ" title="ভাবুর দুনিয়া" href="/bhabur-duniya" linkText="সব পর্ব" />
       <div class="swipe -mx-4 px-4 [grid-auto-columns:78%] sm:mx-0 sm:grid sm:grid-flow-row sm:grid-cols-2 sm:overflow-visible sm:px-0 lg:grid-cols-4">
-        {liveEpisodes.slice().reverse().map((ep) => <EpisodeCard ep={ep} />)}
+        {realEpisodes.slice().reverse().map((e) => (
+          <a href={`/bhabur-duniya/${e.slug}`} class="card card-hover press block overflow-hidden">
+            <span class="relative block">
+              <img src={episodeVideos(e)[0]?.poster} width="540" height="960" alt="" loading="lazy" decoding="async" class="aspect-[4/5] w-full bg-deep object-cover object-top" />
+              <span class="absolute left-2 top-2 rounded-full bg-coral px-2.5 py-0.5 text-xs font-bold text-white">পর্ব {bn(e.number)}</span>
+              <span class="absolute bottom-2 right-2 rounded-md bg-deep/85 px-1.5 py-0.5 text-xs font-bold text-white">{bnDuration(episodeSeconds(e))}</span>
+            </span>
+            <span class="line-clamp-2 min-h-[2.75em] px-3 pb-3 pt-2.5 font-bold leading-snug">{e.title}</span>
+          </a>
+        ))}
       </div>
-      {nextEp && <p class="mt-4 text-sm font-semibold text-ink-soft">পরের পর্ব: <span class="text-ink">“{nextEp.title}”</span> — শীঘ্রই আসছে।</p>}
     </div>
   </section>
 

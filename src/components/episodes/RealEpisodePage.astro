@@ -1,0 +1,114 @@
+---
+/** A released ভাবুর দুনিয়া episode: player (one or more parts), summary, 3 facts, quiz, comments. */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../ui/Icon.astro';
+import QuizPlayer from '../islands/QuizPlayer';
+import Comments from '../islands/Comments';
+import { getQuiz } from '../../lib/content';
+import { bn } from '../../lib/bn';
+import { SITE } from '../../config/site';
+import { type RealEpisode, realEpisodes, episodeVideos, episodeSeconds, bnDuration } from '../../lib/realEpisodes';
+
+interface Props { ep: RealEpisode }
+const { ep } = Astro.props;
+const parts = episodeVideos(ep);
+const quiz = ep.quizSlug ? getQuiz(ep.quizSlug) : undefined;
+const secs = episodeSeconds(ep);
+const others = realEpisodes.filter((e) => e.slug !== ep.slug);
+const next = realEpisodes.find((e) => e.number === ep.number + 1);
+const jsonLd = parts.map((v, i) => ({
+  '@type': 'VideoObject',
+  name: `ভাবুর দুনিয়া · পর্ব ${ep.number}: ${ep.title}${parts.length > 1 ? ` (ভাগ ${i + 1})` : ''}`,
+  description: ep.summary,
+  inLanguage: 'bn',
+  thumbnailUrl: `${SITE.url}${v.poster}`,
+  contentUrl: `${SITE.url}${v.src}`,
+  uploadDate: '2026-11-19',
+  duration: `PT${Math.floor(v.seconds / 60)}M${v.seconds % 60}S`,
+  partOfSeries: { '@type': 'TVSeries', name: 'ভাবুর দুনিয়া' },
+}));
+---
+<BaseLayout title={`পর্ব ${bn(ep.number)} · ${ep.title} — ভাবুর দুনিয়া`} description={ep.summary} type="video.other" jsonLd={jsonLd} image={parts[0]?.poster}>
+  <div class="wrap pt-4 sm:pt-6">
+    <a href="/bhabur-duniya" class="inline-flex min-h-11 items-center gap-1 font-bold text-link"><Icon name="arrow-left" class="h-4 w-4" />ভাবুর দুনিয়া</a>
+
+    <div class="mt-3 grid gap-8 lg:grid-cols-[minmax(0,26rem)_1fr]">
+      <div class="min-w-0">
+        {parts.map((v, i) => (
+          <figure class:list={[i > 0 && 'mt-5']}>
+            {parts.length > 1 && <figcaption class="mb-2 font-bold text-ink-soft">ভাগ {bn(i + 1)}</figcaption>}
+            <video src={v.src} poster={v.poster} controls playsinline preload="none" width="540" height="960"
+              class="mx-auto aspect-[9/16] max-h-[80svh] w-auto max-w-full rounded-[22px] bg-black shadow-[var(--shadow-lift)]"
+              data-episode-part={i}></video>
+          </figure>
+        ))}
+      </div>
+
+      <div class="min-w-0">
+        <p class="font-bold text-coral-dark">ভাবুর দুনিয়া · পর্ব {bn(ep.number)}</p>
+        <h1 class="mt-1 text-[1.8rem] font-bold leading-tight sm:text-4xl">{ep.title}</h1>
+        <p class="mt-1 text-ink-soft">{bnDuration(secs)} মিনিট{parts.length > 1 ? ` · ${bn(parts.length)} ভাগে` : ''} · বাংলা সাবটাইটেল</p>
+        <div class="mt-4 flex flex-wrap gap-2">
+          <button type="button" class="btn btn-sm btn-secondary" data-share data-share-url={`/bhabur-duniya/${ep.slug}`} data-share-title={`ভাবুর দুনিয়া: ${ep.title}`} data-share-text={`${ep.title} — ২ মিনিটের কার্টুনে উত্তর!`}><Icon name="share" class="h-4 w-4" />শেয়ার</button>
+        </div>
+        <p class="mt-5 text-lg leading-relaxed">{ep.summary}</p>
+
+        <aside class="mt-6 rounded-[22px] bg-tint p-5" aria-labelledby="facts-h">
+          <h2 id="facts-h" class="text-lg font-bold">৩টা মজার তথ্য</h2>
+          <ol class="mt-2 grid gap-1.5">
+            {ep.facts.map((f, i) => <li class="flex gap-2"><span class="font-display text-coral">{bn(i + 1)}.</span>{f}</li>)}
+          </ol>
+        </aside>
+
+        {quiz && (
+          <section class="mt-8" aria-labelledby="quiz-h" id="episode-quiz">
+            <h2 id="quiz-h" class="text-2xl font-bold">৩ প্রশ্নের কুইজ</h2>
+            <p class="mb-3 text-ink-soft">পর্বটা দেখেছেন? এবার যাচাই করুন কতটা মনে আছে।</p>
+            <QuizPlayer client:visible quiz={quiz} compact shareUrl={`/bhabur-duniya/${ep.slug}`} />
+          </section>
+        )}
+
+        {next && (
+          <a href={`/bhabur-duniya/${next.slug}`} class="card card-hover press mt-8 flex items-center gap-3 p-4">
+            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-full bg-coral text-xl text-white" aria-hidden="true">▶</span>
+            <span class="min-w-0"><span class="block text-sm text-ink-soft">পরের পর্ব</span><span class="block font-bold">পর্ব {bn(next.number)}: {next.title}</span></span>
+          </a>
+        )}
+
+        <section class="mt-10" aria-labelledby="cm-h">
+          <h2 id="cm-h" class="text-2xl font-bold">আলোচনা</h2>
+          <div class="mt-3"><Comments client:visible target={{ type: 'episode', id: ep.slug }} /></div>
+        </section>
+      </div>
+    </div>
+
+    {others.length > 0 && (
+      <section class="mt-12" aria-labelledby="more-h">
+        <h2 id="more-h" class="section-title">আরও পর্ব</h2>
+        <ul class="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4" role="list">
+          {others.map((e) => {
+            const v = episodeVideos(e)[0];
+            return (
+              <li class="card card-hover press overflow-hidden">
+                <a href={`/bhabur-duniya/${e.slug}`} class="block">
+                  <img src={v.poster} width="540" height="960" alt="" loading="lazy" decoding="async" class="aspect-[9/16] w-full bg-deep object-cover" />
+                  <span class="line-clamp-2 min-h-[2.75em] px-3 pb-3 pt-2.5 font-bold leading-snug">পর্ব {bn(e.number)}: {e.title}</span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      </section>
+    )}
+  </div>
+</BaseLayout>
+
+<script>
+  // when part 1 ends, roll straight into part 2
+  document.querySelectorAll<HTMLVideoElement>('video[data-episode-part]').forEach((v, i, all) => {
+    v.addEventListener('ended', () => {
+      const n = all[i + 1];
+      if (n) { n.scrollIntoView({ behavior: 'smooth', block: 'center' }); void n.play().catch(() => {}); }
+    });
+  });
+</script>

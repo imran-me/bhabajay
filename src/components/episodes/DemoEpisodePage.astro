@@ -1,0 +1,131 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Icon from '../../components/ui/Icon.astro';
+import Bhabu from '../../components/brand/Bhabu.astro';
+import EpisodePlayer from '../../components/islands/EpisodePlayer';
+import QuizPlayer from '../../components/islands/QuizPlayer';
+import Comments from '../../components/islands/Comments';
+import { liveEpisodes, getQuiz, kits } from '../../lib/content';
+import { castSvg, CAST } from '../../lib/cast';
+import { bn, bnCompact, bnDate } from '../../lib/bn';
+import { SITE } from '../../config/site';
+import type { Episode, CastId } from '../../data/types';
+
+const { ep, next, prev } = Astro.props as { ep: Episode; next: Episode | null; prev: Episode | null };
+const quiz = getQuiz(ep.quizSlug)!;
+const kit = kits.find((k) => k.episodeSlug === ep.slug);
+const castIn = [...new Set(ep.beats.map((b) => b.who).filter((w) => w !== 'narrator'))] as CastId[];
+const badge = { 'mosha-keno-amakei': 'episode-mosha', 'bang-keno-dake': 'episode-bang', 'brishtir-pore-matir-gondho': 'episode-mati', 'jonaki-keno-jole': 'episode-jonaki' }[ep.slug];
+const [m, s] = ep.duration.replace(/[০-৯]/g, (d) => String('০১২৩৪৫৬৭৮৯'.indexOf(d))).split(':').map(Number);
+const jsonLd = {
+  '@type': 'VideoObject',
+  name: `ভাবুর দুনিয়া · পর্ব ${ep.number}: ${ep.title}`,
+  description: ep.summary,
+  inLanguage: 'bn',
+  uploadDate: ep.publishedAt,
+  duration: `PT${m}M${s}S`,
+  thumbnailUrl: `${SITE.url}/og/episode/${ep.slug}.png`,
+  ...(ep.youtubeId ? { embedUrl: `https://www.youtube-nocookie.com/embed/${ep.youtubeId}` } : {}),
+  interactionStatistic: { '@type': 'InteractionCounter', interactionType: { '@type': 'WatchAction' }, userInteractionCount: ep.views },
+  partOfSeries: { '@type': 'TVSeries', name: 'ভাবুর দুনিয়া' },
+};
+---
+<BaseLayout noindex title={`নমুনা পর্ব · ${ep.title} — ভাবুর দুনিয়া`} description={ep.summary} type="video.other" jsonLd={jsonLd} image={`/og/episode/${ep.slug}.png`}>
+  <div class="wrap pt-4 sm:pt-6">
+    <a href="/bhabur-duniya" class="inline-flex min-h-11 items-center gap-1 font-bold text-link"><Icon name="arrow-left" class="h-4 w-4" />ভাবুর দুনিয়া</a>
+
+    <p class="mt-2 rounded-2xl bg-sun-soft px-4 py-2 text-sm font-semibold text-deep">নমুনা পর্ব: এটা পরিকল্পনার অ্যানিমেটিক। আসল পর্বগুলো দেখুন <a href="/bhabur-duniya" class="font-bold text-link underline">ভাবুর দুনিয়া</a> পাতায়।</p>
+    <div class="mt-3 grid gap-8 lg:grid-cols-[minmax(0,1fr)_22rem]">
+      <div class="min-w-0">
+        <EpisodePlayer client:load slug={ep.slug} number={ep.number} title={ep.title} youtubeId={ep.youtubeId} doodle={ep.doodle} beats={ep.beats} next={next ? { slug: next.slug, title: next.title } : null} />
+
+        <h1 class="mt-5 text-[1.7rem] font-bold leading-tight sm:text-4xl">পর্ব {bn(ep.number)} · {ep.title}</h1>
+        <p class="mt-1 text-ink-soft">{ep.duration} · বাংলা সাবটাইটেল · {bnCompact(ep.views)} বার দেখা · {bnDate(ep.publishedAt)}</p>
+
+        <div class="mt-4 flex flex-wrap gap-2">
+          <button type="button" class="btn btn-sm btn-ghost aria-pressed:!bg-coral-soft aria-pressed:!text-coral-dark" data-like={`ep:${ep.slug}`} aria-pressed="false" data-on-label="ভালো লেগেছে" data-off-label="ভালো লাগল"><Icon name="heart" class="h-4 w-4" /><span data-label>ভালো লাগল</span></button>
+          <button type="button" class="btn btn-sm btn-ghost aria-pressed:!bg-tint" data-save={`episode:${ep.slug}`} aria-pressed="false" data-on-label="সেভ করা" data-off-label="সেভ"><Icon name="bookmark" class="h-4 w-4" /><span data-label>সেভ</span></button>
+          <button type="button" class="btn btn-sm btn-secondary" data-share data-share-url={`/bhabur-duniya/${ep.slug}`} data-share-title={`ভাবুর দুনিয়া: ${ep.title}`} data-share-text={`${ep.title} — ৪ মিনিটের মজার উত্তর, তারপর কুইজ!`}><Icon name="share" class="h-4 w-4" />শেয়ার</button>
+        </div>
+
+        <p class="mt-5 text-lg leading-relaxed">{ep.summary}</p>
+
+        <aside class="mt-6 rounded-[22px] bg-tint p-5" aria-labelledby="facts-h">
+          <h2 id="facts-h" class="text-lg font-bold">৩টা মজার তথ্য</h2>
+          <ol class="mt-2 grid gap-1.5">
+            {ep.facts.map((f, i) => <li class="flex gap-2"><span class="font-display text-coral">{bn(i + 1)}.</span>{f}</li>)}
+          </ol>
+        </aside>
+
+        <section id="episode-quiz" class="mt-6 scroll-mt-24" aria-label="পর্বের কুইজ">
+          <QuizPlayer client:visible quiz={quiz} lockedUntilEpisodeEnds badgeOnPerfect={badge} compact shareUrl={`/bhabur-duniya/${ep.slug}`} />
+        </section>
+
+        {/* tabs: cast / parents & teachers / behind the scenes */}
+        <div class="mt-10">
+          <div role="tablist" class="flex gap-1 overflow-x-auto border-b border-line" aria-label="আরও">
+            <button type="button" role="tab" aria-selected="true" data-etab="cast" class="tabbtn">চরিত্র</button>
+            <button type="button" role="tab" aria-selected="false" data-etab="parents" class="tabbtn">অভিভাবক ও শিক্ষক</button>
+            <button type="button" role="tab" aria-selected="false" data-etab="bts" class="tabbtn">পর্দার পেছনে</button>
+          </div>
+          <div data-epanel="cast" class="mt-4 grid gap-3 sm:grid-cols-2">
+            {castIn.map((c) => (
+              <div class="card flex items-center gap-3 p-3">
+                <span class="block h-14 w-14 shrink-0" set:html={castSvg(c)} />
+                <span><span class="block font-bold">{CAST[c].bn}</span><span class="text-sm text-ink-soft">{CAST[c].line}</span></span>
+              </div>
+            ))}
+          </div>
+          <div data-epanel="parents" hidden class="mt-4 grid gap-4">
+            <p class="flex flex-wrap gap-2"><span class="tag">বয়স: {ep.ageTag}</span><span class="tag">দৈর্ঘ্য: {ep.duration} মিনিট</span><span class="tag tag-sun">৩ প্রশ্নের কুইজ</span></p>
+            <div>
+              <h3 class="font-bold">আলোচনার প্রশ্ন</h3>
+              <ol class="mt-2 grid list-decimal gap-1.5 pl-5">{ep.discussion.map((d) => <li>{d}</li>)}</ol>
+            </div>
+            {kit ? (
+              <a href={`/teachers/${kit.slug}`} class="btn btn-secondary self-start"><Icon name="printer" class="h-4 w-4" />ছাপানো যায় এমন ওয়ার্কশিট</a>
+            ) : (
+              <button type="button" class="btn btn-ghost self-start" onclick="window.print()"><Icon name="printer" class="h-4 w-4" />প্রশ্নগুলো প্রিন্ট করো</button>
+            )}
+          </div>
+          <div data-epanel="bts" hidden class="mt-4">
+            <div class="flex items-start gap-4 rounded-[22px] bg-surface p-5 ring-1 ring-line">
+              <Bhabu face="wink" body="teal" dot="coral" class="w-12" />
+              <ul class="grid gap-2">{ep.behindScenes.map((x) => <li>{x}</li>)}</ul>
+            </div>
+            <a href="/initiator" class="mt-3 inline-flex font-bold text-link hover:underline">তুমিও এমন কিছু বানাতে চাও? ইনিশিয়েটর হও →</a>
+          </div>
+        </div>
+
+        <section class="mt-10" aria-labelledby="cm-h">
+          <h2 id="cm-h" class="text-xl font-bold">আলোচনা</h2>
+          <div class="mt-3"><Comments client:visible target={{ type: 'episode', id: ep.slug }} /></div>
+        </section>
+      </div>
+
+      <aside class="grid content-start gap-3">
+        <h2 class="font-bold">আরও পর্ব</h2>
+        {liveEpisodes.filter((e) => e.slug !== ep.slug).map((e) => (
+          <a href={`/bhabur-duniya/${e.slug}`} class="card card-hover press flex items-center gap-3 p-2.5">
+            <span class="pattern-deep grid aspect-video w-28 shrink-0 place-items-center rounded-xl"><span class="grid h-8 w-8 place-items-center rounded-full bg-coral text-white"><Icon name="play" class="ml-0.5 h-4 w-4" /></span></span>
+            <span class="min-w-0"><span class="block text-xs font-bold text-coral-dark dark:text-coral">পর্ব {bn(e.number)}</span><span class="line-clamp-2 font-semibold leading-snug">{e.title}</span></span>
+          </a>
+        ))}
+        {prev && <a href={`/bhabur-duniya/${prev.slug}`} class="text-sm font-bold text-link">← আগের পর্ব</a>}
+      </aside>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .tabbtn { position: relative; flex-shrink: 0; padding: .25rem .75rem .75rem; font-weight: 700; color: var(--c-ink-soft); }
+  .tabbtn[aria-selected='true'] { color: var(--color-coral-dark); }
+  .tabbtn[aria-selected='true']::after { content: ''; position: absolute; inset-inline: .5rem; bottom: 0; height: 3px; border-radius: 99px; background: var(--color-coral); }
+</style>
+<script>
+  const tabs = document.querySelectorAll<HTMLButtonElement>('[data-etab]');
+  tabs.forEach((t) => t.addEventListener('click', () => {
+    tabs.forEach((x) => x.setAttribute('aria-selected', String(x === t)));
+    document.querySelectorAll<HTMLElement>('[data-epanel]').forEach((p) => (p.hidden = p.dataset.epanel !== t.dataset.etab));
+  }));
+</script>
