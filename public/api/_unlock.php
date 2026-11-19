@@ -14,6 +14,11 @@ const BJ_POINTS_DAILY_MYSTERY = 2;   // multiplier for "আজকের রহ�
 const BJ_POINTS_SHARE = 5;           // once per Dhaka day
 const BJ_MYTH_SERIES = 'myth-na-sotti';
 
+/** true when a query failed only because the DB sync has not created a table/column yet */
+function bj_missing_schema(Throwable $e): bool {
+  return $e instanceof PDOException && in_array((string)$e->getCode(), ['42S02', '42S22'], true);
+}
+
 function bj_dhaka_now(): DateTime { return new DateTime('now', new DateTimeZone('Asia/Dhaka')); }
 function bj_dhaka_day(): string { return bj_dhaka_now()->format('Y-m-d'); }
 function bj_next_reset(): string {
@@ -39,18 +44,28 @@ function bj_owner_where(array $o): array {
 function bj_unlocked(array $o, string $series): array {
   if (!$o['user'] && !$o['anon']) return [];
   [$w, $v] = bj_owner_where($o);
-  $st = bj_db()->prepare("SELECT item_slug FROM content_unlocks WHERE $w AND series_slug = ?");
-  $st->execute([$v, $series]);
-  return $st->fetchAll(PDO::FETCH_COLUMN);
+  try {
+    $st = bj_db()->prepare("SELECT item_slug FROM content_unlocks WHERE $w AND series_slug = ?");
+    $st->execute([$v, $series]);
+    return $st->fetchAll(PDO::FETCH_COLUMN);
+  } catch (PDOException $e) {
+    if (bj_missing_schema($e)) return [];
+    throw $e;
+  }
 }
 
 /** how many unlocks this owner used today in a series */
 function bj_used_today(array $o, string $series): int {
   if (!$o['user'] && !$o['anon']) return 0;
   [$w, $v] = bj_owner_where($o);
-  $st = bj_db()->prepare("SELECT COUNT(*) FROM content_unlocks WHERE $w AND series_slug = ? AND unlock_day = ?");
-  $st->execute([$v, $series, bj_dhaka_day()]);
-  return (int)$st->fetchColumn();
+  try {
+    $st = bj_db()->prepare("SELECT COUNT(*) FROM content_unlocks WHERE $w AND series_slug = ? AND unlock_day = ?");
+    $st->execute([$v, $series, bj_dhaka_day()]);
+    return (int)$st->fetchColumn();
+  } catch (PDOException $e) {
+    if (bj_missing_schema($e)) return 0;
+    throw $e;
+  }
 }
 
 /** the always-open cards of a series (oldest first) */
@@ -60,8 +75,14 @@ function bj_free_items(string $series): array {
   $sql = $series === BJ_MYTH_SERIES
     ? 'SELECT slug FROM bj_myths ORDER BY published_at ASC, id ASC LIMIT ' . BJ_FREE_PER_SERIES
     : 'SELECT slug FROM bj_posts WHERE series_slug = ? AND hidden = 0 ORDER BY published_at ASC, id ASC LIMIT ' . BJ_FREE_PER_SERIES;
-  $st = bj_db()->prepare($sql);
-  $st->execute($series === BJ_MYTH_SERIES ? [] : [$series]);
+  try {
+    $st = bj_db()->prepare($sql);
+    $st->execute($series === BJ_MYTH_SERIES ? [] : [$series]);
+  } catch (PDOException $e) {
+    if (!bj_missing_schema($e)) throw $e;
+    $st = bj_db()->prepare(str_replace(' AND hidden = 0', '', $sql)); // before the hidden column exists
+    $st->execute($series === BJ_MYTH_SERIES ? [] : [$series]);
+  }
   return $cache[$series] = $st->fetchAll(PDO::FETCH_COLUMN);
 }
 

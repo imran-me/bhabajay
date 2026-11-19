@@ -10,6 +10,17 @@ require __DIR__ . '/_content.php';
 require __DIR__ . '/_unlock.php';
 header('Cache-Control: private, no-store');
 $db = bj_db();
+// zero-downtime: until the DB sync has created the unlock tables, answer a friendly 503
+set_exception_handler(function (Throwable $e) {
+  if (bj_missing_schema($e)) {
+    http_response_code(503);
+    header('Retry-After: 300');
+    echo json_encode(['error' => 'not_ready', 'message' => 'একটু পরে আবার চেষ্টা করো'], JSON_UNESCAPED_UNICODE);
+    exit;
+  }
+  error_log('[bj-api] ' . $e->getMessage());
+  bj_fail('server', 500);
+});
 
 function bj_series_ok(string $s): bool {
   if ($s === BJ_MYTH_SERIES) return true;
