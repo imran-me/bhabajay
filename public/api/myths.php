@@ -8,7 +8,7 @@ require __DIR__ . '/_content.php';
 
 bj_run(function () {
     $slug = bj_param('slug');
-    $today = (new DateTime('now', new DateTimeZone('Asia/Dhaka')))->format('Y-m-d');
+    $today = bj_cutoff();
     $cols = 'id, slug, claim, question, verdict, short, body, sources, images, DATE_FORMAT(published_at, "%Y-%m-%d") AS publishedAt';
     $json = ['body', 'sources', 'images'];
     if ($slug) {

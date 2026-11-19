@@ -32,6 +32,8 @@ export default function IdPanel({ schools, districts }: Props) {
   const [busy, setBusy] = useState(false);
   const [demoLink, setDemoLink] = useState<string | null>(null);
   const [checking, setChecking] = useState(true);
+  const [password, setPassword] = useState('');
+  const [isNew, setIsNew] = useState(false);
 
   useEffect(() => subscribe(setSt), []);
   useEffect(() => {
@@ -113,6 +115,34 @@ export default function IdPanel({ schools, districts }: Props) {
       setStep('magic-sent');
     } catch {
       setErr('উফ! লিংক পাঠানো গেল না। একটু পরে আবার চেষ্টা করো।');
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function passwordAuth(e: FormEvent) {
+    e.preventDefault();
+    if (needAge() || !b?.passwordSignIn) return;
+    if (!isEmail(email)) return setErr('উফ! ইমেইলটা ঠিক মনে হচ্ছে না');
+    if (password.length < 8) return setErr('পাসওয়ার্ড অন্তত ৮ অক্ষরের হোক');
+    setBusy(true);
+    setErr(null);
+    try {
+      const r = await b.passwordSignIn(email.trim(), password, isNew ? 'register' : 'login');
+      setPassword('');
+      if (r.hasProfile) {
+        toast('আবার স্বাগতম!', { mood: 'happy' });
+      } else {
+        setStep('profile');
+      }
+    } catch (x) {
+      const code = (x as { code?: string }).code;
+      setErr(
+        code === 'credentials' ? 'ইমেইল বা পাসওয়ার্ড মিলছে না। নতুন হলে “নতুন আইডি” বেছে নাও।'
+        : code === 'exists' ? 'এই ইমেইলে আগেই আইডি আছে — “লগ ইন” বেছে নাও।'
+        : code === 'rate' ? 'অনেকবার চেষ্টা হয়েছে। ১৫ মিনিট পরে আবার চেষ্টা করো।'
+        : 'উফ! এখন ঢোকা গেল না। একটু পরে আবার চেষ্টা করো।',
+      );
     } finally {
       setBusy(false);
     }
@@ -234,14 +264,32 @@ export default function IdPanel({ schools, districts }: Props) {
 
         {age !== 'under13' ? (
           <div className="mt-5 grid gap-2.5 text-left">
-            <button type="button" className="option justify-center" onClick={google} disabled={busy}><Icon name="google" className="h-5 w-5" />Google দিয়ে চালিয়ে যাও</button>
-            <form onSubmit={magic} className="grid gap-2">
-              <label htmlFor="ml-email" className="sr-only">ইমেইল</label>
-              <div className="flex gap-2">
-                <input id="ml-email" type="email" inputMode="email" autoComplete="email" className="field flex-1" placeholder="তোমার ইমেইল" value={email} onChange={(e) => setEmail(e.target.value)} aria-invalid={!!err && !!email} />
-                <button type="submit" className="btn btn-secondary shrink-0" disabled={busy} aria-label="ম্যাজিক লিংক পাঠাও"><Icon name="mail" className="h-5 w-5" /><span className="hidden sm:inline">ম্যাজিক লিংক</span></button>
-              </div>
-            </form>
+            {b.passwordSignIn ? (
+              <form onSubmit={passwordAuth} className="grid gap-2" noValidate>
+                <div className="grid grid-cols-2 gap-1 rounded-2xl bg-tint p-1" role="tablist" aria-label="লগ ইন না নতুন আইডি">
+                  {([[false, 'লগ ইন'], [true, 'নতুন আইডি']] as const).map(([v, l]) => (
+                    <button key={l} type="button" role="tab" aria-selected={isNew === v} onClick={() => { setIsNew(v); setErr(null); }}
+                      className={`min-h-11 rounded-xl font-bold ${isNew === v ? 'bg-surface shadow-sm' : 'text-ink-soft'}`}>{l}</button>
+                  ))}
+                </div>
+                <label htmlFor="pw-email" className="label !mb-0">ইমেইল</label>
+                <input id="pw-email" type="email" inputMode="email" autoComplete="email" className="field" placeholder="তোমার ইমেইল" value={email} onChange={(e) => setEmail(e.target.value)} />
+                <label htmlFor="pw-pass" className="label !mb-0">পাসওয়ার্ড</label>
+                <input id="pw-pass" type="password" autoComplete={isNew ? 'new-password' : 'current-password'} minLength={8} className="field" placeholder={isNew ? 'অন্তত ৮ অক্ষর' : ''} value={password} onChange={(e) => setPassword(e.target.value)} />
+                <button type="submit" className="btn btn-primary mt-1" disabled={busy}>{busy ? 'একটু দাঁড়াও…' : isNew ? 'আইডি বানাও' : 'ঢুকে পড়ো'}</button>
+              </form>
+            ) : (
+              <>
+                <button type="button" className="option justify-center" onClick={google} disabled={busy}><Icon name="google" className="h-5 w-5" />Google দিয়ে চালিয়ে যাও</button>
+                <form onSubmit={magic} className="grid gap-2">
+                  <label htmlFor="ml-email" className="sr-only">ইমেইল</label>
+                  <div className="flex gap-2">
+                    <input id="ml-email" type="email" inputMode="email" autoComplete="email" className="field flex-1" placeholder="তোমার ইমেইল" value={email} onChange={(e) => setEmail(e.target.value)} aria-invalid={!!err && !!email} />
+                    <button type="submit" className="btn btn-secondary shrink-0" disabled={busy} aria-label="ম্যাজিক লিংক পাঠাও"><Icon name="mail" className="h-5 w-5" /><span className="hidden sm:inline">ম্যাজিক লিংক</span></button>
+                  </div>
+                </form>
+              </>
+            )}
             <button type="button" className="option justify-center opacity-60" disabled title="এসএমএস খরচ আছে, তাই পরের ধাপে"><Icon name="phone" className="h-5 w-5" />ফোন নম্বরে OTP <span className="tag !py-0 text-xs">v2</span></button>
           </div>
         ) : (
@@ -250,7 +298,7 @@ export default function IdPanel({ schools, districts }: Props) {
         {err && <p className="error-text mt-3" role="alert">{err}</p>}
       </div>
       <div className="border-t border-line bg-tint px-6 py-4 text-left text-sm text-ink-soft">
-        <p>🔒 পাসওয়ার্ড নেই, তাই ভোলারও ভয় নেই। ইউজারনেম হবে ডাকনাম — আসল নাম নয়। ব্যবহারকারীদের মধ্যে সরাসরি মেসেজ নেই। এক চাপে “আমার ডেটা মুছে দাও”। <a href="/privacy" className="font-bold text-link">গোপনীয়তা নীতি</a></p>
+        <p>🔒 {b.passwordSignIn ? 'পাসওয়ার্ড এনক্রিপ্ট করে রাখা হয়, আমরাও দেখতে পাই না।' : 'পাসওয়ার্ড নেই, তাই ভোলারও ভয় নেই।'} ইউজারনেম হবে ডাকনাম — আসল নাম নয়। ব্যবহারকারীদের মধ্যে সরাসরি মেসেজ নেই। এক চাপে “আমার ডেটা মুছে দাও”। <a href="/privacy" className="font-bold text-link">গোপনীয়তা নীতি</a></p>
       </div>
     </div>
   );

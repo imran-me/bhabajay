@@ -57,6 +57,11 @@ const jsonLd = [
   keywords={['বাংলা বিজ্ঞান', 'মিথ না সত্য', 'বাংলা কুইজ', 'bhaba jay', 'ভাবা যায়']}
   jsonLd={jsonLd}
 >
+  <!-- ═════════════ real photo cards, one per series (from the API) ═════════════ -->
+  <section class="wrap pt-4 lg:pt-8" aria-label="ভাবা যায়!-এর ছবি-কার্ড">
+    <LivePosts client:load featured limit={8} seriesTitles={libraryTitles} heading="আজ কী ভাববেন?" />
+  </section>
+
   <!-- ═════════════ MOBILE: the daily ritual (Plan p.6) ═════════════ -->
   <div class="wrap grid grid-cols-1 gap-5 pt-4 lg:hidden">
     <h1 class="sr-only">ভাবা যায়! — কৌতূহলী বাংলাদেশের ঘর</h1>
@@ -188,11 +193,6 @@ const jsonLd = [
     <div class="swipe">
       {rows.map((s) => <SeriesCover s={s} />)}
     </div>
-  </section>
-
-  <!-- ═════════════ newest core-team posts (from the API; hidden when there are none) ═════════════ -->
-  <section class="wrap mt-12">
-    <LivePosts client:visible limit={8} seriesTitles={libraryTitles} heading="ভাবা যায়!-এর নতুন পোস্ট" />
   </section>
 
   <!-- ═════════════ ভাবুর দুনিয়া ═════════════ -->

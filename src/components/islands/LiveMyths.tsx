@@ -3,7 +3,7 @@
  * Before the first myth is out it shows the "শীঘ্রই আসছে" teaser. #m=<slug> opens a myth directly.
  */
 import { useEffect, useRef, useState } from 'react';
-import { bnDate } from './bnfmt';
+import { shownDate } from './bnfmt';
 import { TeaserCard, useUpcoming } from './Teaser';
 
 interface Img { src: string; width: number; height: number; alt: string }
@@ -75,7 +75,7 @@ export default function LiveMyths() {
                 </span>
                 <span className="block px-3 pb-3 pt-2.5">
                   <span className="line-clamp-2 block font-bold leading-snug">“{m.claim}”</span>
-                  <span className="mt-1 block text-[.82rem] text-ink-soft">{bnDate(m.publishedAt)}</span>
+                  <span className="mt-1 block text-[.82rem] text-ink-soft">{shownDate(m.publishedAt) || 'মিথ না সত্য?'}</span>
                 </span>
               </button>
             </li>

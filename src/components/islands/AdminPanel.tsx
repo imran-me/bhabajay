@@ -32,13 +32,13 @@ export default function AdminPanel({ mentors }: { mentors: string[] }) {
   useEffect(() => {
     void getBackend().then(async (be) => {
       setB(be);
-      if (be.mode === 'supabase') await be.getSession();
+      if (be.mode !== 'demo') await be.getSession();
       await refresh(be);
     });
   }, []);
 
   if (!b) return <Loader />;
-  if (b.mode === 'supabase' && getState().user?.role !== 'core') {
+  if (b.mode !== 'demo' && getState().user?.role !== 'core') {
     return (
       <div className="card flex items-center gap-4 p-6">
         <Bhabu face="think" body="teal" dot="coral" className="w-12" />
@@ -88,6 +88,16 @@ export default function AdminPanel({ mentors }: { mentors: string[] }) {
                   {(p.status === 'sent' || p.status === 'reviewing') && <span className={`text-xs font-bold ${days > 7 ? 'text-coral-dark' : 'text-ink-soft'}`}>{bn(days)} দিন</span>}
                 </button>
                 {isOpen && <PitchReview p={p} mentors={mentors} onMove={move} />}
+                {isOpen && b.admin.hidePitch && (
+                  <div className="border-t border-line px-4 py-3">
+                    <button type="button" className="btn btn-ghost btn-sm" onClick={async () => {
+                      await b.admin.hidePitch!(p.code, !p.hidden);
+                      toast(p.hidden ? `${p.code} আবার দেখা যাবে` : `${p.code} লুকানো হলো — পাবলিক ট্র্যাকারে আর দেখা যাবে না`, { mood: 'wink' });
+                      await refresh();
+                    }}>{p.hidden ? 'আবার দেখাও' : 'লুকিয়ে রাখো'}</button>
+                    {p.hidden && <span className="tag tag-coral ml-2">লুকানো</span>}
+                  </div>
+                )}
               </li>
             );
           })}

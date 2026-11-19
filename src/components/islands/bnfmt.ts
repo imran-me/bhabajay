@@ -6,3 +6,9 @@ export const bnDate = (iso: string) => {
   const [y, m, d] = iso.split('-').map(Number);
   return `${bn(d)} ${MONTHS[m - 1]} ${bn(y)}`;
 };
+
+/** Date label only for dates that have passed (scheduled posts show no date). */
+export const shownDate = (iso: string) => {
+  const today = new Date(Date.now() + 6 * 3600_000).toISOString().slice(0, 10);
+  return iso <= today ? bnDate(iso) : '';
+};

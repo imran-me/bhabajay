@@ -62,3 +62,16 @@ function bj_param(string $name, string $pattern = '/^[a-z0-9-]{1,100}$/'): ?stri
     if (!is_string($v) || !preg_match($pattern, $v)) bj_json(['error' => "bad $name"], 0, 400);
     return $v;
 }
+
+/**
+ * Last publish date visible on the site. The website is the full library, so by
+ * default every imported post shows regardless of its Facebook schedule.
+ * Set BJ_SCHEDULE=1 in db.env-adjacent server env to hide future posts again.
+ */
+function bj_cutoff(): string
+{
+    if (getenv('BJ_SCHEDULE') === '1') {
+        return (new DateTime('now', new DateTimeZone('Asia/Dhaka')))->format('Y-m-d');
+    }
+    return '9999-12-31';
+}

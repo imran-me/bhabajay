@@ -13,11 +13,11 @@ interface LivePost {
   readMinutes: number; publishedAt: string;
 }
 
-import { bn, bnDate } from './bnfmt';
+import { bn, shownDate } from './bnfmt';
 import { TeaserCard, UpcomingStrip, useUpcoming } from './Teaser';
 
-export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty, heading, teaserTitle }: {
-  series?: string; limit?: number; seriesTitles?: Record<string, string>; empty?: string; heading?: string; teaserTitle?: string;
+export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty, heading, teaserTitle, featured = false }: {
+  series?: string; limit?: number; seriesTitles?: Record<string, string>; empty?: string; heading?: string; teaserTitle?: string; featured?: boolean;
 }) {
   const [items, setItems] = useState<LivePost[] | null>(null);
   const [total, setTotal] = useState(0);
@@ -32,6 +32,7 @@ export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty
     try {
       const q = new URLSearchParams({ limit: String(limit), offset: String(offset) });
       if (series) q.set('series', series);
+      if (featured) q.set('featured', '1');
       const r = await fetch(`/api/posts.php?${q}`, { headers: { Accept: 'application/json' } });
       if (!r.ok) throw new Error(String(r.status));
       const data = await r.json();
@@ -101,7 +102,7 @@ export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty
                 <span className="block px-3 pb-3 pt-2.5">
                   <span className="line-clamp-2 block font-bold leading-snug">{p.title}</span>
                   <span className="mt-1 block truncate text-[.82rem] text-ink-soft">
-                    {seriesTitles[p.seriesSlug] ? `${seriesTitles[p.seriesSlug]} · ` : ''}{bnDate(p.publishedAt)}
+                    {[seriesTitles[p.seriesSlug], shownDate(p.publishedAt)].filter(Boolean).join(' · ') || `${bn(p.readMinutes)} মিনিটে পড়া`}
                   </span>
                 </span>
               </button>
@@ -125,7 +126,7 @@ export default function LivePosts({ series, limit = 24, seriesTitles = {}, empty
               <h2 id="lp-title" className="flex-1 text-xl font-bold leading-snug sm:text-2xl">{open.title}</h2>
               <button type="button" className="btn-icon h-10 w-10 shrink-0" aria-label="বন্ধ করুন" onClick={() => show(null)}>✕</button>
             </div>
-            <p className="mt-1 text-sm text-ink-soft">{bnDate(open.publishedAt)} · {bn(open.readMinutes)} মিনিটে পড়া</p>
+            <p className="mt-1 text-sm text-ink-soft">{shownDate(open.publishedAt) && `${shownDate(open.publishedAt)} · `}{bn(open.readMinutes)} মিনিটে পড়া</p>
             {open.images?.length > 0 && (
               <div className="-mx-4 mt-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 sm:mx-0 sm:px-0">
                 {open.images.map((im) => (
