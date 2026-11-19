@@ -4,6 +4,7 @@
 // Age band, district, school, email and parent email are never public.
 declare(strict_types=1);
 require __DIR__ . '/_lib.php';
+require_once __DIR__ . '/_unlock.php';
 $db = bj_db();
 
 $h = strtolower(bj_str($_GET['u'] ?? '', 20));
@@ -26,14 +27,32 @@ $pi->execute([$uid]);
 $c = $db->prepare("SELECT target_type, target_id, body, created_at FROM comments WHERE user_id = ? AND status = 'approved' ORDER BY created_at DESC LIMIT 20");
 $c->execute([$uid]);
 
+$progress = [];
+$seriesCards = [];
+try {
+  $progress = bj_progress(['user' => $uid, 'anon' => null]);
+  $done = array_map(fn($b) => substr($b, 7), array_values(array_filter($p['badges'] ?? [], fn($b) => is_string($b) && str_starts_with($b, 'series:'))));
+  if ($done) {
+    $in = implode(',', array_fill(0, count($done), '?'));
+    $st = $db->prepare("SELECT slug, title, cover FROM bj_series WHERE slug IN ($in)");
+    $st->execute($done);
+    $seriesCards = $st->fetchAll();
+    if (in_array(BJ_MYTH_SERIES, $done, true)) $seriesCards[] = ['slug' => BJ_MYTH_SERIES, 'title' => 'মিথ না সত্য?', 'cover' => null];
+  }
+} catch (PDOException $e) {
+  if (!in_array((string)$e->getCode(), ['42S02', '42S22'], true)) throw $e;
+}
+
 bj_out([
+  'progress' => array_filter($progress, fn($x) => $x['opened'] > 0),
+  'seriesBadges' => $seriesCards,
   'username' => $u['username'],
   'nickname' => $p['nickname'] ?? $u['username'],
   'realName' => (!empty($p['showRealName']) && $public) ? ($p['realName'] ?? null) : null,
   'bio' => $p['bio'] ?? null,
   'avatar' => $p['avatar'] ?? null,
   'interests' => $p['interests'] ?? [],
-  'badges' => $p['badges'] ?? [],
+  'badges' => array_values(array_filter($p['badges'] ?? [], fn($b) => is_string($b) && !str_starts_with($b, 'series:'))),
   'points' => (int)($p['points'] ?? 0),
   'core' => $u['role'] === 'core',
   'joined' => gmdate('c', strtotime($u['created_at'])),

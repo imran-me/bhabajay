@@ -7,6 +7,7 @@
 // POST {action: ...}  see the switch below.
 declare(strict_types=1);
 require __DIR__ . '/_lib.php';
+require_once __DIR__ . '/_notify.php';
 $db = bj_db();
 
 function bj_iso(?string $t): ?string { return $t ? gmdate('c', strtotime($t)) : null; }
@@ -135,6 +136,15 @@ if ($action === 'comment') {
   if (!in_array($status, ['approved', 'rejected', 'pending'], true)) bj_fail('invalid');
   $id = (int)($in['id'] ?? 0);
   $db->prepare('UPDATE comments SET status = ? WHERE id = ?')->execute([$status, $id]);
+  if ($status === 'approved') {
+    $st = $db->prepare('SELECT user_id, target_type, target_id FROM comments WHERE id = ?');
+    $st->execute([$id]);
+    $c = $st->fetch();
+    if ($c && $c['user_id']) {
+      $href = ['myth' => '/myth/' . $c['target_id'], 'episode' => '/bhabur-duniya/' . $c['target_id']][$c['target_type']] ?? null;
+      bj_notify((int)$c['user_id'], 'comment', 'তোমার মন্তব্য প্রকাশ হয়েছে ✓', 'সবাই এখন দেখতে পাবে।', $href, "comment-$id");
+    }
+  }
   bj_done($admin, $action, "comment:$id", ['status' => $status]);
 }
 if ($action === 'comment_delete') {
@@ -155,6 +165,13 @@ if ($action === 'pitch') {
   $history[] = array_filter(['status' => $status, 'at' => gmdate('c'), 'note' => $feedback], fn($v) => $v !== null);
   $db->prepare('UPDATE pitches SET status = ?, history = ?, feedback = COALESCE(?, feedback), mentor_name = COALESCE(?, mentor_name) WHERE code = ?')
     ->execute([$status, json_encode($history, JSON_UNESCAPED_UNICODE), $feedback, bj_str($in['mentorName'] ?? '', 100) ?: null, $code]);
+  $st = $db->prepare('SELECT user_id, title FROM pitches WHERE code = ?');
+  $st->execute([$code]);
+  $pp = $st->fetch();
+  if ($pp && $pp['user_id']) {
+    $label = ['sent' => 'পাঠানো', 'reviewing' => 'দেখা হচ্ছে', 'mentor' => 'মেন্টর ঠিক', 'live' => 'লাইভ', 'not_yet' => 'এখনো না'][$status];
+    bj_notify((int)$pp['user_id'], 'pitch', "পিচের খবর: $label", '“' . $pp['title'] . '”' . ($feedback ? " — $feedback" : ''), "/initiator/track?code=$code");
+  }
   bj_done($admin, $action, "pitch:$code", ['status' => $status]);
 }
 if ($action === 'pitch_hidden') {

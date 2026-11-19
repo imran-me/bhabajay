@@ -89,7 +89,9 @@ if ($action === 'stats') {
   // badges + points earned in the browser, shown on the public profile
   $prof = $u['profile'] ? (json_decode($u['profile'], true) ?: []) : null;
   if (!is_array($prof)) bj_out(['ok' => false]);
-  $prof['badges'] = array_values(array_slice(array_filter(is_array($in['badges'] ?? null) ? $in['badges'] : [], fn($x) => is_string($x) && preg_match('/^[a-z0-9-]{1,40}$/', $x)), 0, 80));
+  // merge: badges the server awarded (streaks, series) are kept
+  $client = array_filter(is_array($in['badges'] ?? null) ? $in['badges'] : [], fn($x) => is_string($x) && preg_match('/^[a-z0-9-]{1,40}$/', $x));
+  $prof['badges'] = array_values(array_slice(array_unique(array_merge($prof['badges'] ?? [], $client)), 0, 120));
   $prof['points'] = max(0, min(10000000, (int)($in['points'] ?? 0)));
   $db->prepare('UPDATE users SET profile = ? WHERE id = ?')->execute([json_encode($prof, JSON_UNESCAPED_UNICODE), $u['id']]);
   bj_out(['ok' => true]);
@@ -111,13 +113,15 @@ if ($action === 'profile') {
     'parentConfirmed' => $parentOk,
     // teen privacy: never a public real name / school / district without the parent's OK
     'isPublic' => $adult && !empty($p['isPublic']),
+    'showDistrict' => $adult && !empty($p['showDistrict']),
     'showRealName' => $adult && !empty($p['showRealName']),
     'realName' => $adult ? (bj_str($p['realName'] ?? '', 60) ?: null) : null,
     'district' => $parentOk ? (bj_str($p['district'] ?? '', 64) ?: null) : null,
     'schoolId' => $parentOk ? (bj_str($p['schoolId'] ?? '', 64) ?: null) : null,
     'bio' => bj_str($p['bio'] ?? '', 300) ?: null,
     'interests' => array_values(array_slice(array_filter(is_array($p['interests'] ?? null) ? $p['interests'] : [], fn($x) => is_string($x) && preg_match('/^[a-z0-9-]{1,64}$/', $x)), 0, 12)),
-    'badges' => array_values(array_slice(array_filter(is_array($p['badges'] ?? null) ? $p['badges'] : [], fn($x) => is_string($x) && preg_match('/^[a-z0-9-]{1,40}$/', $x)), 0, 80)),
+    'badges' => array_values(array_slice(array_unique(array_merge(array_filter($prev['badges'] ?? [], fn($x) => is_string($x) && str_starts_with($x, 'series:')),
+      array_filter(is_array($p['badges'] ?? null) ? $p['badges'] : [], fn($x) => is_string($x) && preg_match('/^[a-z0-9-]{1,40}$/', $x)))), 0, 120)),
     'points' => max(0, min(10000000, (int)($p['points'] ?? ($prev['points'] ?? 0)))),
     'avatar' => is_array($p['avatar'] ?? null) ? array_map(fn($v) => is_scalar($v) ? mb_substr((string)$v, 0, 40) : null, array_slice($p['avatar'], 0, 12, true)) : new stdClass(),
   ];

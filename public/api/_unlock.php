@@ -110,3 +110,22 @@ function bj_apply_locks(array $rows, string $kind): array {
   $GLOBALS['bj_private'] = true; // personalised: never cache publicly
   return $rows;
 }
+
+/** per-series progress for this visitor: [slug => [opened, total]] */
+function bj_progress(array $o): array {
+  $db = bj_db();
+  $tot = [];
+  foreach ($db->query('SELECT series_slug, COUNT(*) AS n FROM bj_posts WHERE hidden = 0 GROUP BY series_slug')->fetchAll() as $r) $tot[$r['series_slug']] = (int)$r['n'];
+  $tot[BJ_MYTH_SERIES] = (int)$db->query('SELECT COUNT(*) FROM bj_myths')->fetchColumn();
+  $un = [];
+  if ($o['user'] || $o['anon']) {
+    [$w, $v] = bj_owner_where($o);
+    $st = $db->prepare("SELECT series_slug, COUNT(*) AS n FROM content_unlocks WHERE $w GROUP BY series_slug");
+    $st->execute([$v]);
+    foreach ($st->fetchAll() as $r) $un[$r['series_slug']] = (int)$r['n'];
+  }
+  $out = [];
+  foreach ($tot as $slug => $n) $out[$slug] = ['opened' => min($n, min(BJ_FREE_PER_SERIES, $n) + ($un[$slug] ?? 0)), 'total' => $n];
+  return $out;
+}
+

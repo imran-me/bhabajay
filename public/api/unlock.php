@@ -8,6 +8,7 @@
 declare(strict_types=1);
 require __DIR__ . '/_content.php';
 require __DIR__ . '/_unlock.php';
+require_once __DIR__ . '/_notify.php';
 header('Cache-Control: private, no-store');
 $db = bj_db();
 // zero-downtime: until the DB sync has created the unlock tables, answer a friendly 503
@@ -48,9 +49,49 @@ function bj_unlock_points(int $uid): int {
   return (int)$st->fetchColumn();
 }
 
+const BJ_STREAK_BONUS_DAYS = [3, 7, 30];
+
+/** consecutive Dhaka days with at least one unlock, ending yesterday */
+function bj_streak_before_today(?int $uid): int {
+  if (!$uid) return 0;
+  try {
+    $st = bj_db()->prepare('SELECT DISTINCT unlock_day FROM content_unlocks WHERE user_id = ? AND unlock_day < ? ORDER BY unlock_day DESC LIMIT 40');
+    $st->execute([$uid, bj_dhaka_day()]);
+    $days = $st->fetchAll(PDO::FETCH_COLUMN);
+  } catch (PDOException $e) { if (bj_missing_schema($e)) return 0; throw $e; }
+  $d = bj_dhaka_now()->modify('-1 day');
+  $n = 0;
+  foreach ($days as $day) {
+    if ($day !== $d->format('Y-m-d')) break;
+    $n++;
+    $d->modify('-1 day');
+  }
+  return $n;
+}
+
+function bj_unlocked_today_any(?int $uid): bool {
+  if (!$uid) return false;
+  $st = bj_db()->prepare('SELECT 1 FROM content_unlocks WHERE user_id = ? AND unlock_day = ? LIMIT 1');
+  $st->execute([$uid, bj_dhaka_day()]);
+  return (bool)$st->fetchColumn();
+}
+
+/** today's extra key from a 3/7/30-day streak, usable in any one series */
+function bj_bonus_key(?int $uid): bool {
+  if (!$uid || !in_array(bj_streak_before_today($uid) + 1, BJ_STREAK_BONUS_DAYS, true)) return false;
+  try {
+    $st = bj_db()->prepare('SELECT 1 FROM content_unlocks WHERE user_id = ? AND unlock_day = ? AND bonus = 1 LIMIT 1');
+    $st->execute([$uid, bj_dhaka_day()]);
+    return !$st->fetchColumn();
+  } catch (PDOException $e) { if (bj_missing_schema($e)) return false; throw $e; }
+}
+
 function bj_state(array $o, string $series): array {
   $used = bj_used_today($o, $series);
-  return ['series' => $series, 'limit' => BJ_UNLOCKS_PER_DAY, 'used' => $used, 'left' => max(0, BJ_UNLOCKS_PER_DAY - $used),
+  $bonus = bj_bonus_key($o['user']);
+  $streak = bj_streak_before_today($o['user']) + (bj_unlocked_today_any($o['user']) ? 1 : 0);
+  return ['series' => $series, 'limit' => BJ_UNLOCKS_PER_DAY, 'used' => $used, 'left' => max(0, BJ_UNLOCKS_PER_DAY - $used) + ($bonus ? 1 : 0),
+    'bonusKey' => $bonus, 'streak' => $streak,
     'resetsAt' => bj_next_reset(), 'signedIn' => (bool)$o['user'],
     'rules' => ['unlock' => BJ_POINTS_UNLOCK, 'guessBonus' => BJ_POINTS_GUESS_BONUS, 'share' => BJ_POINTS_SHARE, 'mysteryMultiplier' => BJ_POINTS_DAILY_MYSTERY]];
 }
@@ -73,10 +114,11 @@ function bj_item(string $series, string $slug): ?array {
 if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'POST') {
   if (isset($_GET['mystery'])) bj_out(['mystery' => bj_mystery(), 'multiplier' => BJ_POINTS_DAILY_MYSTERY]);
   $o = bj_unlock_owner(false);
+  if (isset($_GET['progress'])) bj_out(['progress' => bj_progress($o)]);
   if (isset($_GET['left'])) {
     $out = [];
     foreach (array_slice(explode(',', (string)$_GET['left']), 0, 40) as $s) {
-      if (preg_match('/^[a-z0-9-]{1,80}$/', $s)) $out[$s] = max(0, BJ_UNLOCKS_PER_DAY - bj_used_today($o, $s));
+      if (preg_match('/^[a-z0-9-]{1,80}$/', $s)) $out[$s] = max(0, BJ_UNLOCKS_PER_DAY - bj_used_today($o, $s)) + (bj_bonus_key($o['user']) ? 1 : 0);
     }
     bj_out(['left' => $out, 'resetsAt' => bj_next_reset()]);
   }
@@ -126,9 +168,15 @@ $db->beginTransaction();
 [$w, $v] = bj_owner_where($o);
 $st = $db->prepare("SELECT COUNT(*) FROM content_unlocks WHERE $w AND series_slug = ? AND unlock_day = ? FOR UPDATE");
 $st->execute([$v, $series, bj_dhaka_day()]);
+$useBonus = false;
+$firstToday = !bj_unlocked_today_any($o['user']);
 if ((int)$st->fetchColumn() >= BJ_UNLOCKS_PER_DAY) {
-  $db->rollBack();
-  bj_out(['error' => 'no_keys'] + bj_state($o, $series), 429);
+  if (bj_bonus_key($o['user'])) {
+    $useBonus = true;
+  } else {
+    $db->rollBack();
+    bj_out(['error' => 'no_keys'] + bj_state($o, $series), 429);
+  }
 }
 $points = 0;
 if ($o['user']) {
@@ -136,14 +184,38 @@ if ($o['user']) {
   if ($isMystery) $points *= BJ_POINTS_DAILY_MYSTERY;
 }
 try {
-  $db->prepare('INSERT INTO content_unlocks (user_id, anon_key, series_slug, item_slug, guess, correct, points, unlock_day) VALUES (?,?,?,?,?,?,?,?)')
-    ->execute([$o['user'], $o['anon'], $series, $slug, $guess, $correct === null ? null : (int)$correct, $points, bj_dhaka_day()]);
+  $cols = 'user_id, anon_key, series_slug, item_slug, guess, correct, points, unlock_day' . ($useBonus ? ', bonus' : '');
+  $vals = [$o['user'], $o['anon'], $series, $slug, $guess, $correct === null ? null : (int)$correct, $points, bj_dhaka_day()];
+  if ($useBonus) $vals[] = 1;
+  $db->prepare("INSERT INTO content_unlocks ($cols) VALUES (" . implode(',', array_fill(0, count($vals), '?')) . ')')->execute($vals);
   $db->commit();
 } catch (PDOException $e) {
   $db->rollBack();
   if ($e->getCode() !== '23000') throw $e;
   $points = 0; // opened in another tab a moment ago
 }
-$out = ['item' => $item, 'points' => $points, 'correct' => $correct, 'mystery' => $isMystery] + bj_state($o, $series);
+$badges = [];
+$progress = null;
+if ($o['user'] && $points > 0) {
+  $uid = $o['user'];
+  // streak milestones (first unlock of the day)
+  if ($firstToday) {
+    $streak = bj_streak_before_today($uid) + 1;
+    if (in_array($streak, BJ_STREAK_BONUS_DAYS, true)) {
+      $badges = array_merge($badges, bj_profile_add_badges($uid, ["streak-$streak"]));
+      bj_notify($uid, 'badge', "টানা {$streak} দিন কৌতূহলী! 🔥", 'আজ একটা বোনাস চাবি পেলে — যেকোনো সিরিজে খোলো।', '/me#badges', "streak-$streak-" . bj_dhaka_day());
+    }
+  }
+  // series completion → collectible badge card
+  $progress = bj_progress($o)[$series] ?? null;
+  if ($progress && $progress['opened'] >= $progress['total']) {
+    $new = bj_profile_add_badges($uid, ["series:$series"]);
+    if ($new) {
+      $badges = array_merge($badges, $new);
+      bj_notify($uid, 'badge', 'সিরিজ শেষ! নতুন ব্যাজ কার্ড 🏅', 'পুরো সিরিজ খুলে ফেলেছ — কার্ডটা তোমার প্রোফাইলে।', '/me#badges', "series-$series");
+    }
+  }
+}
+$out = ['item' => $item, 'points' => $points, 'correct' => $correct, 'mystery' => $isMystery, 'bonusUsed' => $useBonus, 'newBadges' => $badges, 'progress' => $progress] + bj_state($o, $series);
 if ($o['user']) $out['total'] = bj_unlock_points($o['user']);
 bj_out($out);
