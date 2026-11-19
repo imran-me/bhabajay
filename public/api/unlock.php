@@ -52,7 +52,7 @@ function bj_state(array $o, string $series): array {
   $used = bj_used_today($o, $series);
   return ['series' => $series, 'limit' => BJ_UNLOCKS_PER_DAY, 'used' => $used, 'left' => max(0, BJ_UNLOCKS_PER_DAY - $used),
     'resetsAt' => bj_next_reset(), 'signedIn' => (bool)$o['user'],
-    'points' => ['unlock' => BJ_POINTS_UNLOCK, 'guessBonus' => BJ_POINTS_GUESS_BONUS, 'share' => BJ_POINTS_SHARE, 'mysteryMultiplier' => BJ_POINTS_DAILY_MYSTERY]];
+    'rules' => ['unlock' => BJ_POINTS_UNLOCK, 'guessBonus' => BJ_POINTS_GUESS_BONUS, 'share' => BJ_POINTS_SHARE, 'mysteryMultiplier' => BJ_POINTS_DAILY_MYSTERY]];
 }
 
 /** full card (or null) */

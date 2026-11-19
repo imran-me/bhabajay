@@ -9,10 +9,16 @@ import { getState, addPoints, touchActivity, awardBadge, toast } from '../../lib
 import { sound, confetti, prefersReducedMotion, vibrate } from '../../lib/fx';
 import { bn } from './bnfmt';
 
+interface Rules { unlock: number; guessBonus: number; share: number; mysteryMultiplier: number }
+const DEFAULT_RULES: Rules = { unlock: 10, guessBonus: 5, share: 5, mysteryMultiplier: 2 };
+export const rulesOf = (k: KeyState): Rules => k.rules ?? (typeof k.points === 'object' ? k.points : DEFAULT_RULES);
+
 export interface KeyState {
   series: string; limit: number; used: number; left: number; resetsAt: string; signedIn: boolean;
   unlocked?: string[]; free?: string[]; total?: number;
-  points: { unlock: number; guessBonus: number; share: number; mysteryMultiplier: number };
+  rules?: Rules;
+  /** older servers sent the rules as `points` (collides with the earned points of an unlock) */
+  points?: Rules | number;
 }
 
 let csrfCache = '';
@@ -48,7 +54,7 @@ export async function unlockItem<T>(series: string, item: string, guess?: 'myth'
       const { streak } = touchActivity();
       if (streak >= 3) awardBadge('streak-3');
       if (streak >= 7) awardBadge('streak-7');
-      return { item: data.item, points: pts, correct: data.correct, mystery: data.mystery, state: data };
+      return { item: data.item, points: pts, correct: data.correct, mystery: data.mystery, state: { ...data, points: undefined } };
     }
     return { points: 0, error: data.error ?? (status === 429 ? 'no_keys' : 'server'), state: data.limit ? data : undefined };
   } catch {
@@ -192,9 +198,9 @@ export function UnlockPanel({ k, guess, onGuess, busy, onUnlock, mythMode, curre
         </div>
       )}
       <button type="button" className="btn btn-primary btn-lg" disabled={busy || (mythMode && !guess)} onClick={(e) => onUnlock(e.currentTarget)}>
-        <span className={busy ? 'bj-key-turn inline-block' : 'inline-block'} aria-hidden="true">🔑</span> {busy ? 'খুলছি…' : `আনলক (+${bn(k.points.unlock)})`}
+        <span className={busy ? 'bj-key-turn inline-block' : 'inline-block'} aria-hidden="true">🔑</span> {busy ? 'খুলছি…' : `আনলক (+${bn(rulesOf(k).unlock)})`}
       </button>
-      <p className="text-xs text-ink-soft">প্রতিটা সিরিজে দিনে {bn(k.limit)}টা চাবি · প্রতিটা আনলকে +{bn(k.points.unlock)}{mythMode ? `, ঠিক আন্দাজে আরও +${bn(k.points.guessBonus)}` : ''} · মাঝরাতে (ঢাকা) নতুন চাবি</p>
+      <p className="text-xs text-ink-soft">প্রতিটা সিরিজে দিনে {bn(k.limit)}টা চাবি · প্রতিটা আনলকে +{bn(rulesOf(k).unlock)}{mythMode ? `, ঠিক আন্দাজে আরও +${bn(rulesOf(k).guessBonus)}` : ''} · মাঝরাতে (ঢাকা) নতুন চাবি</p>
       <SignInNudge />
     </div>
   );
