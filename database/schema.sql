@@ -194,3 +194,32 @@ CREATE TABLE IF NOT EXISTS audit_log (
   created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   KEY ix_created (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ───────── Daily unlocks ("ভাবুর চাবি") ─────────
+-- One row per opened card. Signed-in: user_id; signed-out: anon_key (hash of the session).
+CREATE TABLE IF NOT EXISTS content_unlocks (
+  id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id     BIGINT UNSIGNED NULL,
+  anon_key    CHAR(64)     NULL,
+  series_slug VARCHAR(80)  NOT NULL,
+  item_slug   VARCHAR(100) NOT NULL,
+  guess       VARCHAR(10)  NULL,
+  correct     TINYINT(1)   NULL,
+  points      SMALLINT UNSIGNED NOT NULL DEFAULT 0,
+  unlock_day  DATE         NOT NULL,
+  unlocked_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE KEY ux_user_item (user_id, series_slug, item_slug),
+  UNIQUE KEY ux_anon_item (anon_key, series_slug, item_slug),
+  KEY ix_user_day (user_id, series_slug, unlock_day),
+  KEY ix_anon_day (anon_key, series_slug, unlock_day)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- one-time-per-day bonuses (e.g. sharing an unlocked card)
+CREATE TABLE IF NOT EXISTS bonus_points (
+  user_id     BIGINT UNSIGNED NOT NULL,
+  kind        VARCHAR(20)  NOT NULL,
+  bonus_day   DATE         NOT NULL,
+  points      SMALLINT UNSIGNED NOT NULL,
+  created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, kind, bonus_day)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
