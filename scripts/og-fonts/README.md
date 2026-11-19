@@ -7,7 +7,7 @@ correct.
 
 | File | Source | Notes |
 |---|---|---|
-| HindSiliguri-Bold.ttf / -Medium.ttf | google/fonts `ofl/hindsiliguri` | as published |
+| AnekBangla-Bold.ttf / -Medium.ttf | google/fonts `ofl/anekbangla` | static instances `wdth=100, wght=700 / 500` (fontTools instancer); Hind Siliguri was dropped because its ১ renders badly |
 | BalooDa2-ExtraBold.ttf | google/fonts `ofl/balooda2` | static instance `wght=800` (fontTools instancer) |
 | AnekBangla-CondensedExtraBold.ttf | google/fonts `ofl/anekbangla` | static instance `wdth=75, wght=800` |
 
