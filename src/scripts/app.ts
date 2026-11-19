@@ -4,7 +4,7 @@
  */
 import {
   getState, subscribe, setPref, setFlag, currentStreak, toast, countShare,
-  toggleSave, toggleFollow, toggleLike, isSaved, markMythRead, type Notice,
+  toggleSave, toggleFollow, toggleLike, isSaved, markMythRead, pushNotice, type Notice,
 } from '../lib/store';
 import { sound, confetti, prefersReducedMotion, vibrate } from '../lib/fx';
 import { iconSvg, flameSvg } from '../lib/icons';
@@ -77,6 +77,11 @@ function applyIdentity() {
   });
   const unread = s.notices.filter((n) => !n.read).length;
   $$('[data-notice-dot]').forEach((d) => d.toggleAttribute('hidden', unread === 0));
+  $$('[data-bell]').forEach((b) => {
+    b.toggleAttribute('hidden', !s.user && unread === 0);
+    b.setAttribute('aria-label', unread ? `${bn(unread)}টা নতুন নোটিফিকেশন` : 'নোটিফিকেশন');
+  });
+  $$('[data-bell-count]').forEach((c) => { c.textContent = unread > 9 ? '৯+' : bn(unread); c.toggleAttribute('hidden', unread === 0); });
   const sub = $('[data-menu-account-sub]');
   if (sub && s.user) sub.textContent = `${s.user.nickname} · ${bn(s.points)} পয়েন্ট`;
 }
@@ -364,7 +369,28 @@ const waved = waveHello();
 if (!waved) dailyFact();
 
 // Under Supabase, refresh the session mirror (magic-link / OAuth return)
-void getBackend().then((b) => { if (b.mode !== 'demo') void b.getSession(); });
+void getBackend().then(async (b) => {
+  if (b.mode === 'demo') return;
+  await b.getSession();
+  if (b.mode === 'php' && getState().user) void importServerNotices();
+});
+
+/** server notifications (badge, comment approved, pitch status, keys refilled) → the local notice list */
+async function importServerNotices() {
+  try {
+    const r = await fetch('/api/notifications.php', { credentials: 'same-origin', headers: { Accept: 'application/json' } });
+    if (!r.ok) return;
+    const d = (await r.json()) as { items?: { id: number; kind: string; title: string; body: string; href: string | null; read: boolean }[] };
+    const seen = Number(getState().flags.srvNoticeId || 0);
+    const fresh = (d.items ?? []).filter((n) => n.id > seen && !n.read).reverse();
+    if (!fresh.length) return;
+    const mood = { badge: 'wow', comment: 'happy', pitch: 'grin', keys: 'wink' } as const;
+    for (const n of fresh) pushNotice({ mood: mood[n.kind as keyof typeof mood] ?? 'happy', title: n.title, body: n.body, href: n.href ?? undefined });
+    setFlag('srvNoticeId', String(Math.max(...fresh.map((n) => n.id))));
+    const { api } = await import('../lib/backend/php');
+    void api('notifications.php', { action: 'read' }).catch(() => {});
+  } catch { /* offline */ }
+}
 
 /* ───────────── Reveal on scroll + hero parallax (CSS does the motion; off for reduced motion) ───────────── */
 (() => {

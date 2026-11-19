@@ -127,7 +127,7 @@ export default function MeDashboard({ catalog, quizTopics, schools, districts, s
 
       {/* notifications */}
       {st.notices.length > 0 && (
-        <section className="card p-5" aria-labelledby="nt-h">
+        <section id="notices" className="card scroll-mt-24 p-5" aria-labelledby="nt-h">
           <h2 id="nt-h" className="text-xl font-bold">ভাবুর খবর</h2>
           <ul className="mt-3 grid gap-2">
             {st.notices.slice(0, 5).map((n) => (

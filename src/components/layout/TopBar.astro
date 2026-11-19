@@ -31,6 +31,10 @@ const deltaHref = SITE.deltaUrl || '/about#delta';
         <span data-sound-off><Icon name="sound-off" /></span>
         <span data-sound-on hidden><Icon name="sound-on" /></span>
       </button>
+      <a href="/me#notices" data-bell hidden class="btn-icon relative text-link" aria-label="নোটিফিকেশন">
+        <Icon name="bell" />
+        <span data-bell-count hidden class="absolute -right-0.5 -top-0.5 grid h-5 min-w-5 place-items-center rounded-full bg-coral px-1 text-[.7rem] font-bold leading-none text-white ring-2 ring-ground"></span>
+      </a>
       <span data-streak-slot class="inline-flex">
         <a href="/id" class="inline-flex h-9 items-center rounded-xl px-3 text-[.95rem] font-bold text-link hover:bg-tint" data-login-link>
           <T bn="লগ ইন" en="Log in" />
