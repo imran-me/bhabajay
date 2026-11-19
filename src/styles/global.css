@@ -292,7 +292,7 @@
   /* Filter chips (buttons) */
   .chip {
     display: inline-flex; align-items: center; gap: .35rem;
-    min-height: 40px; padding: .3rem 1rem; border-radius: 999px;
+    min-height: 44px; padding: .3rem 1rem; border-radius: 999px;
     font-weight: 600; font-size: .95rem;
     background: var(--c-tint); color: var(--c-link);
     border: 2px solid transparent;
