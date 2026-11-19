@@ -223,3 +223,21 @@ CREATE TABLE IF NOT EXISTS bonus_points (
   created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (user_id, kind, bonus_day)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ───────── Round 3: streak bonus keys + in-site notifications ─────────
+SET @s := IF((SELECT COUNT(*) FROM information_schema.columns WHERE table_schema = DATABASE() AND table_name = 'content_unlocks' AND column_name = 'bonus') = 0, 'ALTER TABLE content_unlocks ADD COLUMN bonus TINYINT(1) NOT NULL DEFAULT 0', 'SELECT 1');
+PREPARE st FROM @s; EXECUTE st; DEALLOCATE PREPARE st;
+
+CREATE TABLE IF NOT EXISTS notifications (
+  id          BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id     BIGINT UNSIGNED NOT NULL,
+  kind        VARCHAR(20)  NOT NULL,
+  title       VARCHAR(200) NOT NULL,
+  body        VARCHAR(500) NOT NULL DEFAULT '',
+  href        VARCHAR(255) NULL,
+  dedupe      VARCHAR(120) NULL,
+  read_at     TIMESTAMP    NULL,
+  created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  KEY ix_user (user_id, read_at, id),
+  UNIQUE KEY ux_dedupe (user_id, dedupe)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
